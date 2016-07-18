@@ -37,7 +37,7 @@
 				</TR>
 				<TR>
 					<TD colspan=3 align='center'>
-						<input type='submit' name='subcart' title='subcart'>
+						<input type='submit' onsubmit='CartConvert()' name='subcart' title='subcart'>
 					</TD>
 				</TR>
 			</TABLE>
@@ -75,7 +75,7 @@
 				</TR>
 				<TR>
 					<TD colspan=3 align='center'>
-						<input type='submit' name='subpolr' title='subpolr'>
+						<input type='submit' onsubmit='PolarConvert()' name='subpolr' title='subpolr'>
 					</TD>
 				</TR>
 			</TABLE>
@@ -83,5 +83,51 @@
 		<P>
 		<HR>
 		<P>
+		<script src="POLRCART.js"></script>
+		<script>
+
+			function CartConvert() {
+
+				let angle = cartesian_to_polar_coords(
+						document.forms[0].xcoordinate.value,
+						document.forms[0].ycoordinate.value,
+						'a');
+
+				let radius = cartesian_to_polar_coords(
+						document.forms[0].xcoordinate.value,
+						document.forms[0].ycoordinate.value,
+						'r');
+
+				window.alert("Polar equivalent of Cartesian(" +
+						document.forms[0].xcoordinate.value + "," +
+						document.forms[0].ycoordinate.value + ") is " +
+						"angle = " + angle + " radius = " + radius + ".");
+					
+				return;
+
+			}
+
+			function PolarConvert() {
+
+				let x = cartesian_to_polar_coords(
+						document.forms[1].angle.value,
+						document.forms[1].radius.value,
+						'a');
+
+				let y = cartesian_to_polar_coords(
+						document.forms[1].angle.value,
+						document.forms[1].radius.value,
+						'r');
+
+				window.alert("Cartesian equivalent of Polar (" +
+						document.forms[1].angle.value + "," +
+						document.forms[1].radius.value + ") is " +
+						"x = " + x + " y = " + y + ".");
+					
+				return;
+
+			}
+
+		</script>
 	</BODY>
 </HTML>
