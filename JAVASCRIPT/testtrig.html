@@ -6,7 +6,7 @@
 	<BODY>
 		<P>
 		<HR>
-		<FORM action='' method='get'>
+		<FORM action='http://localhost' method='get'>
 			<TABLE border=1 align='center' bgcolor='salmon'>
 				<TR>
 					<TD colspan=3 align='center'>
@@ -44,7 +44,7 @@
 		</FORM>
 		<P>
 		<HR>
-		<FORM action='' method='get'>
+		<FORM action='http://localhost' method='get'>
 			<TABLE border=1 align='center' bgcolor='yellow'>
 				<TR>
 					<TD colspan=3 align='center'>
@@ -88,6 +88,8 @@
 
 			function CartConvert() {
 
+				console.log("Entered CartConvert().");
+
 				let angle = cartesian_to_polar_coords(
 						document.forms[0].xcoordinate.value,
 						document.forms[0].ycoordinate.value,
@@ -102,12 +104,16 @@
 						document.forms[0].xcoordinate.value + "," +
 						document.forms[0].ycoordinate.value + ") is " +
 						"angle = " + angle + " radius = " + radius + ".");
+
+				console.log("Leaving CartConvert().");
 					
 				return;
 
 			}
 
 			function PolarConvert() {
+
+				console.log("Entering PolarConvert().");
 
 				let x = cartesian_to_polar_coords(
 						document.forms[1].angle.value,
@@ -123,6 +129,8 @@
 						document.forms[1].angle.value + "," +
 						document.forms[1].radius.value + ") is " +
 						"x = " + x + " y = " + y + ".");
+
+				console.log("Leaving PolarConvert().");
 					
 				return;
 
