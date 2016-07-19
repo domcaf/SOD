@@ -6,7 +6,7 @@
 	<BODY>
 		<P>
 		<HR>
-		<FORM action='http://localhost' method='get'>
+		<!-- <FORM action='http://localhost' method='get'> -->
 			<TABLE border=1 align='center' bgcolor='salmon'>
 				<TR>
 					<TD colspan=3 align='center'>
@@ -37,14 +37,14 @@
 				</TR>
 				<TR>
 					<TD colspan=3 align='center'>
-						<input type='submit' onsubmit='CartConvert()' name='subcart' title='subcart'>
+						<button type='button' onclick='CartConvert()' name='subcart' value='subcart'>Convert To Polar</button>
 					</TD>
 				</TR>
 			</TABLE>
-		</FORM>
+		<!-- </FORM> -->
 		<P>
 		<HR>
-		<FORM action='http://localhost' method='get'>
+		<!-- <FORM action='http://localhost' method='get'> -->
 			<TABLE border=1 align='center' bgcolor='yellow'>
 				<TR>
 					<TD colspan=3 align='center'>
@@ -75,11 +75,11 @@
 				</TR>
 				<TR>
 					<TD colspan=3 align='center'>
-						<input type='submit' onsubmit='PolarConvert()' name='subpolr' title='subpolr'>
+						<button type='button' onclick='PolarConvert()' name='subpolr' value='subpolr'>Convert To Cartesian</button>
 					</TD>
 				</TR>
 			</TABLE>
-		</FORM>
+		<!-- </FORM> -->
 		<P>
 		<HR>
 		<P>
@@ -91,18 +91,24 @@
 				console.log("Entered CartConvert().");
 
 				let angle = cartesian_to_polar_coords(
-						document.forms[0].xcoordinate.value,
-						document.forms[0].ycoordinate.value,
+						document.xcoordinate.value,
+						document.ycoordinate.value,
+						//document.forms[0].xcoordinate.value,
+						//document.forms[0].ycoordinate.value,
 						'a');
 
 				let radius = cartesian_to_polar_coords(
-						document.forms[0].xcoordinate.value,
-						document.forms[0].ycoordinate.value,
+						document.xcoordinate.value,
+						document.ycoordinate.value,
+						//document.forms[0].xcoordinate.value,
+						//document.forms[0].ycoordinate.value,
 						'r');
 
 				window.alert("Polar equivalent of Cartesian(" +
-						document.forms[0].xcoordinate.value + "," +
-						document.forms[0].ycoordinate.value + ") is " +
+						document.xcoordinate.value + "," +
+						document.ycoordinate.value + ") is " +
+						//document.forms[0].xcoordinate.value + "," +
+						//document.forms[0].ycoordinate.value + ") is " +
 						"angle = " + angle + " radius = " + radius + ".");
 
 				console.log("Leaving CartConvert().");
@@ -116,18 +122,24 @@
 				console.log("Entering PolarConvert().");
 
 				let x = cartesian_to_polar_coords(
-						document.forms[1].angle.value,
-						document.forms[1].radius.value,
+						document.angle.value,
+						document.radius.value,
+						//document.forms[1].angle.value,
+						//document.forms[1].radius.value,
 						'a');
 
 				let y = cartesian_to_polar_coords(
-						document.forms[1].angle.value,
-						document.forms[1].radius.value,
+						document.angle.value,
+						document.radius.value,
+						//document.forms[1].angle.value,
+						//document.forms[1].radius.value,
 						'r');
 
 				window.alert("Cartesian equivalent of Polar (" +
-						document.forms[1].angle.value + "," +
-						document.forms[1].radius.value + ") is " +
+						document.angle.value + "," +
+						document.radius.value + ") is " +
+						//document.forms[1].angle.value + "," +
+						//document.forms[1].radius.value + ") is " +
 						"x = " + x + " y = " + y + ".");
 
 				console.log("Leaving PolarConvert().");
