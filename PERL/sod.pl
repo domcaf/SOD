@@ -122,7 +122,7 @@ pod2usage(
 ) if ($opt_help);
 
 
-# methods
+# methods ----------------------------------*/
 ADD_GOOD.C
 ADD_PL.C
 DEL_PL.C
@@ -134,7 +134,7 @@ SPIRALS.C
 SPIRHELP.C
 TESTTRIG.C
 VISIT_PL.C
-# constants
+# constants  ----------------------------------*/
 GETKEYS.H
 NUM_DEFS.H
 PLAYERS.H
@@ -147,96 +147,92 @@ Contents of GETKEYS.H below:
 
 # ---------------------------------constants---------------------------------*/
 
-#define F1               59
-#define F2               60
-#define F3               61
-#define F4               62
-#define F5               63
-#define F6               64
-#define F7               65
-#define F8               66
-#define F9               67
-#define F10              68
-#define F11              133
-#define F12              134
+# Keyboard constants
+use constant {
 
-#define SHIFT_F1         84
-#define SHIFT_F2         85
-#define SHIFT_F3         86
-#define SHIFT_F4         87
-#define SHIFT_F5         88
-#define SHIFT_F6         89
-#define SHIFT_F7         90
-#define SHIFT_F8         91
-#define SHIFT_F9         92
-#define SHIFT_F10        93
-#define SHIFT_F11        135
-#define SHIFT_F12        136
+    F1  => 59,
+    F2  => 60,
+    F3  => 61,
+    F4  => 62,
+    F5  => 63,
+    F6  => 64,
+    F7  => 65,
+    F8  => 66,
+    F9  => 67,
+    F10 => 68,
+    F11 => 133,
+    F12 => 134,
 
-#define CTRL_F1          94
-#define CTRL_F2          95
-#define CTRL_F3          96
-#define CTRL_F4          97
-#define CTRL_F5          98
-#define CTRL_F6          99
-#define CTRL_F7          100
-#define CTRL_F8          101
-#define CTRL_F9          102
-#define CTRL_F10         103
-#define CTRL_F11         137
-#define CTRL_F12         138  
+    SHIFT_F1  => 84,
+    SHIFT_F2  => 85,
+    SHIFT_F3  => 86,
+    SHIFT_F4  => 87,
+    SHIFT_F5  => 88,
+    SHIFT_F6  => 89,
+    SHIFT_F7  => 90,
+    SHIFT_F8  => 91,
+    SHIFT_F9  => 92,
+    SHIFT_F10 => 93,
+    SHIFT_F11 => 135,
+    SHIFT_F12 => 136,
 
-#define ALT_F1           104
-#define ALT_F2           105
-#define ALT_F3           106
-#define ALT_F4           107
-#define ALT_F5           108
-#define ALT_F6           109
-#define ALT_F7           110
-#define ALT_F8           111
-#define ALT_F9           112
-#define ALT_F10          113
-#define ALT_F11          139
-#define ALT_F12          140
+    CTRL_F1  => 94,
+    CTRL_F2  => 95,
+    CTRL_F3  => 96,
+    CTRL_F4  => 97,
+    CTRL_F5  => 98,
+    CTRL_F6  => 99,
+    CTRL_F7  => 100,
+    CTRL_F8  => 101,
+    CTRL_F9  => 102,
+    CTRL_F10 => 103,
+    CTRL_F11 => 137,
+    CTRL_F12 => 138,
 
-#define UP_ARROW         72
-#define DOWN_ARROW       80
-#define LEFT_ARROW       75
-#define RIGHT_ARROW      77
+    ALT_F1  => 104,
+    ALT_F2  => 105,
+    ALT_F3  => 106,
+    ALT_F4  => 107,
+    ALT_F5  => 108,
+    ALT_F6  => 109,
+    ALT_F7  => 110,
+    ALT_F8  => 111,
+    ALT_F9  => 112,
+    ALT_F10 => 113,
+    ALT_F11 => 139,
+    ALT_F12 => 140,
 
-#define CTRL_W           23
-#define CTRL_Z           26
+    UP_ARROW    => 72,
+    DOWN_ARROW  => 80,
+    LEFT_ARROW  => 75,
+    RIGHT_ARROW => 77,
 
-#define HOME_KEY         71
-#define END_KEY          79
+    CTRL_W => 23,
+    CTRL_Z => 26,
 
-#define PGUP_KEY         73
-#define PGDN_KEY         81
+    HOME_KEY => 71,
+    END_KEY  => 79,
 
-#define INSERT_KEY       82
-#define DELETE_KEY       83
+    PGUP_KEY => 73,
+    PGDN_KEY => 81,
 
-#define SPACE_BAR        32  #  added by Dominic Caffey on 4-28-92 */
+    INSERT_KEY => 82,
+    DELETE_KEY => 83,
 
-#define WAIT             0
-#define DONT_WAIT        1
+    SPACE_BAR => 32,    #  added by Dominic Caffey on 4-28-92 */,
 
-# -------------------------------end constants-------------------------------*/
+    WAIT      => 0,
+    DONT_WAIT => 1
+
+};
 
 
-
-# --------------------------------prototypes---------------------------------*/
-
-int get_keystroke(int pause, int *special_key);
-
-# ------------------------------end prototypes-------------------------------*/
-
+# int get_keystroke(int pause, int *special_key); # prototype - C language context.
 
 #define __GETKEYS_INCLUDED__ 
 #endif
 
 # ------------------------------end getkeys.h--------------------------------*/
-Contents of NUM_DEFS.H below:
 
 # ----------------------------< Start Of File >------------------------------*/
 
@@ -253,31 +249,27 @@ Contents of NUM_DEFS.H below:
 #ifndef NUM_DEFS_H
 
 #  integer constants */
+use constant {
 
-	#define ZERO_VALUE  0
-	#define ONE_VALUE   1
-	#define TWO_VALUE   2
-	#define THREE_VALUE 3
-	#define FOUR_VALUE  4
-	#define FIVE_VALUE  5
-	#define TEN_VALUE   10
+    ZERO_VALUE  => 0,
+    ONE_VALUE   => 1,
+    TWO_VALUE   => 2,
+    THREE_VALUE => 3,
+    FOUR_VALUE  => 4,
+    FIVE_VALUE  => 5,
+    TEN_VALUE   => 10
+
+};
 
 #  trigonometry constants */
+use constant {
 
-	#define HALF_CIRCLE_RADIANS 3.1415927 #  # of radians in half circle */
-	#define HALF_CIRCLE_DEGREES 180  #  # of degrees in half circle */
-	#define PI          3.1415927
+    PI                  => 3.1415927,
+    HALF_CIRCLE_RADIANS => PI,          #  # of radians in half circle */
+    HALF_CIRCLE_DEGREES => 180          #  # of degrees in half circle */
 
-	#define NUM_DEFS_H
+};
 
-#endif
-
-# --------------------------< End Constants >--------------------------------*/
-
-# -----------------------------< End Of File >-------------------------------*/
-
-Contents of PLAYERS.H below:
-# ----------------------------< Start Of File >------------------------------*/
 
 # ****************************< General Information >*************************/
 # * Description     : This file contains the definition of a player for the **/
@@ -294,36 +286,47 @@ Contents of PLAYERS.H below:
 # * Description     : Stores constants associated with the description and  **/
 # *                   behavior of a good guy.                               **/
 
+# Good guy constants
+use constant {
 
-#define GOOD_GUY_RADIUS 0.05      #  This is specified as a percentage */
-#define GOOD_GUY_GUN_LENGTH 0.01 #  This is specified as a percentage */
-#define GUN_WIDTH_HALF_ANGLE 0.1  #  SPECIFIED IN RADIANS */
+    GOOD_GUY_RADIUS      => 0.05,    #  This is specified as a percentage */
+    GOOD_GUY_GUN_LENGTH  => 0.01,    #  This is specified as a percentage */
+    GUN_WIDTH_HALF_ANGLE => 0.1      #  SPECIFIED IN RADIANS */
 
-# * Description     : Stores constants associated with the description and                                                      **/
-# *                   behavior of a bad guy.                                                      **/
+};
+
+# * Description     : Stores constants associated with the description and **/
+# *                   behavior of a bad guy.                               **/
 
 #  What follows below are actually radii for the different body parts mentioned */
+# Bad guy constants
+use constant {
 
-#define BAD_GUY_BODY_HEIGHT 	0.01      #  percentage */
-#define BAD_GUY_BODY_WIDTH 	0.02      #  percentage */
-#define BAD_GUY_MOUTH_HEIGHT 	0.006     #  percentage */
-#define BAD_GUY_MOUTH_WIDTH 	0.01 	  #  percentage */
-#define BAD_GUY_EYE_LENGTH 	0.02      #  percentage */
-#define BAD_GUY_EYE_ANGLE_1     30        #  degrees */
-#define BAD_GUY_EYE_ANGLE_2     50        #  degrees */
-#define BAD_GUY_EYE_ANGLE_3     130       #  degrees */
-#define BAD_GUY_EYE_ANGLE_4     150       #  degrees */
+    BAD_GUY_BODY_HEIGHT  => 0.01,     #  percentage */
+    BAD_GUY_BODY_WIDTH   => 0.02,     #  percentage */
+    BAD_GUY_MOUTH_HEIGHT => 0.006,    #  percentage */
+    BAD_GUY_MOUTH_WIDTH  => 0.01,     #  percentage */
+    BAD_GUY_EYE_LENGTH   => 0.02,     #  percentage */
+    BAD_GUY_EYE_ANGLE_1  => 30,       #  degrees */
+    BAD_GUY_EYE_ANGLE_2  => 50,       #  degrees */
+    BAD_GUY_EYE_ANGLE_3  => 130,      #  degrees */
+    BAD_GUY_EYE_ANGLE_4  => 150       #  degrees */
 
+};
 
+# Player behaviour limits
+use constant {
 
-#define SHOOTING_PROBABILITY_FACTOR 101
+    SHOOTING_PROBABILITY_FACTOR  => 101,
+    BAD_GUY_MAX_ANGLE_STEP       => 6,     #  This is in degrees */
+    GOOD_GUY_BULLET_SPEED_FACTOR => 3,
+    MAX_GOOD_GUY_EVENTS =>
+      1,    #  max # of events processed per visit to good guy */
+    GOOD_GUY_ROTATION_INCREMENT =>
+      0.087,    #  equivalent to 5 degrees in radians */
+    BULLET_RADIUS => 2
 
-
-#define BAD_GUY_MAX_ANGLE_STEP 6 #  This is in degrees */
-#define GOOD_GUY_BULLET_SPEED_FACTOR 3
-#define MAX_GOOD_GUY_EVENTS 1 #  max # of events processed per visit to good guy */
-#define GOOD_GUY_ROTATION_INCREMENT 0.087 #  equivalent to 5 degrees in radians */
-#define BULLET_RADIUS 2
+};
 
 # --------------------------< End Constants >--------------------------------*/
 
