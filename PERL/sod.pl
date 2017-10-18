@@ -337,12 +337,16 @@ use constant {
 
 	#ifndef SPRITES_H
 
-		typedef struct _sprites
+		package _sprites;
+		use Moose;
 		{
 			short unsigned int *bitmap;
 			int x, y;
 			int width, height;
 		} sprites;
+
+		no Moose;
+		__PACKAGE__->meta->make_immutable;
 
 		#define SPRITES_H
 	#endif
@@ -351,7 +355,8 @@ use constant {
 
 	#ifndef BULLET_H
 
-		typedef struct _bullet
+		package _bullet;
+		use Moose;
 		{
 			float x, y;       #  center of circular bullet */
 			int radius;	#  radius of bullet as %age of screen dimensions */
@@ -359,13 +364,17 @@ use constant {
 			void *from; #  pointer to player who shot bullet */
 		} bullets;
 
+		no Moose;
+		__PACKAGE__->meta->make_immutable;
+
 		#define BULLET_H
 	#endif
 
 
 	#ifndef BADGUY_H
 
-		typedef struct _badguy
+		package _badguy;
+		use Moose;
 		{
 			sprites badguy;    #  badguy inherits qualities of sprite */
 
@@ -375,13 +384,17 @@ use constant {
 			float current_angle; #  current angular position in radians */
 		} badguys;
 
+		no Moose;
+		__PACKAGE__->meta->make_immutable;
+
 		#define BADGUY_H
 	#endif
 
 
 	#ifndef GOODGUY_H
 
-		typedef struct _goodguy
+		package _goodguy;
+		use Moose;
 		{
 			int x, y;       #  center of good guy */
 			int radius;	#  radius of good_guy, excluding barrel */
@@ -393,10 +406,14 @@ use constant {
 			float gun_width_half_angle; #  half the angle width of the gun barrel in radians */
 		} goodguys;
 
+		no Moose;
+		__PACKAGE__->meta->make_immutable;
+
 		#define GOODGUY_H
 	#endif
 
-		typedef struct _player
+		package _player;
+		use Moose;
 		{
 			enum player_type {good,bad,bullet} pt;
 
@@ -409,6 +426,9 @@ use constant {
 
 			struct _player *next, *prev; #  link structure pointers */
 		} players;
+
+	no Moose;
+	__PACKAGE__->meta->make_immutable;
 
 	#define PLAYERS_H
 #endif
@@ -1454,8 +1474,12 @@ Contents of SPIRALS.C below:
 
 # ----------------------------< Constants >----------------------------------*/
 
-#define MAX_BAD_GUYS 3
-#define MAX_BULLETS  1
+use constant {
+
+MAX_BAD_GUYS => 3,
+MAX_BULLETS  => 1
+
+};
 
 # --------------------------< End Constants >--------------------------------*/
 
