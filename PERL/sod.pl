@@ -122,31 +122,6 @@ pod2usage(
 ) if ($opt_help);
 
 
-# methods ----------------------------------*/
-ADD_GOOD.C
-ADD_PL.C
-DEL_PL.C
-DRAW_PL.C
-HITCOLID.C
-MOVE_PL.C
-SETCLEAN.C
-SPIRALS.C
-SPIRHELP.C
-TESTTRIG.C
-VISIT_PL.C
-# constants  ----------------------------------*/
-GETKEYS.H
-NUM_DEFS.H
-PLAYERS.H
-PROTOTYP.H
-Contents of GETKEYS.H below:
-# --------------------------------getkeys.h----------------------------------*/
-
-#ifndef __GETKEYS_INCLUDED__
-
-
-# ---------------------------------constants---------------------------------*/
-
 # Keyboard constants
 use constant {
 
@@ -229,24 +204,6 @@ use constant {
 
 # int get_keystroke(int pause, int *special_key); # prototype - C language context.
 
-#define __GETKEYS_INCLUDED__ 
-#endif
-
-# ------------------------------end getkeys.h--------------------------------*/
-
-# ----------------------------< Start Of File >------------------------------*/
-
-# ****************************< General Information >*************************/
-# * Description     : This file contains definitions for numeric constants. **/
-# * This File's Name: Num_defs.h.                                           **/
-# * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 2-23-92.                                   **/
-# *                                                                         **/
-# **************************< End General Information >***********************/
-
-# ----------------------------< Constants >----------------------------------*/
-
-#ifndef NUM_DEFS_H
 
 #  integer constants */
 use constant {
@@ -271,29 +228,89 @@ use constant {
 };
 
 
-# ****************************< General Information >*************************/
-# * Description     : This file contains the definition of a player for the **/
-# *                   game "Spirals Of Death". A player can be the goodguy, **/
-# *                   a badguy or a bullet fired by either of the previous. **/
-# * This File's Name: Players.h.                                            **/
-# * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 4-05-92.                                   **/
-# *                                                                         **/
-# **************************< End General Information >***********************/
 
-# ----------------------------< Constants >----------------------------------*/
+                package _sprites;
+                use Moose;
+                {
 
-# * Description     : Stores constants associated with the description and  **/
-# *                   behavior of a good guy.                               **/
+                    # Player behaviour limits
+                    use constant {
 
-# Good guy constants
-use constant {
+        # Some of these constants might be more appropriately located in spcific
+        # player type definitions.
 
-    GOOD_GUY_RADIUS      => 0.05,    #  This is specified as a percentage */
-    GOOD_GUY_GUN_LENGTH  => 0.01,    #  This is specified as a percentage */
-    GUN_WIDTH_HALF_ANGLE => 0.1      #  SPECIFIED IN RADIANS */
+                        SHOOTING_PROBABILITY_FACTOR => 101,
+                        BAD_GUY_MAX_ANGLE_STEP => 6,    #  This is in degrees */
+                        GOOD_GUY_BULLET_SPEED_FACTOR => 3,
+                        MAX_GOOD_GUY_EVENTS          => 1
+                        ,  #  max # of events processed per visit to good guy */
+                        GOOD_GUY_ROTATION_INCREMENT =>
+                          0.087,    #  equivalent to 5 degrees in radians */
+                        BULLET_RADIUS => 2
 
-};
+                    };
+                    short unsigned int *bitmap;
+                    int x, y;
+			int width, height;
+		} sprites;
+
+                      no Moose;
+                    __PACKAGE__->meta->make_immutable;
+
+
+		package _bullet;
+		use Moose;
+		{
+ 			#  x-coordinate of center of circular bullet */
+			has 'x' => (
+				isa => 'Num',
+				is => 'rw'
+			);
+
+ 			#  y-coordinate of center of circular bullet */
+			has 'y' => (
+				isa => 'Num',
+				is => 'rw'
+			);
+
+			# radius of bullet as %age of screen dimensions */
+			has 'radius' => (
+				isa => 'Int',
+				is => 'ro'
+			);
+
+			#  movement increments */
+			has 'x_step' => (
+				isa => 'Num',
+				is => 'ro'
+			);
+
+			#  movement increments */
+			has 'y_step' => (
+				isa => 'Num',
+				is => 'ro'
+			);
+
+			# reference to player who shot bullet */
+			has 'from' => (
+				isa => 'Object',
+				is => 'ro'
+			);
+
+		} #bullets attributes/properties.
+
+		no Moose;
+		__PACKAGE__->meta->make_immutable;
+
+		#define BULLET_H
+	#endif
+
+
+	#ifndef BADGUY_H
+
+		package _badguy;
+		use Moose;
+		{
 
 # * Description     : Stores constants associated with the description and **/
 # *                   behavior of a bad guy.                               **/
@@ -313,69 +330,6 @@ use constant {
     BAD_GUY_EYE_ANGLE_4  => 150       #  degrees */
 
 };
-
-# Player behaviour limits
-use constant {
-
-    SHOOTING_PROBABILITY_FACTOR  => 101,
-    BAD_GUY_MAX_ANGLE_STEP       => 6,     #  This is in degrees */
-    GOOD_GUY_BULLET_SPEED_FACTOR => 3,
-    MAX_GOOD_GUY_EVENTS =>
-      1,    #  max # of events processed per visit to good guy */
-    GOOD_GUY_ROTATION_INCREMENT =>
-      0.087,    #  equivalent to 5 degrees in radians */
-    BULLET_RADIUS => 2
-
-};
-
-# --------------------------< End Constants >--------------------------------*/
-
-
-# ----------------------------< Typedefs  >----------------------------------*/
-
-#ifndef PLAYERS_H
-
-	#ifndef SPRITES_H
-
-		package _sprites;
-		use Moose;
-		{
-			short unsigned int *bitmap;
-			int x, y;
-			int width, height;
-		} sprites;
-
-		no Moose;
-		__PACKAGE__->meta->make_immutable;
-
-		#define SPRITES_H
-	#endif
-
-
-
-	#ifndef BULLET_H
-
-		package _bullet;
-		use Moose;
-		{
-			float x, y;       #  center of circular bullet */
-			int radius;	#  radius of bullet as %age of screen dimensions */
-			float x_step, y_step;	#  movement increments */
-			void *from; #  pointer to player who shot bullet */
-		} bullets;
-
-		no Moose;
-		__PACKAGE__->meta->make_immutable;
-
-		#define BULLET_H
-	#endif
-
-
-	#ifndef BADGUY_H
-
-		package _badguy;
-		use Moose;
-		{
 			sprites badguy;    #  badguy inherits qualities of sprite */
 
 			int radius; #  radial distance from screen center */
@@ -396,6 +350,15 @@ use constant {
 		package _goodguy;
 		use Moose;
 		{
+
+# Good guy constants
+use constant {
+
+    GOOD_GUY_RADIUS      => 0.05,    #  This is specified as a percentage */
+    GOOD_GUY_GUN_LENGTH  => 0.01,    #  This is specified as a percentage */
+    GUN_WIDTH_HALF_ANGLE => 0.1      #  SPECIFIED IN RADIANS */
+
+};
 			int x, y;       #  center of good guy */
 			int radius;	#  radius of good_guy, excluding barrel */
 
@@ -412,23 +375,29 @@ use constant {
 		#define GOODGUY_H
 	#endif
 
-		package _player;
-		use Moose;
-		{
-			enum player_type {good,bad,bullet} pt;
+                package _player;
 
-			union
-			{
-				goodguys gg;
-				badguys  bg;
-				bullets   b;
-			} pd; #  pd = player data */
+ # * Description     : This file contains the definition of a player for the **/
+ # *                   game "Spirals Of Death". A player can be the goodguy, **/
+ # *                   a badguy or a bullet fired by either of the previous. **/
 
-			struct _player *next, *prev; #  link structure pointers */
-		} players;
+                use Moose;
+                {
+                    enum player_type { good, bad, bullet } pt;
 
-	no Moose;
-	__PACKAGE__->meta->make_immutable;
+                    union {
+                        goodguys gg;
+                        badguys bg;
+                        bullets b;
+                    }
+                    pd;    #  pd = player data */
+
+                    struct _player * next, *prev;  #  link structure pointers */
+                }
+                players;
+
+                no Moose;
+                __PACKAGE__->meta->make_immutable;
 
 	#define PLAYERS_H
 #endif
@@ -436,7 +405,7 @@ use constant {
 # --------------------------< End Typedefs  >--------------------------------*/
 
 # -----------------------------< End Of File >-------------------------------*/
-Contents of PROTOTYP.H below:
+# Contents of PROTOTYP.H below:
 
 # ----------------------------< Start Of File >------------------------------*/
 
