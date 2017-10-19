@@ -453,7 +453,6 @@ use constant {
 		__PACKAGE__->meta->make_immutable;
 
 		#define GOODGUY_H
-	#endif
 
                 package _player;
 
@@ -462,29 +461,41 @@ use constant {
  # *                   a badguy or a bullet fired by either of the previous. **/
 
                 use Moose;
-                {
-                    enum player_type { good, bad, bullet } pt;
 
-                    union {
-                        goodguys gg;
-                        badguys bg;
-                        bullets b;
-                    }
-                    pd;    #  pd = player data */
+                    #enum player_type { good, bad, bullet } pt;
+					has player_type (
+						isa => 'Str',
+						is	=> 'ro'
+					);
 
-                    struct _player * next, *prev;  #  link structure pointers */
-                }
-                players;
+#                    union {
+#                        goodguys gg;
+#                        badguys bg;
+#                        bullets b;
+#                    }
+
+                    has pd (
+						isa => '_goodguy | _badguy | _bullet',
+						is => 'rw'
+						);    #  pd = player data */
+
+                    #struct _player * next, *prev;  #  link structure pointers */
+
+					has next (
+						isa => 'Object',
+						is = 'ro'
+					);
+
+					has prev (
+						isa => 'Object',
+						is = 'ro'
+					);
 
                 no Moose;
                 __PACKAGE__->meta->make_immutable;
 
 	#define PLAYERS_H
-#endif
 
-# --------------------------< End Typedefs  >--------------------------------*/
-
-# -----------------------------< End Of File >-------------------------------*/
 # Contents of PROTOTYP.H below:
 
 # ----------------------------< Start Of File >------------------------------*/
