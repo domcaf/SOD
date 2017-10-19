@@ -1,12 +1,11 @@
 #!/usr/bin/perl
 #!/usr/bin/perl -d:ptkdb
 
-use Data::Dumper;
 use constant LOG_FILE => '>/tmp/sod.log';
-#use Excel::Writer::XLSX;
-#use File::Find;
+use Data::Dumper;
 use Getopt::Long;
-use Log::Log4perl qw(:easy);
+#use Log::Log4perl qw(:easy);
+use namespace::autoclean;
 use Pod::Usage;
 
 $opt_help = 0; # Default to not displaying help.
@@ -260,7 +259,9 @@ use constant {
 
 		package _bullet;
 		use Moose;
-		{
+
+		 #bullets attributes/properties.
+		
  			#  x-coordinate of center of circular bullet */
 			has 'x' => (
 				isa => 'Num',
@@ -297,16 +298,93 @@ use constant {
 				is => 'ro'
 			);
 
-		} #bullets attributes/properties.
+		# methods go here
+		players *did_bullet_hit_something(players *);
+
+
+# ****************************< Start did_bullet_hit_something >********/
+
+# ****************************************************************************/
+# * Function Name   : did_bullet_hit_something.                        **/
+# * Description     : This function determines if a bullet hit something.   **/
+# *                   If it hit something it identifies what it hit and     **/
+# *                   returns a pointer to the hit object otherwise it      **/
+# *                   returns a value of NULL.                              **/
+# * Inputs          : A pointer to the bullet being tested for a hit.       **/
+# * Outputs         : A pointer to hit object or NULL if no hit.            **/
+# * Programmer(s)   : Dominic Caffey.                                       **/
+# * Notes & Comments: Created on 4-30-92.                                   **/
+# *                                                                         **/
+# *                                                                         **/
+# ****************************************************************************/
+
+players *did_bullet_hit_something(players *bullet)
+{
+	players *target = NULL;
+	float look_ahead_x, look_ahead_y, look_ahead_dist_to_screen_center, distance_between_bullets;
+	static int background_color;
+	static int screen_center_x, screen_center_y;
+	int target_found = ZERO_VALUE;
+
+	background_color = getbkcolor();
+	screen_center_x = (int) (getmaxx()/TWO_VALUE);
+	screen_center_y = (int) (getmaxy()/TWO_VALUE);
+
+
+	#  calculate look ahead coordinates */
+	look_ahead_x = bullet->pd.b.x + (TWO_VALUE * bullet->pd.b.x_step);
+	look_ahead_y = bullet->pd.b.y + (TWO_VALUE * bullet->pd.b.y_step);
+
+	#  determine if the bullet actually hit something */
+	if(getpixel((int) look_ahead_x,(int) look_ahead_y) != background_color)
+	{
+		#  the bullet hit something, find out what it hit */
+		target = bullet->next; #  set starting point for search */
+
+		while((target != bullet) && (!target_found))  #  traverse the player list */
+		{
+			if(target != bullet->pd.b.from) #  a player can't shoot itself */
+
+				if(target->pt == good)
+				{
+					look_ahead_dist_to_screen_center = sqrt(pow((look_ahead_x - screen_center_x),TWO_VALUE) + pow((look_ahead_y - screen_center_y),TWO_VALUE));
+
+					if(look_ahead_dist_to_screen_center <= target->pd.gg.radius)
+						target_found = ONE_VALUE;
+				}
+				else if(target->pt == bad)
+				{
+					if((look_ahead_x >= target->pd.bg.badguy.x) &&
+						(look_ahead_x <= (target->pd.bg.badguy.x + target->pd.bg.badguy.width)) &&
+						(look_ahead_y >= target->pd.bg.badguy.y) &&
+						(look_ahead_y <= (target->pd.bg.badguy.y + target->pd.bg.badguy.height)))
+							target_found = ONE_VALUE;
+				}
+				else #  the player type is another bullet */
+				{
+				  #  if the distance between their two centers is less than (2 * r) then they hit each other */
+					distance_between_bullets = sqrt(pow((look_ahead_x - target->pd.b.x),TWO_VALUE) + pow((look_ahead_y - target->pd.b.y),TWO_VALUE));
+
+					if(distance_between_bullets <= (2 * bullet->pd.b.radius))
+						target_found = ONE_VALUE;
+				}
+
+			if(!target_found)
+				target = target->next;
+
+		}
+	}
+
+	return(target);
+}
+
+# ****************************< End did_bullet_hit_something >***********/
+
+		# package _bullet;
 
 		no Moose;
 		__PACKAGE__->meta->make_immutable;
 
-		#define BULLET_H
-	#endif
-
-
-	#ifndef BADGUY_H
 
 		package _badguy;
 		use Moose;
@@ -337,6 +415,8 @@ use constant {
 			float angle_step;  #  angle in radians */
 			float current_angle; #  current angular position in radians */
 		} badguys;
+
+		# package _badguy;
 
 		no Moose;
 		__PACKAGE__->meta->make_immutable;
@@ -461,7 +541,7 @@ use constant {
 	#  prototypes for hit.c */
 
 		int did_bad_good_guy_collide(players *);
-		players *did_bullet_hit_something(players *);
+		#players *did_bullet_hit_something(players *);
 
 	#  prototypes for spirhelp.c */
 		void spirals_help(void);
@@ -1052,86 +1132,6 @@ int did_bad_good_guy_collide(players *bg)
 }
 
 # ****************************< End did_bad_good_guy_collide >***********/
-
-
-
-# ****************************< Start did_bullet_hit_something >********/
-
-# ****************************************************************************/
-# * Function Name   : did_bullet_hit_something.                        **/
-# * Description     : This function determines if a bullet hit something.   **/
-# *                   If it hit something it identifies what it hit and     **/
-# *                   returns a pointer to the hit object otherwise it      **/
-# *                   returns a value of NULL.                              **/
-# * Inputs          : A pointer to the bullet being tested for a hit.       **/
-# * Outputs         : A pointer to hit object or NULL if no hit.            **/
-# * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 4-30-92.                                   **/
-# *                                                                         **/
-# *                                                                         **/
-# ****************************************************************************/
-
-players *did_bullet_hit_something(players *bullet)
-{
-	players *target = NULL;
-	float look_ahead_x, look_ahead_y, look_ahead_dist_to_screen_center, distance_between_bullets;
-	static int background_color;
-	static int screen_center_x, screen_center_y;
-	int target_found = ZERO_VALUE;
-
-	background_color = getbkcolor();
-	screen_center_x = (int) (getmaxx()/TWO_VALUE);
-	screen_center_y = (int) (getmaxy()/TWO_VALUE);
-
-
-	#  calculate look ahead coordinates */
-	look_ahead_x = bullet->pd.b.x + (TWO_VALUE * bullet->pd.b.x_step);
-	look_ahead_y = bullet->pd.b.y + (TWO_VALUE * bullet->pd.b.y_step);
-
-	#  determine if the bullet actually hit something */
-	if(getpixel((int) look_ahead_x,(int) look_ahead_y) != background_color)
-	{
-		#  the bullet hit something, find out what it hit */
-		target = bullet->next; #  set starting point for search */
-
-		while((target != bullet) && (!target_found))  #  traverse the player list */
-		{
-			if(target != bullet->pd.b.from) #  a player can't shoot itself */
-
-				if(target->pt == good)
-				{
-					look_ahead_dist_to_screen_center = sqrt(pow((look_ahead_x - screen_center_x),TWO_VALUE) + pow((look_ahead_y - screen_center_y),TWO_VALUE));
-
-					if(look_ahead_dist_to_screen_center <= target->pd.gg.radius)
-						target_found = ONE_VALUE;
-				}
-				else if(target->pt == bad)
-				{
-					if((look_ahead_x >= target->pd.bg.badguy.x) &&
-						(look_ahead_x <= (target->pd.bg.badguy.x + target->pd.bg.badguy.width)) &&
-						(look_ahead_y >= target->pd.bg.badguy.y) &&
-						(look_ahead_y <= (target->pd.bg.badguy.y + target->pd.bg.badguy.height)))
-							target_found = ONE_VALUE;
-				}
-				else #  the player type is another bullet */
-				{
-				  #  if the distance between their two centers is less than (2 * r) then they hit each other */
-					distance_between_bullets = sqrt(pow((look_ahead_x - target->pd.b.x),TWO_VALUE) + pow((look_ahead_y - target->pd.b.y),TWO_VALUE));
-
-					if(distance_between_bullets <= (2 * bullet->pd.b.radius))
-						target_found = ONE_VALUE;
-				}
-
-			if(!target_found)
-				target = target->next;
-
-		}
-	}
-
-	return(target);
-}
-
-# ****************************< End did_bullet_hit_something >***********/
 
 # ---------------------------< End Functions >-------------------------------*/
 
