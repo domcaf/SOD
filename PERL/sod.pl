@@ -120,6 +120,92 @@ pod2usage(
     }
 ) if ($opt_help);
 
+# Description     : This is the main module for the game "Spirals Of Death
+# This File's Name: spirals.c or 0-0-main.                                
+# Programmer(s)   : Dominic Caffey.                                       
+# Notes & Comments: Created on 3/31/1992. Converted to PERL beginning Oct/2017.
+
+int main(void)
+{
+	sprites bad_image;
+	players *player_list = NULL;
+	int bad_guy_count = ZERO_VALUE;
+	int error_flag;
+
+	#  set up the video environment */
+	if (setup_video_driver_and_mode())
+	{
+		print("\a\a\a\nVideo driver or screen mode error - program execution terminated.");
+		exit(ONE_VALUE);
+	}
+
+	#  initialize the random # generator */
+	randomize();
+
+	#  make the game background color black */
+	setbkcolor(BLACK);
+
+	#  generate and capture bad guy & good guy images */
+	if(draw_bad_guy(&bad_image))
+	{
+		print("\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated.");
+		exit(ONE_VALUE);
+	}
+
+	#  load initial conditions into good_guy & bad_guys i.e. build player list */
+
+	#  load the good guy into the list */
+
+	player_list = add_good();
+
+	if(player_list == NULL)
+	{
+		print("\a\a\a\nCouldn't create good guy to add to list.\nProgram execution terminated.");
+		exit(ONE_VALUE);
+	}
+
+	#  display the good guy */
+	draw_good_guy(player_list,ZERO_VALUE);
+
+#ifndef good_debug
+	#  load the bad guys into the list */
+	do
+	{
+		error_flag = add_player(player_list,bad,&bad_image,NULL);
+		bad_guy_count++;
+	}
+	while((bad_guy_count < MAX_BAD_GUYS) && (!error_flag));
+#endif
+
+	#  main processing loop - let the games begin ! */
+
+	while(player_list != NULL)
+	{
+		visit_player(player_list);
+
+		player_list = player_list->next;
+	}
+
+	#  the game's over so free up the memory that was previously allocated */
+
+	player_list->prev->next = NULL;
+
+	while(player_list != NULL)
+	{
+		player_list = player_list->next;
+		free(player_list->prev);
+	}
+
+
+	#  restore the pregame video environment */
+	restore_pre_game_environment();
+
+	return(ZERO_VALUE); #  indicate normal program termination */
+}
+
+# -----------------------------< End Main >----------------------------------*/
+
+
 
 # Keyboard constants
 use constant {
@@ -217,19 +303,262 @@ use constant {
 
 };
 
+
+                package _utilities
+                use Moose;
+use namespace::autoclean;
+                {
+					# ATTRIBUTES
 #  trigonometry constants */
 use constant {
-
-    PI                  => 3.1415927,
-    HALF_CIRCLE_RADIANS => PI,          #  # of radians in half circle */
-    HALF_CIRCLE_DEGREES => 180          #  # of degrees in half circle */
-
+    HALF_CIRCLE_DEGREES => 180,                #  # of degrees in half circle */
+    HALF_CIRCLE_RADIANS => 3.1415927,          #  # of radians in half circle */
+    MAX_BAD_GUYS        => 3,
+    MAX_BULLETS         => 1,
+    PI                  => HALF_CIRCLE_RADIANS,
 };
+
+
+					# METHODS
+
+# -----------------------------< Functions >---------------------------------*/
+
+# Put what follows below in the Utilities package.
+
+
+# ****************************< Start setup_video_driver_and_mode >*******/
+
+# ****************************************************************************/
+# * Function Name   : setup_video_driver_and_mode.                      **/
+# * Description     : This routine registers the video driver and sets the  **/
+# *                   screen mode that the calling routine will use.  This  **/
+# *                   routine is currently hardwired to register the        **/
+# *                   "egavga" driver and set the screen mode to "VGAMED"   **/
+# *                   which is 640 X 350, 16 color with 2 graphics pages.   **/
+# * Inputs          : None.                                                 **/
+# * Outputs         : Returns an integer value of "0" if successful and "1" **/
+# *                   if the routine failed to register the driver or set   **/
+# *                   the appropriate screen mode.                          **/
+# * Programmer(s)   : Dominic Caffey.                                       **/
+# * Notes & Comments: Created on 4/02/1992.                                 **/
+# *                                                                         **/
+# *                                                                         **/
+# ****************************************************************************/
+
+int setup_video_driver_and_mode(void)
+{
+	int error_flag = ZERO_VALUE;
+	int  errorcode, graphics_mode = VGAMED;
+
+#ifdef video_problems
+
+#  DAVE - I've been having a lot of problems getting video drivers to link
+#  into my program correctly; I've been in touch with Borland and they say that
+#  it's probably due to my hardware incompatibility problem.  Everything links
+#  fine and dandy but when I run the program I get a very vague message that
+#  tells me nothing about what the problem actually is.  I've used preprocessor
+#  directives to hop back back and forth between loading the video driver and
+#  linking it into the code.  As a result of the problems I've been having, I'm
+#  including the "egavga.bgi" video driver and doing a "detect" with "initgraph()".
+#  This may be shoddy but it works given my present incompatibility dilemma.
+#  - Dom */
+
+	#  register the graphics driver to be used before calling initgraph */
+   	errorcode = registerbgidriver(EGAVGA_driver);    
+
+	#  test to see if video driver registration worked */
+
+	if (errorcode < ZERO_VALUE)
+	{
+		print("Video driver - graphics error: %s\n",grapherrormsg(errorcode));
+		print("errorcode = %d\n",errorcode);
+		print("Press any key to quit.");
+		getch();
+		error_flag = ONE_VALUE; #  set an error_flag */
+	}
+	else
+	{
+		#  Set the video environment for the program to be VGA, 640 x 350, 16 color.
+		The VGA driver will be linked directly into this program's resulting
+		executable. See "UTIL.DOC" on your Borland distribution diskettes. */
+
+		initgraph((int far *) &errorcode,(int far *) &graphics_mode, "");
+
+		#  test to see if initgraph worked */
+		errorcode = graphresult(); 
+
+		if (errorcode != grOk)
+		{
+			print("Initgraph - graphics error: %s\n",grapherrormsg(errorcode));
+			print("Press any key to quit.");
+			getch();
+			error_flag = ONE_VALUE; #  set an error_flag */
+		}
+	}
+
+#endif
+
+#ifndef video_problems
+
+	errorcode = DETECT;
+	initgraph((int far *) &errorcode,(int far *) &graphics_mode, "");
+
+
+		#  test to see if initgraph worked */
+		errorcode = graphresult();
+
+		if (errorcode != grOk)
+		{
+			print("Initgraph - graphics error: %s\n",grapherrormsg(errorcode));
+			print("Press any key to quit.");
+			getch();
+			error_flag = ONE_VALUE; #  set an error_flag */
+		}
+
+#endif
+
+	return(error_flag);
+}
+
+# ****************************< End setup_video_driver_and_mode >*********/
+
+
+# ****************************< Start restore_pre_game_environment >******/
+
+# ****************************************************************************/
+# * Function Name   : restore_pre_game_environment.                    **/
+# * Description     : This routine restores the pre game environment.       **/
+# *                   Currently, the pre game environment restoration       **/
+# *                   consists only of restoring the pre game video mode but**/
+# *                   later revisions of this routine will also restore     **/
+# *                   other pre game environment elements.                  **/
+# * Inputs          : None.                                                 **/
+# * Outputs         : None.                                                 **/
+# * Programmer(s)   : Dominic Caffey.                                       **/
+# * Notes & Comments: Created on 4-4-92.                                    **/
+# *                                                                         **/
+# *                                                                         **/
+# ****************************************************************************/
+
+void restore_pre_game_environment(void)
+{
+	closegraph(); #  free the memory allocated by graphics system */
+
+	restorecrtmode(); #  put the system back in the text mode it was in prior to start of game */
+}
+
+# ****************************< End restore_pre_game_environment >********/
+
+
+# ****************************< Start spirals_help >*************************/
+
+# ****************************************************************************/
+# * Function Name   : spirals_help.													    **/
+# * Description     : This is the online help facility for the game "Spirals**/
+# *                   Of Death".                                            **/
+# * Inputs          : None.                                                 **/
+# * Outputs         : None.                                                 **/
+# * Programmer(s)   : Dominic Caffey.                                       **/
+# * Notes & Comments: Created on 5-14-92.                                   **/
+# *                                                                         **/
+# *                                                                         **/
+# ****************************************************************************/
+
+void spirals_help(void)
+{
+	#  put the display in text mode */
+	restorecrtmode();
+
+	#  display the help text */
+
+	print("                        S P I R A L S    O F    D E A T H\n\n");
+	print("\"Spirals of Death\" is a game in which bad guys, who move in a decaying spirals,\n");
+	print("shoot at the good guy who's located in the center of the screen.  The good guy\n");
+	print("can rotate his gun and fire back.  The user assumes the role of the good guy.\n"); 
+	print("The object of the game is to destroy all the bad guys before being destroyed.\n"); 
+	print("The good guy can take 3 hits before dying; he will change to a different color\n");
+	print("each time he's hit in the following color progression:  Green -> Yellow -> Red -\n");
+	print("> Background Color.  The game is over when the good guy's color is the same as\n");
+	print("that of the game background.  The good guy fires green bullets and the bad guys\n");
+	print("fire yellow bullets.\n\n");
+	print("                            C O M M A N D    K E Y S\n\n");
+	print("Key         | Function\n");
+	print("------------+------------------------------\n");
+	print(""<-"        = Rotate gun counter clockwise.\n");
+	print(""->"        = Rotate gun clockwise.\n");
+	print(""space bar" = fire gun.\n");
+	print(""h" or "H"  = display this help screen.\n");
+	print(""p" or "P"  = pause the game.\n");
+	print(""q" or "Q"  = quit the game.\n");
+	print("\a\a\a           =======> touch a key to start or resume game play <=======");
+
+	getch(); #  pause the routine while the user is reading the help screen */
+
+	#  put the display back into graphics mode */
+	setgraphmode(getgraphmode());
+
+}
+
+# ****************************< End spirals_help >***************************/
+
+# Put what follows below in the Utilities package.
+
+#  Contents of TESTTRIG.C below:
+#  this program is used to test the correctness and functionality of the
+#  routines contained in the file "polrcart.c". */
+
+float polar_to_cartesian_coords(float,float,char);
+
+float cartesian_to_polar_coords(float , float , char);
+
+#include <stdio.h>
+
+main()
+{
+
+
+	float x, y, radius, angle;
+	int resp = 1;
+
+
+# *****/
+
+	while(resp)
+	{
+		print("\a\a\nEnter float values for x & y ---> ");
+		scanf("%f %f",&x,&y);
+		print("\nYou entered the following values: %f %f.",x,y);
+
+
+		radius = cartesian_to_polar_coords(x,y,'r');
+		angle = cartesian_to_polar_coords(x,y,'a');
+
+		print("\n\nThe polar coordinates for (%f,%f) are (%f,%f).",x,y,radius,angle);
+
+		print("\n\nEnter float values for radius & angle ---> ");
+		scanf("%f %f",&radius,&angle);
+		print("\nYou entered the following values: %f %f",radius,angle);
+
+		print("\nThe x coordinate for (%f,%f) is %f",radius,angle,polar_to_cartesian_coords(radius,angle,'x'));
+
+		print("\nThe y coordinate for (%f,%f) is %f",radius,angle,polar_to_cartesian_coords(radius,angle,'y'));
+
+		print("\nDo you want to run another test (1 for y, 0 for n) ---> ");
+		scanf("%d",&resp);
+	}
+}
+
+#  end of file */
+
+				} # package _utilities
+                      no Moose;
+                    __PACKAGE__->meta->make_immutable;
 
 
 
                 package _sprites;
                 use Moose;
+use namespace::autoclean;
                 {
 
                     # Player behaviour limits
@@ -259,6 +588,7 @@ use constant {
 
 		package _bullet;
 		use Moose;
+use namespace::autoclean;
 
 		 #bullets attributes/properties.
 		
@@ -388,6 +718,7 @@ players *did_bullet_hit_something(players *bullet)
 
 		package _badguy;
 		use Moose;
+use namespace::autoclean;
 		{
 
 # * Description     : Stores constants associated with the description and **/
@@ -416,6 +747,11 @@ use constant {
 			float current_angle; #  current angular position in radians */
 		} badguys;
 
+# METHODS
+
+		int  draw_bad_guy(sprites *);
+
+
 		# package _badguy;
 
 		no Moose;
@@ -429,6 +765,7 @@ use constant {
 
 		package _goodguy;
 		use Moose;
+use namespace::autoclean;
 		{
 
 # Good guy constants
@@ -449,6 +786,15 @@ use constant {
 			float gun_width_half_angle; #  half the angle width of the gun barrel in radians */
 		} goodguys;
 
+# METHODS
+
+	#  prototypes for add_good.c */
+
+		void draw_good_guy(players *, float new_angle);
+
+
+		players *add_good(void);
+
 		no Moose;
 		__PACKAGE__->meta->make_immutable;
 
@@ -461,6 +807,7 @@ use constant {
  # *                   a badguy or a bullet fired by either of the previous. **/
 
                 use Moose;
+use namespace::autoclean;
 
                     #enum player_type { good, bad, bullet } pt;
 					has player_type (
@@ -476,20 +823,234 @@ use constant {
 
                     has pd (
 						isa => '_goodguy | _badguy | _bullet',
-						is => 'rw'
+						is => 'ro'
 						);    #  pd = player data */
 
                     #struct _player * next, *prev;  #  link structure pointers */
 
 					has next (
 						isa => 'Object',
-						is = 'ro'
+						is = 'rw'
 					);
 
 					has prev (
 						isa => 'Object',
-						is = 'ro'
+						is = 'rw'
 					);
+
+					# METHODS
+
+
+	#  prototypes for add_pl.c */
+
+		int add_player(players *, enum player_type, sprites *, players *);
+
+	#  prototypes for del_pl.c */
+
+		void  delete_player(players *);
+
+	#  prototypes for visit_pl.c */
+
+		void  visit_player(players *);
+
+
+Contents of VISIT_PL.C below:
+
+# ----------------------------< Start Of File >------------------------------*/
+
+# ****************************< General Information >*************************/
+# * Description     : This file contains the routine for visiting a player  **/
+# *                   in the game "Spirals Of Death".                       **/
+# * This File's Name: visit_pl.c or visit_player.                           **/
+# * Programmer(s)   : Dominic Caffey.                                       **/
+# * Notes & Comments: Created on 4/01/1992.                                 **/
+# *                                                                         **/
+# **************************< End General Information >***********************/
+
+
+# ****************************< Start visit_player >********************/
+
+# ****************************************************************************/
+# * Function Name   : visit_player.                                    **/
+# * Description     : This routine visits a player in the player_list and   **/
+# *                   gives the player the opportunity to behave according  **/
+# *                   to its nature. ie shoot, move, crash or do nothing.   **/
+# * Inputs          : A pointer to a player in the player_list.             **/
+# * Outputs         : None.                                                 **/
+# * Programmer(s)   : Dominic Caffey.                                       **/
+# * Notes & Comments: Created on 4-28-92.                                   **/
+# *                                                                         **/
+# *                                                                         **/
+# ****************************************************************************/
+
+void visit_player(players *player)
+{
+	int event_count, keystroke, special_key, exit_flag = ZERO_VALUE;
+	int good_shot;  #  this is basically a dummy variable & is used only to satisfy function calling conventions */
+	players *wounded;
+
+	switch(player->pt)
+	{
+		case good:
+			for(event_count = ZERO_VALUE; event_count < MAX_GOOD_GUY_EVENTS; event_count++)
+			{
+				#  get a keystroke from the good guy and act accordingly */
+				keystroke = get_keystroke(DONT_WAIT,&special_key);
+
+			  #  process the keystroke */
+				if(keystroke || special_key)
+					if(keystroke && !special_key)
+					{
+						switch(keystroke)
+						{
+							case 'H': #  activate help and pause the game */
+							case 'h':
+								spirals_help();
+								break;
+
+							case 'P': #  pause the game */
+							case 'p':
+								getch();
+								break;
+
+							case 'Q': #  quit the game */
+							case 'q':
+								exit_flag = ONE_VALUE;
+								break;
+
+							case SPACE_BAR:  #  fire the good guy's gun */
+								good_shot = add_player(player,bullet,NULL,player);
+								break;
+
+							default:  #  ignore invalid keystrokes */
+								break;
+						}
+					}
+					else if(!keystroke && special_key)
+					{
+						switch(special_key)
+						{
+							case LEFT_ARROW:  #  rotate the good guy's gun counter clockwise */
+								draw_good_guy(player,-GOOD_GUY_ROTATION_INCREMENT);
+								break;
+
+							case RIGHT_ARROW: #  rotate the good guy's gun clockwise */
+								draw_good_guy(player,GOOD_GUY_ROTATION_INCREMENT);
+								break;
+
+							default:  #  ignore invalid keystrokes */
+								break;
+						}
+					}
+			}
+			break;
+
+		case bad:
+
+			#  determine if bad guy crashed into good guy */
+			if(did_bad_good_guy_collide(player))
+				delete_player(player);
+			else
+			{
+
+#ifndef no_shoot
+
+				#  randomly decide on gun firing & take action */
+				if(random(SHOOTING_PROBABILITY_FACTOR) == ONE_VALUE)
+					good_shot = add_player(player,bullet,NULL,player);
+
+#endif
+
+				#  erase bad guy from old location and move to new location */
+				move_player(player);
+			}
+
+			break;
+
+		case bullet:
+
+			#  determine if and what bullet may have struck */
+			if((wounded = did_bullet_hit_something(player)) != NULL)
+			{
+				#  delete the wounded player or change its status */
+				switch(wounded->pt)
+				{
+					case good:
+
+						#  set the good guy's color to its next color */
+						switch(wounded->pd.gg.gun_color)
+						{
+							case GREEN:
+								wounded->pd.gg.gun_color = YELLOW;
+								break;
+
+							case YELLOW:
+								wounded->pd.gg.gun_color = RED;
+								break;
+
+							case RED:
+							default:
+								wounded->pd.gg.gun_color = getbkcolor();
+								break;
+						}
+
+						draw_good_guy(wounded,ZERO_VALUE);
+						break;
+
+					case bad:
+					case bullet:
+						#  delete the bad guy or the bullet */
+						delete_player(wounded);
+						break;
+
+					default: #  do nothing */
+						break;
+				}
+
+				#  delete the bullet */
+				delete_player(player);
+
+			}
+
+			#  bullet didn't hit anything, move the player to its next position */
+			move_player(player);
+
+			break;
+
+		default:    #  don't do anything */
+			break;
+	}
+
+	if (exit_flag)
+	{
+		#  the game's over so free up the memory that was previously allocated */
+
+		player->prev->next = NULL;
+
+		while(player != NULL)
+		{
+			player = player->next;
+			free(player->prev);
+		}
+
+
+		#  restore the pregame video environment */
+		restore_pre_game_environment();
+
+		#  display the score & pause before terminating program */
+		exit(ZERO_VALUE);
+	}
+} # ****************************< End visit_player >**********************/
+
+
+	#  prototypes for move_pl.c */
+
+		void  move_player(players *);
+
+		int did_bad_good_guy_collide(players *);
+		#players *did_bullet_hit_something(players *);
+
+
 
                 no Moose;
                 __PACKAGE__->meta->make_immutable;
@@ -514,11 +1075,6 @@ use constant {
 #ifndef prototyp_h
 
 	#  prototypes for draw_pl.c */
-
-		void draw_good_guy(players *, float new_angle);
-
-		int  draw_bad_guy(sprites *);
-
 	#  prototypes for setclean.c */
 
 		int  setup_video_driver_and_mode(void);
@@ -529,31 +1085,7 @@ use constant {
 		float polar_to_cartesian_coords(float, float, char);
 		float cartesian_to_polar_coords(float, float, char);
 
-	#  prototypes for add_good.c */
-
-		players *add_good(void);
-
-	#  prototypes for add_pl.c */
-
-		int add_player(players *, enum player_type, sprites *, players *);
-
-	#  prototypes for del_pl.c */
-
-		void  delete_player(players *);
-
-	#  prototypes for visit_pl.c */
-
-		void  visit_player(players *);
-
-	#  prototypes for move_pl.c */
-
-		void  move_player(players *);
-
 	#  prototypes for hit.c */
-
-		int did_bad_good_guy_collide(players *);
-		#players *did_bullet_hit_something(players *);
-
 	#  prototypes for spirhelp.c */
 		void spirals_help(void);
 
@@ -1269,658 +1801,6 @@ void move_player(players *mm)  #  mm = move me */
 # ****************************< End move_player >************************/
 
 
-# ---------------------------< End Functions >-------------------------------*/
-
-# -----------------------------< End Of File >-------------------------------*/
-
-Contents of SETCLEAN.C below:
-
-# ----------------------------< Start Of File >------------------------------*/
-
-# ****************************< General Information >*************************/
-# * Description     : This module sets up the environment for the game and  **/
-# *                   restores the pre game evironment once the game is over**/
-# *                   .  Currently, the pre game environment restoration    **/
-# *                   consists only of restoring the pre game video mode but**/
-# *                   later revisions of this routine will also restore     **/
-# *                   other pre game environment elements.                  **/
-# * This File's Name: setclean.c or game_setup_cleanup_module.              **/
-# * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 4/01/1992.                                 **/
-# *                                                                         **/
-# **************************< End General Information >***********************/
-
-# -------------------------< Other Include Files >---------------------------*/
-
-#include <stdio.h>
-#include <conio.h>
-#include <graphics.h>
-#include "num_defs.h"
-
-# ----------------------< End Other Include Files >--------------------------*/
-
-# -----------------------------< Functions >---------------------------------*/
-
-# ****************************< Start setup_video_driver_and_mode >*******/
-
-# ****************************************************************************/
-# * Function Name   : setup_video_driver_and_mode.                      **/
-# * Description     : This routine registers the video driver and sets the  **/
-# *                   screen mode that the calling routine will use.  This  **/
-# *                   routine is currently hardwired to register the        **/
-# *                   "egavga" driver and set the screen mode to "VGAMED"   **/
-# *                   which is 640 X 350, 16 color with 2 graphics pages.   **/
-# * Inputs          : None.                                                 **/
-# * Outputs         : Returns an integer value of "0" if successful and "1" **/
-# *                   if the routine failed to register the driver or set   **/
-# *                   the appropriate screen mode.                          **/
-# * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 4/02/1992.                                 **/
-# *                                                                         **/
-# *                                                                         **/
-# ****************************************************************************/
-
-int setup_video_driver_and_mode(void)
-{
-	int error_flag = ZERO_VALUE;
-	int  errorcode, graphics_mode = VGAMED;
-
-#ifdef video_problems
-
-#  DAVE - I've been having a lot of problems getting video drivers to link
-into my program correctly; I've been in touch with Borland and they say that
-it's probably due to my hardware incompatibility problem.  Everything links
-fine and dandy but when I run the program I get a very vague message that
-tells me nothing about what the problem actually is.  I've used preprocessor
-directives to hop back back and forth between loading the video driver and
-linking it into the code.  As a result of the problems I've been having, I'm
-including the "egavga.bgi" video driver and doing a "detect" with "initgraph()".
-This may be shoddy but it works given my present incompatibility dilemma.
-- Dom */
-
-	#  register the graphics driver to be used before calling initgraph */
-   	errorcode = registerbgidriver(EGAVGA_driver);    
-
-	#  test to see if video driver registration worked */
-
-	if (errorcode < ZERO_VALUE)
-	{
-		printf("Video driver - graphics error: %s\n",grapherrormsg(errorcode));
-		printf("errorcode = %d\n",errorcode);
-		printf("Press any key to quit.");
-		getch();
-		error_flag = ONE_VALUE; #  set an error_flag */
-	}
-	else
-	{
-		#  Set the video environment for the program to be VGA, 640 x 350, 16 color.
-		The VGA driver will be linked directly into this program's resulting
-		executable. See "UTIL.DOC" on your Borland distribution diskettes. */
-
-		initgraph((int far *) &errorcode,(int far *) &graphics_mode, "");
-
-		#  test to see if initgraph worked */
-		errorcode = graphresult(); 
-
-		if (errorcode != grOk)
-		{
-			printf("Initgraph - graphics error: %s\n",grapherrormsg(errorcode));
-			printf("Press any key to quit.");
-			getch();
-			error_flag = ONE_VALUE; #  set an error_flag */
-		}
-	}
-
-#endif
-
-#ifndef video_problems
-
-	errorcode = DETECT;
-	initgraph((int far *) &errorcode,(int far *) &graphics_mode, "");
-
-
-		#  test to see if initgraph worked */
-		errorcode = graphresult();
-
-		if (errorcode != grOk)
-		{
-			printf("Initgraph - graphics error: %s\n",grapherrormsg(errorcode));
-			printf("Press any key to quit.");
-			getch();
-			error_flag = ONE_VALUE; #  set an error_flag */
-		}
-
-#endif
-
-	return(error_flag);
-}
-
-# ****************************< End setup_video_driver_and_mode >*********/
-
-# ****************************< Start restore_pre_game_environment >******/
-
-# ****************************************************************************/
-# * Function Name   : restore_pre_game_environment.                    **/
-# * Description     : This routine restores the pre game environment.       **/
-# *                   Currently, the pre game environment restoration       **/
-# *                   consists only of restoring the pre game video mode but**/
-# *                   later revisions of this routine will also restore     **/
-# *                   other pre game environment elements.                  **/
-# * Inputs          : None.                                                 **/
-# * Outputs         : None.                                                 **/
-# * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 4-4-92.                                    **/
-# *                                                                         **/
-# *                                                                         **/
-# ****************************************************************************/
-
-void restore_pre_game_environment(void)
-{
-	closegraph(); #  free the memory allocated by graphics system */
-
-	restorecrtmode(); #  put the system back in the text mode it was in prior to start of game */
-}
-
-# ****************************< End restore_pre_game_environment >********/
-
-# ---------------------------< End Functions >-------------------------------*/
-
-# -----------------------------< End Of File >-------------------------------*/
-
-Contents of SPIRALS.C below:
-
-# ----------------------------< Start Of File >------------------------------*/
-
-# ****************************< General Information >*************************/
-# * Description     : This is the main module for the game "Spirals Of Death**/
-# * This File's Name: spirals.c or 0-0-main.                                **/
-# * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 3/31/1992.                                 **/
-# *                                                                         **/
-# **************************< End General Information >***********************/
-
-# -------------------------< Other Include Files >---------------------------*/
-
-#include <stdio.h>
-#include <conio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <graphics.h>
-#include "num_defs.h"
-#include "players.h"
-
-
-# ----------------------< End Other Include Files >--------------------------*/
-
-# ----------------------------< Constants >----------------------------------*/
-
-use constant {
-
-MAX_BAD_GUYS => 3,
-MAX_BULLETS  => 1
-
-};
-
-# --------------------------< End Constants >--------------------------------*/
-
-# -----------------------------< Prototypes >--------------------------------*/
-
-#include "prototyp.h"
-
-# ---------------------------< End Prototypes >------------------------------*/
-
-# -------------------------------< Main >------------------------------------*/
-
-int main(void)
-{
-	sprites bad_image;
-	players *player_list = NULL;
-	int bad_guy_count = ZERO_VALUE;
-	int error_flag;
-
-	#  set up the video environment */
-	if (setup_video_driver_and_mode())
-	{
-		printf("\a\a\a\nVideo driver or screen mode error - program execution terminated.");
-		exit(ONE_VALUE);
-	}
-
-	#  initialize the random # generator */
-	randomize();
-
-	#  make the game background color black */
-	setbkcolor(BLACK);
-
-	#  generate and capture bad guy & good guy images */
-	if(draw_bad_guy(&bad_image))
-	{
-		printf("\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated.");
-		exit(ONE_VALUE);
-	}
-
-	#  load initial conditions into good_guy & bad_guys i.e. build player list */
-
-	#  load the good guy into the list */
-
-	player_list = add_good();
-
-	if(player_list == NULL)
-	{
-		printf("\a\a\a\nCouldn't create good guy to add to list.\nProgram execution terminated.");
-		exit(ONE_VALUE);
-	}
-
-	#  display the good guy */
-	draw_good_guy(player_list,ZERO_VALUE);
-
-#ifndef good_debug
-	#  load the bad guys into the list */
-	do
-	{
-		error_flag = add_player(player_list,bad,&bad_image,NULL);
-		bad_guy_count++;
-	}
-	while((bad_guy_count < MAX_BAD_GUYS) && (!error_flag));
-#endif
-
-	#  main processing loop - let the games begin ! */
-
-	while(player_list != NULL)
-	{
-		visit_player(player_list);
-
-		player_list = player_list->next;
-	}
-
-	#  the game's over so free up the memory that was previously allocated */
-
-	player_list->prev->next = NULL;
-
-	while(player_list != NULL)
-	{
-		player_list = player_list->next;
-		free(player_list->prev);
-	}
-
-
-	#  restore the pregame video environment */
-	restore_pre_game_environment();
-
-	return(ZERO_VALUE); #  indicate normal program termination */
-}
-
-# -----------------------------< End Main >----------------------------------*/
-
-# -----------------------------< End Of File >-------------------------------*/
-
-Contents of SPIRHELP.C below:
-
-# ----------------------------< Start Of File >------------------------------*/
-
-# ****************************< General Information >*************************/
-# * Description     : This file contains the online help facility for the   **/
-# *                   game "Spirals of Death".                              **/
-# * This File's Name: spirhelp.c or spirals_help.                           **/
-# * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 5-14-92.                                    **/
-# *                                                                         **/
-# **************************< End General Information >***********************/
-
-# -------------------------< Other Include Files >---------------------------*/
-
-#include <stdio.h>
-#include <conio.h>
-#include <graphics.h>
-
-# ----------------------< End Other Include Files >--------------------------*/
-
-# ----------------------------< Constants >----------------------------------*/
-
-
-
-# --------------------------< End Constants >--------------------------------*/
-
-# ------------------------< Enumerated Types >-------------------------------*/
-
-
-
-# ----------------------< End Enumerated Types >-----------------------------*/
-
-# ----------------------------< Typedefs  >----------------------------------*/
-
-
-
-# --------------------------< End Typedefs  >--------------------------------*/
-
-# -----------------------------< Macros  >-----------------------------------*/
-
-
-
-# ---------------------------< End Macros  >---------------------------------*/
-
-# -----------------------------< Prototypes >--------------------------------*/
-
-
-
-# ---------------------------< End Prototypes >------------------------------*/
-
-# -----------------------------< Functions >---------------------------------*/
-
-# ****************************< Start spirals_help >*************************/
-
-# ****************************************************************************/
-# * Function Name   : spirals_help.													    **/
-# * Description     : This is the online help facility for the game "Spirals**/
-# *                   Of Death".                                            **/
-# * Inputs          : None.                                                 **/
-# * Outputs         : None.                                                 **/
-# * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 5-14-92.                                   **/
-# *                                                                         **/
-# *                                                                         **/
-# ****************************************************************************/
-
-void spirals_help(void)
-{
-	#  put the display in text mode */
-	restorecrtmode();
-
-	#  display the help text */
-
-	printf("                        S P I R A L S    O F    D E A T H\n\n");
-	printf("\"Spirals of Death\" is a game in which bad guys, who move in a decaying spirals,\n");
-	printf("shoot at the good guy who's located in the center of the screen.  The good guy\n");
-	printf("can rotate his gun and fire back.  The user assumes the role of the good guy.\n"); 
-	printf("The object of the game is to destroy all the bad guys before being destroyed.\n"); 
-	printf("The good guy can take 3 hits before dying; he will change to a different color\n");
-	printf("each time he's hit in the following color progression:  Green -> Yellow -> Red -\n");
-	printf("> Background Color.  The game is over when the good guy's color is the same as\n");
-	printf("that of the game background.  The good guy fires green bullets and the bad guys\n");
-	printf("fire yellow bullets.\n\n");
-	printf("                            C O M M A N D    K E Y S\n\n");
-	printf("Key         | Function\n");
-	printf("------------+------------------------------\n");
-	printf(""<-"        = Rotate gun counter clockwise.\n");
-	printf(""->"        = Rotate gun clockwise.\n");
-	printf(""space bar" = fire gun.\n");
-	printf(""h" or "H"  = display this help screen.\n");
-	printf(""p" or "P"  = pause the game.\n");
-	printf(""q" or "Q"  = quit the game.\n");
-	printf("\a\a\a           =======> touch a key to start or resume game play <=======");
-
-	getch(); #  pause the routine while the user is reading the help screen */
-
-	#  put the display back into graphics mode */
-	setgraphmode(getgraphmode());
-
-}
-
-# ****************************< End spirals_help >***************************/
-
-# ---------------------------< End Functions >-------------------------------*/
-
-# -------------------------------< Main >------------------------------------*/
-
-
-
-# -----------------------------< End Main >----------------------------------*/
-
-# -----------------------------< End Of File >-------------------------------*/
-
-Contents of TESTTRIG.C below:
-#  this program is used to test the correctness and functionality of the
-routines contained in the file "polrcart.c". */
-
-float polar_to_cartesian_coords(float,float,char);
-
-float cartesian_to_polar_coords(float , float , char);
-
-#include <stdio.h>
-
-main()
-{
-
-
-	float x, y, radius, angle;
-	int resp = 1;
-
-
-# *****/
-
-	while(resp)
-	{
-		printf("\a\a\nEnter float values for x & y ---> ");
-		scanf("%f %f",&x,&y);
-		printf("\nYou entered the following values: %f %f.",x,y);
-
-
-		radius = cartesian_to_polar_coords(x,y,'r');
-		angle = cartesian_to_polar_coords(x,y,'a');
-
-		printf("\n\nThe polar coordinates for (%f,%f) are (%f,%f).",x,y,radius,angle);
-
-		printf("\n\nEnter float values for radius & angle ---> ");
-		scanf("%f %f",&radius,&angle);
-		printf("\nYou entered the following values: %f %f",radius,angle);
-
-		printf("\nThe x coordinate for (%f,%f) is %f",radius,angle,polar_to_cartesian_coords(radius,angle,'x'));
-
-		printf("\nThe y coordinate for (%f,%f) is %f",radius,angle,polar_to_cartesian_coords(radius,angle,'y'));
-
-		printf("\nDo you want to run another test (1 for y, 0 for n) ---> ");
-		scanf("%d",&resp);
-	}
-}
-
-#  end of file */
-Contents of VISIT_PL.C below:
-
-# ----------------------------< Start Of File >------------------------------*/
-
-# ****************************< General Information >*************************/
-# * Description     : This file contains the routine for visiting a player  **/
-# *                   in the game "Spirals Of Death".                       **/
-# * This File's Name: visit_pl.c or visit_player.                           **/
-# * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 4/01/1992.                                 **/
-# *                                                                         **/
-# **************************< End General Information >***********************/
-
-# -------------------------< Other Include Files >---------------------------*/
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <graphics.h>
-#include <conio.h>
-#include "num_defs.h"
-#include "getkeys.h"
-#include "players.h"
-#include "prototyp.h"
-
-# ----------------------< End Other Include Files >--------------------------*/
-
-# -----------------------------< Functions >---------------------------------*/
-
-# ****************************< Start visit_player >********************/
-
-# ****************************************************************************/
-# * Function Name   : visit_player.                                    **/
-# * Description     : This routine visits a player in the player_list and   **/
-# *                   gives the player the opportunity to behave according  **/
-# *                   to its nature. ie shoot, move, crash or do nothing.   **/
-# * Inputs          : A pointer to a player in the player_list.             **/
-# * Outputs         : None.                                                 **/
-# * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 4-28-92.                                   **/
-# *                                                                         **/
-# *                                                                         **/
-# ****************************************************************************/
-
-void visit_player(players *player)
-{
-	int event_count, keystroke, special_key, exit_flag = ZERO_VALUE;
-	int good_shot;  #  this is basically a dummy variable & is used only to satisfy function calling conventions */
-	players *wounded;
-
-	switch(player->pt)
-	{
-		case good:
-			for(event_count = ZERO_VALUE; event_count < MAX_GOOD_GUY_EVENTS; event_count++)
-			{
-				#  get a keystroke from the good guy and act accordingly */
-				keystroke = get_keystroke(DONT_WAIT,&special_key);
-
-			  #  process the keystroke */
-				if(keystroke || special_key)
-					if(keystroke && !special_key)
-					{
-						switch(keystroke)
-						{
-							case 'H': #  activate help and pause the game */
-							case 'h':
-								spirals_help();
-								break;
-
-							case 'P': #  pause the game */
-							case 'p':
-								getch();
-								break;
-
-							case 'Q': #  quit the game */
-							case 'q':
-								exit_flag = ONE_VALUE;
-								break;
-
-							case SPACE_BAR:  #  fire the good guy's gun */
-								good_shot = add_player(player,bullet,NULL,player);
-								break;
-
-							default:  #  ignore invalid keystrokes */
-								break;
-						}
-					}
-					else if(!keystroke && special_key)
-					{
-						switch(special_key)
-						{
-							case LEFT_ARROW:  #  rotate the good guy's gun counter clockwise */
-								draw_good_guy(player,-GOOD_GUY_ROTATION_INCREMENT);
-								break;
-
-							case RIGHT_ARROW: #  rotate the good guy's gun clockwise */
-								draw_good_guy(player,GOOD_GUY_ROTATION_INCREMENT);
-								break;
-
-							default:  #  ignore invalid keystrokes */
-								break;
-						}
-					}
-			}
-			break;
-
-		case bad:
-
-			#  determine if bad guy crashed into good guy */
-			if(did_bad_good_guy_collide(player))
-				delete_player(player);
-			else
-			{
-
-#ifndef no_shoot
-
-				#  randomly decide on gun firing & take action */
-				if(random(SHOOTING_PROBABILITY_FACTOR) == ONE_VALUE)
-					good_shot = add_player(player,bullet,NULL,player);
-
-#endif
-
-				#  erase bad guy from old location and move to new location */
-				move_player(player);
-			}
-
-			break;
-
-		case bullet:
-
-			#  determine if and what bullet may have struck */
-			if((wounded = did_bullet_hit_something(player)) != NULL)
-			{
-				#  delete the wounded player or change its status */
-				switch(wounded->pt)
-				{
-					case good:
-
-						#  set the good guy's color to its next color */
-						switch(wounded->pd.gg.gun_color)
-						{
-							case GREEN:
-								wounded->pd.gg.gun_color = YELLOW;
-								break;
-
-							case YELLOW:
-								wounded->pd.gg.gun_color = RED;
-								break;
-
-							case RED:
-							default:
-								wounded->pd.gg.gun_color = getbkcolor();
-								break;
-						}
-
-						draw_good_guy(wounded,ZERO_VALUE);
-						break;
-
-					case bad:
-					case bullet:
-						#  delete the bad guy or the bullet */
-						delete_player(wounded);
-						break;
-
-					default: #  do nothing */
-						break;
-				}
-
-				#  delete the bullet */
-				delete_player(player);
-
-			}
-
-			#  bullet didn't hit anything, move the player to its next position */
-			move_player(player);
-
-			break;
-
-		default:    #  don't do anything */
-			break;
-	}
-
-	if (exit_flag)
-	{
-		#  the game's over so free up the memory that was previously allocated */
-
-		player->prev->next = NULL;
-
-		while(player != NULL)
-		{
-			player = player->next;
-			free(player->prev);
-		}
-
-
-		#  restore the pregame video environment */
-		restore_pre_game_environment();
-
-		#  display the score & pause before terminating program */
-		exit(ZERO_VALUE);
-	}
-}
-
-# ****************************< End visit_player >**********************/
-
-# ---------------------------< End Functions >-------------------------------*/
-
-# -----------------------------< End Of File >-------------------------------*/
 
 sub BEGIN {
     $ENV{'DISPLAY'} = 'localhost:10.0';    # Needed for use with PTKDB & SSH & X11 forwarding over SSH.
