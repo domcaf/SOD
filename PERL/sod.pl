@@ -1,14 +1,15 @@
-#!/usr/bin/perl
-#!/usr/bin/perl -d:ptkdb
+#!/usr/bin/env perl
+#!/usr/bin/env perl -d:ptkdb
 
 use constant LOG_FILE => '>/tmp/sod.log';
 use Data::Dumper;
 use Getopt::Long;
+
 #use Log::Log4perl qw(:easy);
 use namespace::autoclean;
 use Pod::Usage;
 
-$opt_help = 0; # Default to not displaying help.
+$opt_help = 0;    # Default to not displaying help.
 
 $Data::Dumper::Sortkeys = 1;
 
@@ -121,91 +122,88 @@ pod2usage(
 ) if ($opt_help);
 
 # Description     : This is the main module for the game "Spirals Of Death
-# This File's Name: spirals.c or 0-0-main.                                
-# Programmer(s)   : Dominic Caffey.                                       
+# Programmer(s)   : Dominic Caffey.
 # Notes & Comments: Created on 3/31/1992. Converted to PERL beginning Oct/2017.
 
-int main(void)
-{
-	sprites bad_image;
-	players *player_list = NULL;
-	int bad_guy_count = ZERO_VALUE;
-	int error_flag;
+sprites bad_image;
+players * player_list = NULL;
+int bad_guy_count = ZERO_VALUE;
+int error_flag;
 
-	#  set up the video environment */
-	if (setup_video_driver_and_mode())
-	{
-		print("\a\a\a\nVideo driver or screen mode error - program execution terminated.");
-		exit(ONE_VALUE);
-	}
+#  set up the video environment */
+if ( setup_video_driver_and_mode() ) {
+    print(
+"\a\a\a\nVideo driver or screen mode error - program execution terminated."
+    );
+    exit(ONE_VALUE);
+}
 
-	#  initialize the random # generator */
-	randomize();
+#  initialize the random # generator */
+randomize();
 
-	#  make the game background color black */
-	setbkcolor(BLACK);
+#  make the game background color black */
+setbkcolor(BLACK);
 
-	#  generate and capture bad guy & good guy images */
-	if(draw_bad_guy(&bad_image))
-	{
-		print("\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated.");
-		exit(ONE_VALUE);
-	}
+#  generate and capture bad guy & good guy images */
+if ( draw_bad_guy(&bad_image) ) {
+    print(
+"\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated."
+    );
+    exit(ONE_VALUE);
+}
 
-	#  load initial conditions into good_guy & bad_guys i.e. build player list */
+#  load initial conditions into good_guy & bad_guys i.e. build player list */
 
-	#  load the good guy into the list */
+#  load the good guy into the list */
 
-	player_list = add_good();
+player_list = add_good();
 
-	if(player_list == NULL)
-	{
-		print("\a\a\a\nCouldn't create good guy to add to list.\nProgram execution terminated.");
-		exit(ONE_VALUE);
-	}
+if ( player_list == NULL ) {
+    print(
+"\a\a\a\nCouldn't create good guy to add to list.\nProgram execution terminated."
+    );
+    exit(ONE_VALUE);
+}
 
-	#  display the good guy */
-	draw_good_guy(player_list,ZERO_VALUE);
+#  display the good guy */
+draw_good_guy( player_list, ZERO_VALUE );
 
 #ifndef good_debug
-	#  load the bad guys into the list */
-	do
-	{
-		error_flag = add_player(player_list,bad,&bad_image,NULL);
-		bad_guy_count++;
-	}
-	while((bad_guy_count < MAX_BAD_GUYS) && (!error_flag));
+#  load the bad guys into the list */
+do {
+    error_flag = add_player( player_list, bad, &bad_image, NULL );
+    bad_guy_count++;
+} while ( ( bad_guy_count < MAX_BAD_GUYS ) && ( !error_flag ) );
+
 #endif
 
-	#  main processing loop - let the games begin ! */
+#  main processing loop - let the games begin ! */
 
-	while(player_list != NULL)
-	{
-		visit_player(player_list);
+while ( player_list != NULL ) {
+    visit_player(player_list);
 
-		player_list = player_list->next;
-	}
-
-	#  the game's over so free up the memory that was previously allocated */
-
-	player_list->prev->next = NULL;
-
-	while(player_list != NULL)
-	{
-		player_list = player_list->next;
-		free(player_list->prev);
-	}
-
-
-	#  restore the pregame video environment */
-	restore_pre_game_environment();
-
-	return(ZERO_VALUE); #  indicate normal program termination */
+    player_list = player_list->next;
 }
+
+#  the game's over so free up the memory that was previously allocated */
+
+player_list->prev->next = NULL;
+
+while ( player_list != NULL ) {
+    player_list = player_list->next;
+    free( player_list->prev );
+}
+
+#  restore the pregame video environment */
+restore_pre_game_environment();
+
+return (ZERO_VALUE);    #  indicate normal program termination */
 
 # -----------------------------< End Main >----------------------------------*/
 
 
+package _utilities use Moose;
+use namespace::autoclean;
 
 # Keyboard constants
 use constant {
@@ -286,9 +284,7 @@ use constant {
 
 };
 
-
 # int get_keystroke(int pause, int *special_key); # prototype - C language context.
-
 
 #  integer constants */
 use constant {
@@ -303,12 +299,7 @@ use constant {
 
 };
 
-
-                package _utilities
-                use Moose;
-use namespace::autoclean;
-                {
-					# ATTRIBUTES
+# ATTRIBUTES
 #  trigonometry constants */
 use constant {
     HALF_CIRCLE_DEGREES => 180,                #  # of degrees in half circle */
@@ -318,13 +309,11 @@ use constant {
     PI                  => HALF_CIRCLE_RADIANS,
 };
 
-
-					# METHODS
+# METHODS
 
 # -----------------------------< Functions >---------------------------------*/
 
 # Put what follows below in the Utilities package.
-
 
 # ****************************< Start setup_video_driver_and_mode >*******/
 
@@ -345,12 +334,12 @@ use constant {
 # *                                                                         **/
 # ****************************************************************************/
 
-int setup_video_driver_and_mode(void)
-{
-	int error_flag = ZERO_VALUE;
-	int  errorcode, graphics_mode = VGAMED;
+sub setup_video_driver_and_mode {
+    my $error_flag = ZERO_VALUE;
+    my $errorcode
+	my $graphics_mode = VGAMED;
 
-#ifdef video_problems
+      #ifdef video_problems
 
 #  DAVE - I've been having a lot of problems getting video drivers to link
 #  into my program correctly; I've been in touch with Borland and they say that
@@ -363,161 +352,175 @@ int setup_video_driver_and_mode(void)
 #  This may be shoddy but it works given my present incompatibility dilemma.
 #  - Dom */
 
-	#  register the graphics driver to be used before calling initgraph */
-   	errorcode = registerbgidriver(EGAVGA_driver);    
+      #  register the graphics driver to be used before calling initgraph */
+      $errorcode = registerbgidriver(EGAVGA_driver);
 
-	#  test to see if video driver registration worked */
+      #  test to see if video driver registration worked */
 
-	if (errorcode < ZERO_VALUE)
-	{
-		print("Video driver - graphics error: %s\n",grapherrormsg(errorcode));
-		print("errorcode = %d\n",errorcode);
-		print("Press any key to quit.");
-		getch();
-		error_flag = ONE_VALUE; #  set an error_flag */
-	}
-	else
-	{
-		#  Set the video environment for the program to be VGA, 640 x 350, 16 color.
-		The VGA driver will be linked directly into this program's resulting
-		executable. See "UTIL.DOC" on your Borland distribution diskettes. */
+      if ( $errorcode < ZERO_VALUE ) {
+        print( "Video driver - graphics error: %s\n",
+            grapherrormsg($errorcode) );
+        print( "errorcode = %d\n", $errorcode );
+        print("Press any key to quit.");
+        getch();
+        error_flag = ONE_VALUE;    #  set an error_flag */
+    }
+    else {
+    #  Set the video environment for the program to be VGA, 640 x 350, 16 color.
+        The VGA driver will be linked directly into this program's
+          resulting executable
+          . See "UTIL.DOC" on your Borland distribution diskettes
+          . */
 
-		initgraph((int far *) &errorcode,(int far *) &graphics_mode, "");
+          initgraph( ( int far * ) & $errorcode,
+            ( int far * ) & graphics_mode, "" );
 
-		#  test to see if initgraph worked */
-		errorcode = graphresult(); 
+        #  test to see if initgraph worked */
+        $errorcode = graphresult();
 
-		if (errorcode != grOk)
-		{
-			print("Initgraph - graphics error: %s\n",grapherrormsg(errorcode));
-			print("Press any key to quit.");
-			getch();
-			error_flag = ONE_VALUE; #  set an error_flag */
-		}
-	}
+        if ( $errorcode != grOk ) {
+            print( "Initgraph - graphics error: %s\n",
+                grapherrormsg($errorcode) );
+            print("Press any key to quit.");
+            getch();
+            error_flag = ONE_VALUE;    #  set an error_flag */
+        }
+    }
 
-#endif
+    #endif
 
-#ifndef video_problems
+    #ifndef video_problems
 
-	errorcode = DETECT;
-	initgraph((int far *) &errorcode,(int far *) &graphics_mode, "");
+    $errorcode = DETECT;
+      initgraph( ( int far * ) & $errorcode, ( int far * ) & graphics_mode, "" );
 
+      #  test to see if initgraph worked */
+      $errorcode = graphresult();
 
-		#  test to see if initgraph worked */
-		errorcode = graphresult();
+      if ( $errorcode != grOk ) {
+        print( "Initgraph - graphics error: %s\n", grapherrormsg($errorcode) );
+        print("Press any key to quit.");
+        getch();
+        error_flag = ONE_VALUE;    #  set an error_flag */
+    }
 
-		if (errorcode != grOk)
-		{
-			print("Initgraph - graphics error: %s\n",grapherrormsg(errorcode));
-			print("Press any key to quit.");
-			getch();
-			error_flag = ONE_VALUE; #  set an error_flag */
-		}
+    #endif
 
-#endif
+    return (error_flag);
+  }
 
-	return(error_flag);
-}
+  # ****************************< End setup_video_driver_and_mode >*********/
 
-# ****************************< End setup_video_driver_and_mode >*********/
+  # ****************************< Start restore_pre_game_environment >******/
 
+ # ****************************************************************************/
+ # * Function Name   : restore_pre_game_environment.                    **/
+ # * Description     : This routine restores the pre game environment.       **/
+ # *                   Currently, the pre game environment restoration       **/
+ # *                   consists only of restoring the pre game video mode but**/
+ # *                   later revisions of this routine will also restore     **/
+ # *                   other pre game environment elements.                  **/
+ # * Inputs          : None.                                                 **/
+ # * Outputs         : None.                                                 **/
+ # * Programmer(s)   : Dominic Caffey.                                       **/
+ # * Notes & Comments: Created on 4-4-92.                                    **/
+ # *                                                                         **/
+ # *                                                                         **/
+ # ****************************************************************************/
 
-# ****************************< Start restore_pre_game_environment >******/
+  void restore_pre_game_environment(void) {
+    closegraph();    #  free the memory allocated by graphics system */
 
-# ****************************************************************************/
-# * Function Name   : restore_pre_game_environment.                    **/
-# * Description     : This routine restores the pre game environment.       **/
-# *                   Currently, the pre game environment restoration       **/
-# *                   consists only of restoring the pre game video mode but**/
-# *                   later revisions of this routine will also restore     **/
-# *                   other pre game environment elements.                  **/
-# * Inputs          : None.                                                 **/
-# * Outputs         : None.                                                 **/
-# * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 4-4-92.                                    **/
-# *                                                                         **/
-# *                                                                         **/
-# ****************************************************************************/
+      restorecrtmode()
+      ; #  put the system back in the text mode it was in prior to start of game */
+  }
 
-void restore_pre_game_environment(void)
-{
-	closegraph(); #  free the memory allocated by graphics system */
+  # ****************************< End restore_pre_game_environment >********/
 
-	restorecrtmode(); #  put the system back in the text mode it was in prior to start of game */
-}
+  # ****************************< Start spirals_help >*************************/
 
-# ****************************< End restore_pre_game_environment >********/
+ # ****************************************************************************/
+ # * Function Name   : spirals_help.													    **/
+ # * Description     : This is the online help facility for the game "Spirals**/
+ # *                   Of Death".                                            **/
+ # * Inputs          : None.                                                 **/
+ # * Outputs         : None.                                                 **/
+ # * Programmer(s)   : Dominic Caffey.                                       **/
+ # * Notes & Comments: Created on 5-14-92.                                   **/
+ # *                                                                         **/
+ # *                                                                         **/
+ # ****************************************************************************/
 
+  void spirals_help(void) {
 
-# ****************************< Start spirals_help >*************************/
+    #  put the display in text mode */
+    restorecrtmode();
 
-# ****************************************************************************/
-# * Function Name   : spirals_help.													    **/
-# * Description     : This is the online help facility for the game "Spirals**/
-# *                   Of Death".                                            **/
-# * Inputs          : None.                                                 **/
-# * Outputs         : None.                                                 **/
-# * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 5-14-92.                                   **/
-# *                                                                         **/
-# *                                                                         **/
-# ****************************************************************************/
+      #  display the help text */
 
-void spirals_help(void)
-{
-	#  put the display in text mode */
-	restorecrtmode();
+      print("                        S P I R A L S    O F    D E A T H\n\n");
+      print(
+"\"Spirals of Death\" is a game in which bad guys, who move in a decaying spirals,\n"
+      );
+      print(
+"shoot at the good guy who's located in the center of the screen.  The good guy\n"
+      );
+      print(
+"can rotate his gun and fire back.  The user assumes the role of the good guy.\n"
+      );
+      print(
+"The object of the game is to destroy all the bad guys before being destroyed.\n"
+      );
+      print(
+"The good guy can take 3 hits before dying; he will change to a different color\n"
+      );
+      print(
+"each time he's hit in the following color progression:  Green -> Yellow -> Red -\n"
+      );
+      print(
+"> Background Color.  The game is over when the good guy's color is the same as\n"
+      );
+      print(
+"that of the game background.  The good guy fires green bullets and the bad guys\n"
+      );
+      print("fire yellow bullets.\n\n");
+      print("                            C O M M A N D    K E Y S\n\n");
+      print("Key         | Function\n");
+      print("------------+------------------------------\n");
+      print( "" < -"        = Rotate gun counter clockwise.\n" );
+      print( ""->"        = Rotate gun clockwise.\n" );
+      print( "" space bar " = fire gun.\n" );
+      print( "" h " or " H "  = display this help screen.\n" );
+      print( "" p " or " P "  = pause the game.\n" );
+      print( ""q" or " Q "  = quit the game.\n" );
+      print(
+"\a\a\a           =======> touch a key to start or resume game play <======="
+      );
 
-	#  display the help text */
+      getch(); #  pause the routine while the user is reading the help screen */
 
-	print("                        S P I R A L S    O F    D E A T H\n\n");
-	print("\"Spirals of Death\" is a game in which bad guys, who move in a decaying spirals,\n");
-	print("shoot at the good guy who's located in the center of the screen.  The good guy\n");
-	print("can rotate his gun and fire back.  The user assumes the role of the good guy.\n"); 
-	print("The object of the game is to destroy all the bad guys before being destroyed.\n"); 
-	print("The good guy can take 3 hits before dying; he will change to a different color\n");
-	print("each time he's hit in the following color progression:  Green -> Yellow -> Red -\n");
-	print("> Background Color.  The game is over when the good guy's color is the same as\n");
-	print("that of the game background.  The good guy fires green bullets and the bad guys\n");
-	print("fire yellow bullets.\n\n");
-	print("                            C O M M A N D    K E Y S\n\n");
-	print("Key         | Function\n");
-	print("------------+------------------------------\n");
-	print(""<-"        = Rotate gun counter clockwise.\n");
-	print(""->"        = Rotate gun clockwise.\n");
-	print(""space bar" = fire gun.\n");
-	print(""h" or "H"  = display this help screen.\n");
-	print(""p" or "P"  = pause the game.\n");
-	print(""q" or "Q"  = quit the game.\n");
-	print("\a\a\a           =======> touch a key to start or resume game play <=======");
+      #  put the display back into graphics mode */
+      setgraphmode( getgraphmode() );
 
-	getch(); #  pause the routine while the user is reading the help screen */
+  }
 
-	#  put the display back into graphics mode */
-	setgraphmode(getgraphmode());
+  # ****************************< End spirals_help >***************************/
 
-}
+  # Put what follows below in the Utilities package.
 
-# ****************************< End spirals_help >***************************/
+  #  Contents of TESTTRIG.C below:
+  #  this program is used to test the correctness and functionality of the
+  #  routines contained in the file "polrcart.c". */
 
-# Put what follows below in the Utilities package.
+  float polar_to_cartesian_coords( float, float, char );
 
-#  Contents of TESTTRIG.C below:
-#  this program is used to test the correctness and functionality of the
-#  routines contained in the file "polrcart.c". */
-
-float polar_to_cartesian_coords(float,float,char);
-
-float cartesian_to_polar_coords(float , float , char);
+float cartesian_to_polar_coords( float, float, char );
 
 #include <stdio.h>
 
-main()
-{
+main() {
 
-
-	float x, y, radius, angle;
+    float x, y, radius, angle;
 	int resp = 1;
 
 
@@ -526,34 +529,47 @@ main()
 	while(resp)
 	{
 		print("\a\a\nEnter float values for x & y ---> ");
-		scanf("%f %f",&x,&y);
-		print("\nYou entered the following values: %f %f.",x,y);
+		scanf("%f %f", & x, &y );
+      print(
+          "\nYou entered the following values: %f %f.", x, y);
 
 
 		radius = cartesian_to_polar_coords(x,y,'r');
 		angle = cartesian_to_polar_coords(x,y,'a');
 
-		print("\n\nThe polar coordinates for (%f,%f) are (%f,%f).",x,y,radius,angle);
+            print(
+              "\n\nThe polar coordinates for (%f,%f) are (%f,%f).", x,
+              y,radius,angle);
 
 		print("\n\nEnter float values for radius & angle ---> ");
-		scanf("%f %f",&radius,&angle);
-		print("\nYou entered the following values: %f %f",radius,angle);
+		scanf("%f %f", & radius, &angle
+            );
+            print( "\nYou entered the following values: %f %f", radius, angle );
 
-		print("\nThe x coordinate for (%f,%f) is %f",radius,angle,polar_to_cartesian_coords(radius,angle,'x'));
+            print( "\nThe x coordinate for (%f,%f) is %f",
+              radius, angle, polar_to_cartesian_coords( radius, angle, 'x' ) );
 
-		print("\nThe y coordinate for (%f,%f) is %f",radius,angle,polar_to_cartesian_coords(radius,angle,'y'));
+            print( "\nThe y coordinate for (%f,%f) is %f",
+              radius, angle, polar_to_cartesian_coords( radius, angle, 'y' ) );
 
-		print("\nDo you want to run another test (1 for y, 0 for n) ---> ");
-		scanf("%d",&resp);
-	}
+            print("\nDo you want to run another test (1 for y, 0 for n) ---> ");
+            scanf( "%d", &resp );
+      }
 }
 
 #  end of file */
 
-				} # package _utilities
-                      no Moose;
-                    __PACKAGE__->meta->make_immutable;
+# package _utilities
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
+
+# ======================================================================================================
+# ======================================================================================================
+# ======================================================================================================
+# ======================================================================================================
+
+=begin UseLater
 
 
                 package _sprites;
@@ -1801,6 +1817,7 @@ void move_player(players *mm)  #  mm = move me */
 # ****************************< End move_player >************************/
 
 
+=end UseLater
 
 sub BEGIN {
     $ENV{'DISPLAY'} = 'localhost:10.0';    # Needed for use with PTKDB & SSH & X11 forwarding over SSH.
