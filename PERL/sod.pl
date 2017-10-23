@@ -5,9 +5,10 @@ use constant LOG_FILE => '>/tmp/sod.log';
 use Data::Dumper;
 use Getopt::Long;
 
-#use Log::Log4perl qw(:easy);
+use Log::Log4perl qw(:easy);
 use namespace::autoclean;
 use Pod::Usage;
+use Tk;
 
 $opt_help = 0;    # Default to not displaying help.
 
@@ -125,18 +126,39 @@ pod2usage(
 # Programmer(s)   : Dominic Caffey.
 # Notes & Comments: Created on 3/31/1992. Converted to PERL beginning Oct/2017.
 
-sprites bad_image;
-players * player_list = NULL;
-int bad_guy_count = ZERO_VALUE;
-int error_flag;
+#sprites bad_image;
+#players * player_list = NULL;
+#int bad_guy_count = ZERO_VALUE;
+#int error_flag;
 
 #  set up the video environment */
-if ( setup_video_driver_and_mode() ) {
+
+my $mw = MainWindow->new; 
+
+if ( !defined($mw) ) {
     print(
 "\a\a\a\nVideo driver or screen mode error - program execution terminated."
     );
     exit(ONE_VALUE);
 }
+
+$mw->title("Spirals Of Death - $0");
+
+# Layout top widgets of game.
+my $gof = $mw->Frame(-label => 'Game Options', -background => 'black', -borderwidth => 1, -relief => 'raised')->pack(-side => 'right'); # Game Options Frame
+my $qb = $gof->Button(-text => 'Quit', -command => sub { exit;} )->pack(-side => 'bottom'); # Quit button.
+
+my $gcf = $mw->Frame(-label => 'Game Controls', -background => 'black', -borderwidth => 1, -relief => 'raised')->pack(-side => 'bottom'); # Game Controls Frame
+my $rlb = $gcf->Button(-text => '< Rotate Left', -command => sub { exit;} )->pack(-side => 'left'); # Rotate left button.
+my $fgb = $gcf->Button(-text => 'Fire * Gun', -command => sub { exit;} )->pack(-side => 'left'); # Fire button.
+my $rrb = $gcf->Button(-text => 'Rotate Right >', -command => sub { exit;} )->pack(-side => 'left'); # Rotate right button.
+
+
+my $gdc = $mw->Canvas(-background => 'black', -borderwidth => 1)->pack(-side => 'top', -fill => 'both'); # Game Display Canvas Widget
+
+MainLoop; # Let's see what we got.
+sleep(15); #sleep for 15 seconds be bailing.
+exit(ONE_VALUE);
 
 #  initialize the random # generator */
 randomize();
