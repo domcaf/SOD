@@ -16,6 +16,8 @@ use lib '/home/domcaf/Documents/GIT-DATA/SOD/PERL';
 #use SOD::Sprites; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 use SOD::Utilities; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 use Tk;
+use Tk::Animation; # See sect 17.9 of "Mastering PERL/Tk".
+use Tk::WinPhoto; # See sect 17.7.3 of "Mastering PERL/Tk". For grabbing a bitmap off a canvas. BadGuy.
 
 $opt_help = 0;    # Default to not displaying help.
 

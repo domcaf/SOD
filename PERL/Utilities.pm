@@ -100,11 +100,13 @@ use constant {
 # ATTRIBUTES
 #  trigonometry constants */
 use constant {
-    HALF_CIRCLE_DEGREES => 180,                #  # of degrees in half circle */
-    HALF_CIRCLE_RADIANS => 3.1415927,          #  # of radians in half circle */
+    HALF_CIRCLE_DEGREES => 180,          #  # of degrees in half circle */
+    HALF_CIRCLE_RADIANS => 3.1415927,    #  # of radians in half circle */
     MAX_BAD_GUYS        => 3,
     MAX_BULLETS         => 1,
-    PI                  => HALF_CIRCLE_RADIANS,
+    PI                  => 3.1415927,
+
+    #PI                  => HALF_CIRCLE_RADIANS,
 };
 
 # METHODS
@@ -133,234 +135,199 @@ use constant {
 # ****************************************************************************/
 
 sub setup_video_driver_and_mode {
-    my $error_flag = ZERO_VALUE;
-    my $errorcode;
-	my $graphics_mode = VGAMED;
+    #
+## Pretty much all setup is done in the main of the consumer of this module when
+## using PERL/Tk. So this sub becomes a no-op that just returns that everything
+## is ok until this sub/method is deprecated later.
+    #
+    #    my $error_flag = ZERO_VALUE;
+    #    my $errorcode;
+    #	my $graphics_mode = VGAMED;
+    #
+    #      #ifdef video_problems
+    #
+##  DAVE - I've been having a lot of problems getting video drivers to link
+##  into my program correctly; I've been in touch with Borland and they say that
+##  it's probably due to my hardware incompatibility problem.  Everything links
+##  fine and dandy but when I run the program I get a very vague message that
+##  tells me nothing about what the problem actually is.  I've used preprocessor
+##  directives to hop back back and forth between loading the video driver and
+##  linking it into the code.  As a result of the problems I've been having, I'm
+##  including the "egavga.bgi" video driver and doing a "detect" with "initgraph()".
+##  This may be shoddy but it works given my present incompatibility dilemma.
+##  - Dom */
+#
+#      #  register the graphics driver to be used before calling initgraph */
+#      $errorcode = registerbgidriver(EGAVGA_driver);
+#
+#      #  test to see if video driver registration worked */
+#
+#      if ( $errorcode < ZERO_VALUE ) {
+#        print( "Video driver - graphics error: %s\n",
+#            grapherrormsg($errorcode) );
+#        print( "errorcode = %d\n", $errorcode );
+#        print("Press any key to quit.");
+#        getch();
+#        $error_flag = ONE_VALUE;    #  set an error_flag */
+#    }
+#    else {
+#    #  Set the video environment for the program to be VGA, 640 x 350, 16 color.
+##        The VGA driver will be linked directly into this program's
+##          resulting executable
+##          . See "UTIL.DOC" on your Borland distribution diskettes
+##          . */
+#
+#          initgraph( ( int far * ) & $errorcode,
+#            ( int far * ) & graphics_mode, "" );
+#
+#        #  test to see if initgraph worked */
+#        $errorcode = graphresult();
+#
+#        if ( $errorcode != grOk ) {
+#            print( "Initgraph - graphics error: %s\n",
+#                grapherrormsg($errorcode) );
+#            print("Press any key to quit.");
+#            getch();
+#            $error_flag = ONE_VALUE;    #  set an error_flag */
+#        }
+#    }
+#
+#    #endif
+#
+#    #ifndef video_problems
+#
+#    $errorcode = DETECT;
+#      initgraph( ( int far * ) & $errorcode, ( int far * ) & graphics_mode, "" );
+#
+#      #  test to see if initgraph worked */
+#      $errorcode = graphresult();
+#
+#      if ( $errorcode != grOk ) {
+#        print( "Initgraph - graphics error: %s\n", grapherrormsg($errorcode) );
+#        print("Press any key to quit.");
+#        getch();
+#        $error_flag = ONE_VALUE;    #  set an error_flag */
+#    }
+#
+#    #endif
+#
+#    return ($error_flag);
+    return (ZERO_VALUE);
+}
 
-      #ifdef video_problems
+# ****************************< End setup_video_driver_and_mode >*********/
 
-#  DAVE - I've been having a lot of problems getting video drivers to link
-#  into my program correctly; I've been in touch with Borland and they say that
-#  it's probably due to my hardware incompatibility problem.  Everything links
-#  fine and dandy but when I run the program I get a very vague message that
-#  tells me nothing about what the problem actually is.  I've used preprocessor
-#  directives to hop back back and forth between loading the video driver and
-#  linking it into the code.  As a result of the problems I've been having, I'm
-#  including the "egavga.bgi" video driver and doing a "detect" with "initgraph()".
-#  This may be shoddy but it works given my present incompatibility dilemma.
-#  - Dom */
+# ****************************< Start restore_pre_game_environment >******/
 
-      #  register the graphics driver to be used before calling initgraph */
-      $errorcode = registerbgidriver(EGAVGA_driver);
+# ****************************************************************************/
+# * Function Name   : restore_pre_game_environment.                    **/
+# * Description     : This routine restores the pre game environment.       **/
+# *                   Currently, the pre game environment restoration       **/
+# *                   consists only of restoring the pre game video mode but**/
+# *                   later revisions of this routine will also restore     **/
+# *                   other pre game environment elements.                  **/
+# * Inputs          : None.                                                 **/
+# * Outputs         : None.                                                 **/
+# * Programmer(s)   : Dominic Caffey.                                       **/
+# * Notes & Comments: Created on 4-4-92.                                    **/
+# *                                                                         **/
+# *                                                                         **/
+# ****************************************************************************/
 
-      #  test to see if video driver registration worked */
+sub restore_pre_game_environment {
 
-      if ( $errorcode < ZERO_VALUE ) {
-        print( "Video driver - graphics error: %s\n",
-            grapherrormsg($errorcode) );
-        print( "errorcode = %d\n", $errorcode );
-        print("Press any key to quit.");
-        getch();
-        $error_flag = ONE_VALUE;    #  set an error_flag */
-    }
-    else {
-    #  Set the video environment for the program to be VGA, 640 x 350, 16 color.
-#        The VGA driver will be linked directly into this program's
-#          resulting executable
-#          . See "UTIL.DOC" on your Borland distribution diskettes
-#          . */
+    #closegraph();    #  free the memory allocated by graphics system */
 
-          initgraph( ( int far * ) & $errorcode,
-            ( int far * ) & graphics_mode, "" );
+#restorecrtmode(); #  put the system back in the text mode it was in prior to start of game */
 
-        #  test to see if initgraph worked */
-        $errorcode = graphresult();
+    return;
+}
 
-        if ( $errorcode != grOk ) {
-            print( "Initgraph - graphics error: %s\n",
-                grapherrormsg($errorcode) );
-            print("Press any key to quit.");
-            getch();
-            $error_flag = ONE_VALUE;    #  set an error_flag */
-        }
-    }
 
-    #endif
-
-    #ifndef video_problems
-
-    $errorcode = DETECT;
-      initgraph( ( int far * ) & $errorcode, ( int far * ) & graphics_mode, "" );
-
-      #  test to see if initgraph worked */
-      $errorcode = graphresult();
-
-      if ( $errorcode != grOk ) {
-        print( "Initgraph - graphics error: %s\n", grapherrormsg($errorcode) );
-        print("Press any key to quit.");
-        getch();
-        $error_flag = ONE_VALUE;    #  set an error_flag */
-    }
-
-    #endif
-
-    return ($error_flag);
-  }
-
-  # ****************************< End setup_video_driver_and_mode >*********/
-
-  # ****************************< Start restore_pre_game_environment >******/
-
- # ****************************************************************************/
- # * Function Name   : restore_pre_game_environment.                    **/
- # * Description     : This routine restores the pre game environment.       **/
- # *                   Currently, the pre game environment restoration       **/
- # *                   consists only of restoring the pre game video mode but**/
- # *                   later revisions of this routine will also restore     **/
- # *                   other pre game environment elements.                  **/
- # * Inputs          : None.                                                 **/
- # * Outputs         : None.                                                 **/
- # * Programmer(s)   : Dominic Caffey.                                       **/
- # * Notes & Comments: Created on 4-4-92.                                    **/
- # *                                                                         **/
- # *                                                                         **/
- # ****************************************************************************/
-
-  void restore_pre_game_environment(void) {
-    closegraph();    #  free the memory allocated by graphics system */
-
-      restorecrtmode()
-      ; #  put the system back in the text mode it was in prior to start of game */
-  }
-
-  # ****************************< End restore_pre_game_environment >********/
-
-  # ****************************< Start spirals_help >*************************/
-
- # ****************************************************************************/
- # * Function Name   : spirals_help.													    **/
- # * Description     : This is the online help facility for the game "Spirals**/
- # *                   Of Death".                                            **/
- # * Inputs          : None.                                                 **/
- # * Outputs         : None.                                                 **/
- # * Programmer(s)   : Dominic Caffey.                                       **/
- # * Notes & Comments: Created on 5-14-92.                                   **/
- # *                                                                         **/
- # *                                                                         **/
- # ****************************************************************************/
-
-  void spirals_help(void) {
+sub spirals_help {
 
     #  put the display in text mode */
-    restorecrtmode();
+    #restorecrtmode();
 
-      #  display the help text */
+    my $helpString = "\t\t\t"
+      . "S P I R A L S    O F    D E A T H\n\n"
+      . "\"Spirals of Death\" is a game in which bad guys, who move in a decaying spirals,\n"
+      . "shoot at the good guy who's located in the center of the screen.  The good guy\n"
+      . "can rotate his gun and fire back.  The user assumes the role of the good guy.\n"
+      . "The object of the game is to destroy all the bad guys before being destroyed.\n"
+      . "The good guy can take 3 hits before dying; he will change to a different color\n"
+      . "each time he's hit in the following color progression:  Green -> Yellow -> Red -\n"
+      . "> Background Color.  The game is over when the good guy's color is the same as\n"
+      . "that of the game background.  The good guy fires green bullets and the bad guys\n"
+      . "fire yellow bullets.\n\n"
+      . "\t\t\tC O M M A N D    K E Y S\n\n"
+      . "Key         | Function\n"
+      . "------------+------------------------------\n"
+      . "\"< -\"       = Rotate gun counter clockwise.\n"
+      . "\"->\"        = Rotate gun clockwise.\n"
+      . "\"space bar\" = fire gun.\n"
+      . "\"h\" or \"H\"  = display this help screen.\n"
+      . "\"p\" or \"P\"  = pause the game.\n"
+      . "\"q\" or \"Q\"  = quit the game.\n"
+      . "\a\a\a           =======> touch a key to start or resume game play <=======";
 
-      print("                        S P I R A L S    O F    D E A T H\n\n");
-      print(
-"\"Spirals of Death\" is a game in which bad guys, who move in a decaying spirals,\n"
-      );
-      print(
-"shoot at the good guy who's located in the center of the screen.  The good guy\n"
-      );
-      print(
-"can rotate his gun and fire back.  The user assumes the role of the good guy.\n"
-      );
-      print(
-"The object of the game is to destroy all the bad guys before being destroyed.\n"
-      );
-      print(
-"The good guy can take 3 hits before dying; he will change to a different color\n"
-      );
-      print(
-"each time he's hit in the following color progression:  Green -> Yellow -> Red -\n"
-      );
-      print(
-"> Background Color.  The game is over when the good guy's color is the same as\n"
-      );
-      print(
-"that of the game background.  The good guy fires green bullets and the bad guys\n"
-      );
-      print("fire yellow bullets.\n\n");
-      print("                            C O M M A N D    K E Y S\n\n");
-      print("Key         | Function\n");
-      print("------------+------------------------------\n");
-      print("\"< -\"       = Rotate gun counter clockwise.\n" );
-      print("\"->\"        = Rotate gun clockwise.\n" );
-      print("\"space bar\" = fire gun.\n" );
-      print("\"h\" or \"H\"  = display this help screen.\n" );
-      print("\"p\" or \"P\"  = pause the game.\n" );
-      print("\"q\" or \"Q\"  = quit the game.\n" );
-      print(
-"\a\a\a           =======> touch a key to start or resume game play <======="
-      );
+    # getch(); #  pause the routine while the user is reading the help screen */
 
-      getch(); #  pause the routine while the user is reading the help screen */
+    #  put the display back into graphics mode */
+    # setgraphmode( getgraphmode() );
 
-      #  put the display back into graphics mode */
-      setgraphmode( getgraphmode() );
+    return ($helpString);
 
-  }
+} # spirals_help
 
   # ****************************< End spirals_help >***************************/
 
-  # Put what follows below in the Utilities package.
+  sub testTrig {
 
-  #  Contents of TESTTRIG.C below:
-  #  this program is used to test the correctness and functionality of the
-  #  routines contained in the file "polrcart.c". */
+    my ( $x, $y, $radius, $angle, $resp );
+    $resp = 1;
 
-  float polar_to_cartesian_coords( float, float, char );
+    while ($resp) {
+        print("\a\a\nEnter float values for x & y ---> ");
+        my $vals = <>;
+        chomp($vals);
+        ( $x, $y ) = split $vals;
+        print("\nYou entered the following values: $x\t$y.");
 
-float cartesian_to_polar_coords( float, float, char );
+        $radius = cartesian_to_polar_coords( $x, $y, 'r' );
 
-#include <stdio.h>
+        $angle = cartesian_to_polar_coords( $x, $y, 'a' );
 
-sub testTrig {
+        print "\n\nThe polar coordinates for ($x, $y) are ($radius, $angle).";
 
-    my $x, $y, $radius, $angle;
-	my $resp = 1;
+        print("\n\nEnter float values for radius & angle ---> ");
+        $vals = <>;
+        chomp($vals);
+        ( $radius, $angle ) = split $vals;
 
+        print("\nYou entered the following values: $radius\t$angle");
 
-# *****/
+        print(  "\nThe x coordinate for ($radius ,$angle) is \""
+              . polar_to_cartesian_coords( $radius, $angle, 'x' )
+              . "\"" );
 
-	while($resp)
-	{
-		print("\a\a\nEnter float values for x & y ---> ");
-		scanf("%f %f", & x, &y );
-      print("\nYou entered the following values: $x\t$y.");
+        print(  "\nThe y coordinate for ($radius ,$angle) is \""
+              . polar_to_cartesian_coords( $radius, $angle, 'y' )
+              . "\"" );
 
+        print("\nDo you want to run another test (1 for y, 0 for n) ---> ");
+        $vals = <>;
+        chomp($vals);
+        ($resp) = split $vals;
 
-		$radius = cartesian_to_polar_coords(x,y,'r');
-		$angle = cartesian_to_polar_coords(x,y,'a');
-
-            print(
-              "\n\nThe polar coordinates for (%f,%f) are (%f,%f).", x,
-              y,$radius,$angle);
-
-		print("\n\nEnter float values for radius & angle ---> ");
-		scanf("%f %f", & $radius, &$angle
-            );
-            print( "\nYou entered the following values: %f %f", $radius, $angle );
-
-            print( "\nThe x coordinate for (%f,%f) is %f",
-              $radius, $angle, polar_to_cartesian_coords( $radius, $angle, 'x' ) );
-
-            print( "\nThe y coordinate for (%f,%f) is %f",
-              $radius, $angle, polar_to_cartesian_coords( $radius, $angle, 'y' ) );
-
-            print("\nDo you want to run another test (1 for y, 0 for n) ---> ");
-            scanf( "%d", $resp );
-      }
-}
-
-#  end of file */
+    }
+  }    # sub testTrig
 
 # package _utilities
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
 # End of file.
-  
+
 1;
-  
+
