@@ -134,7 +134,7 @@ use constant {
 
 sub setup_video_driver_and_mode {
     my $error_flag = ZERO_VALUE;
-    my $errorcode
+    my $errorcode;
 	my $graphics_mode = VGAMED;
 
       #ifdef video_problems
@@ -161,14 +161,14 @@ sub setup_video_driver_and_mode {
         print( "errorcode = %d\n", $errorcode );
         print("Press any key to quit.");
         getch();
-        error_flag = ONE_VALUE;    #  set an error_flag */
+        $error_flag = ONE_VALUE;    #  set an error_flag */
     }
     else {
     #  Set the video environment for the program to be VGA, 640 x 350, 16 color.
-        The VGA driver will be linked directly into this program's
-          resulting executable
-          . See "UTIL.DOC" on your Borland distribution diskettes
-          . */
+#        The VGA driver will be linked directly into this program's
+#          resulting executable
+#          . See "UTIL.DOC" on your Borland distribution diskettes
+#          . */
 
           initgraph( ( int far * ) & $errorcode,
             ( int far * ) & graphics_mode, "" );
@@ -181,7 +181,7 @@ sub setup_video_driver_and_mode {
                 grapherrormsg($errorcode) );
             print("Press any key to quit.");
             getch();
-            error_flag = ONE_VALUE;    #  set an error_flag */
+            $error_flag = ONE_VALUE;    #  set an error_flag */
         }
     }
 
@@ -199,12 +199,12 @@ sub setup_video_driver_and_mode {
         print( "Initgraph - graphics error: %s\n", grapherrormsg($errorcode) );
         print("Press any key to quit.");
         getch();
-        error_flag = ONE_VALUE;    #  set an error_flag */
+        $error_flag = ONE_VALUE;    #  set an error_flag */
     }
 
     #endif
 
-    return (error_flag);
+    return ($error_flag);
   }
 
   # ****************************< End setup_video_driver_and_mode >*********/
@@ -285,12 +285,12 @@ sub setup_video_driver_and_mode {
       print("                            C O M M A N D    K E Y S\n\n");
       print("Key         | Function\n");
       print("------------+------------------------------\n");
-      print( "" < -"        = Rotate gun counter clockwise.\n" );
-      print( ""->"        = Rotate gun clockwise.\n" );
-      print( "" space bar " = fire gun.\n" );
-      print( "" h " or " H "  = display this help screen.\n" );
-      print( "" p " or " P "  = pause the game.\n" );
-      print( ""q" or " Q "  = quit the game.\n" );
+      print("\"< -\"       = Rotate gun counter clockwise.\n" );
+      print("\"->\"        = Rotate gun clockwise.\n" );
+      print("\"space bar\" = fire gun.\n" );
+      print("\"h\" or \"H\"  = display this help screen.\n" );
+      print("\"p\" or \"P\"  = pause the game.\n" );
+      print("\"q\" or \"Q\"  = quit the game.\n" );
       print(
 "\a\a\a           =======> touch a key to start or resume game play <======="
       );
@@ -316,42 +316,41 @@ float cartesian_to_polar_coords( float, float, char );
 
 #include <stdio.h>
 
-main() {
+sub testTrig {
 
-    float x, y, radius, angle;
-	int resp = 1;
+    my $x, $y, $radius, $angle;
+	my $resp = 1;
 
 
 # *****/
 
-	while(resp)
+	while($resp)
 	{
 		print("\a\a\nEnter float values for x & y ---> ");
 		scanf("%f %f", & x, &y );
-      print(
-          "\nYou entered the following values: %f %f.", x, y);
+      print("\nYou entered the following values: $x\t$y.");
 
 
-		radius = cartesian_to_polar_coords(x,y,'r');
-		angle = cartesian_to_polar_coords(x,y,'a');
+		$radius = cartesian_to_polar_coords(x,y,'r');
+		$angle = cartesian_to_polar_coords(x,y,'a');
 
             print(
               "\n\nThe polar coordinates for (%f,%f) are (%f,%f).", x,
-              y,radius,angle);
+              y,$radius,$angle);
 
 		print("\n\nEnter float values for radius & angle ---> ");
-		scanf("%f %f", & radius, &angle
+		scanf("%f %f", & $radius, &$angle
             );
-            print( "\nYou entered the following values: %f %f", radius, angle );
+            print( "\nYou entered the following values: %f %f", $radius, $angle );
 
             print( "\nThe x coordinate for (%f,%f) is %f",
-              radius, angle, polar_to_cartesian_coords( radius, angle, 'x' ) );
+              $radius, $angle, polar_to_cartesian_coords( $radius, $angle, 'x' ) );
 
             print( "\nThe y coordinate for (%f,%f) is %f",
-              radius, angle, polar_to_cartesian_coords( radius, angle, 'y' ) );
+              $radius, $angle, polar_to_cartesian_coords( $radius, $angle, 'y' ) );
 
             print("\nDo you want to run another test (1 for y, 0 for n) ---> ");
-            scanf( "%d", &resp );
+            scanf( "%d", $resp );
       }
 }
 
