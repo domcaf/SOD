@@ -1,19 +1,20 @@
 #!/usr/bin/env perl
 #!/usr/bin/env perl -d:ptkdb
 
-
 use constant LOG_FILE => '>/tmp/sod.log';
 use Data::Dumper;
 use Getopt::Long;
 use Log::Log4perl qw(:easy);
 use namespace::autoclean;
 use Pod::Usage;
-use SOD::Badguy;
-use SOD::Bullet;
-use SOD::Goodguy;
-use SOD::Player;
-use SOD::Sprites;
-use SOD::Utilities;
+use lib '/home/domcaf/Documents/GIT-DATA/SOD/PERL';
+
+#use SOD::Badguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+#use SOD::Bullet; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+#use SOD::Goodguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+#use SOD::Player; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+#use SOD::Sprites; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+use SOD::Utilities; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 use Tk;
 
 $opt_help = 0;    # Default to not displaying help.
@@ -139,7 +140,7 @@ pod2usage(
 
 #  set up the video environment */
 
-my $mw = MainWindow->new; 
+my $mw = MainWindow->new;
 
 if ( !defined($mw) ) {
     print(
@@ -151,76 +152,39 @@ if ( !defined($mw) ) {
 $mw->title("Spirals Of Death - $0");
 
 # Layout top widgets of game.
-my $gof = $mw->Frame(-label => 'Game Options', -background => 'black', -borderwidth => 1, -relief => 'raised')->pack(-side => 'right'); # Game Options Frame
-my $qb = $gof->Button(-text => 'Quit', -command => sub { exit;} )->pack(-side => 'bottom'); # Quit button.
+my $gof = $mw->Frame(
+    -label       => 'Game Options',
+    -background  => 'black',
+    -borderwidth => 1,
+    -relief      => 'raised'
+)->pack( -side => 'right' );    # Game Options Frame
 
-my $gcf = $mw->Frame(-label => 'Game Controls', -background => 'black', -borderwidth => 1, -relief => 'raised')->pack(-side => 'bottom'); # Game Controls Frame
-my $rlb = $gcf->Button(-text => '< Rotate Left', -command => sub { exit;} )->pack(-side => 'left'); # Rotate left button.
-my $fgb = $gcf->Button(-text => 'Fire * Gun', -command => sub { exit;} )->pack(-side => 'left'); # Fire button.
-my $rrb = $gcf->Button(-text => 'Rotate Right >', -command => sub { exit;} )->pack(-side => 'left'); # Rotate right button.
+my $qb = $gof->Button( -text => 'Quit', -command => sub { exit; } )
+  ->pack( -side => 'bottom' );    # Quit button.
 
+my $gcf = $mw->Frame(
+    -label       => 'Game Controls',
+    -background  => 'black',
+    -borderwidth => 1,
+    -relief      => 'raised'
+)->pack( -side => 'bottom' );     # Game Controls Frame
 
-my $gdc = $mw->Canvas(-background => 'black', -borderwidth => 1)->pack(-side => 'top', -fill => 'both'); # Game Display Canvas Widget
+my $rlb = $gcf->Button( -text => '< Rotate Left', -command => sub { exit; } )
+  ->pack( -side => 'left' );      # Rotate left button.
 
-MainLoop; # Let's see what we got.
-sleep(15); #sleep for 15 seconds be bailing.
-exit(ONE_VALUE);
+my $fgb = $gcf->Button( -text => 'Fire * Gun', -command => sub { exit; } )
+  ->pack( -side => 'left' );      # Fire button.
 
-#  initialize the random # generator */
-randomize();
+my $rrb = $gcf->Button( -text => 'Rotate Right >', -command => sub { exit; } )
+  ->pack( -side => 'left' );      # Rotate right button.
 
-#  make the game background color black */
-setbkcolor(BLACK);
+my $gdc = $mw->Canvas( -background => 'black', -borderwidth => 1 )
+  ->pack( -side => 'top', -fill => 'both' );    # Game Display Canvas Widget
 
-#  generate and capture bad guy & good guy images */
-if ( draw_bad_guy(&bad_image) ) {
-    print(
-"\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated."
-    );
-    exit(ONE_VALUE);
-}
+my $pb = $gof->Button( -text => 'Play', -command => &playGame )
+  ->pack( -side => 'top' );    # Play button. This gets all the action going.
 
-#  load initial conditions into good_guy & bad_guys i.e. build player list */
-
-#  load the good guy into the list */
-
-player_list = add_good();
-
-if ( player_list == NULL ) {
-    print(
-"\a\a\a\nCouldn't create good guy to add to list.\nProgram execution terminated."
-    );
-    exit(ONE_VALUE);
-}
-
-#  display the good guy */
-draw_good_guy( player_list, ZERO_VALUE );
-
-#ifndef good_debug
-#  load the bad guys into the list */
-do {
-    error_flag = add_player( player_list, bad, &bad_image, NULL );
-    bad_guy_count++;
-} while ( ( bad_guy_count < MAX_BAD_GUYS ) && ( !error_flag ) );
-
-#endif
-
-#  main processing loop - let the games begin ! */
-
-while ( player_list != NULL ) {
-    visit_player(player_list);
-
-    player_list = player_list->next;
-}
-
-#  the game's over so free up the memory that was previously allocated */
-
-player_list->prev->next = NULL;
-
-while ( player_list != NULL ) {
-    player_list = player_list->next;
-    free( player_list->prev );
-}
+MainLoop;    # This starts the graphics subsystem and causes UI to be displayed.
 
 #  restore the pregame video environment */
 restore_pre_game_environment();
@@ -228,4 +192,68 @@ restore_pre_game_environment();
 return (ZERO_VALUE);    #  indicate normal program termination */
 
 # -----------------------------< End Main >----------------------------------*/
+
+sub playGame {
+
+    #  initialize the random # generator */
+    #randomize();
+
+    #  generate and capture bad guy & good guy images */
+#    if ( draw_bad_guy(&bad_image) ) {
+#        print(
+#"\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated."
+#        );
+#        exit(ONE_VALUE);
+#    }
+#
+#   #  load initial conditions into good_guy & bad_guys i.e. build player list */
+#
+#    #  load the good guy into the list */
+#
+#    player_list = add_good();
+#
+#    if ( player_list == NULL ) {
+#        print(
+#"\a\a\a\nCouldn't create good guy to add to list.\nProgram execution terminated."
+#        );
+#        exit(ONE_VALUE);
+#    }
+#
+#    #  display the good guy */
+#    draw_good_guy( player_list, ZERO_VALUE );
+#
+#    #ifndef good_debug
+#    #  load the bad guys into the list */
+#    do {
+#        error_flag = add_player( player_list, bad, &bad_image, NULL );
+#        bad_guy_count++;
+#    } while ( ( bad_guy_count < MAX_BAD_GUYS ) && ( !error_flag ) );
+#
+#    #endif
+#
+#    #  main processing loop - let the games begin ! */
+#
+#    while ( player_list != NULL ) {
+#        visit_player(player_list);
+#
+#        player_list = player_list->next;
+#    }
+#
+#    #  the game's over so free up the memory that was previously allocated */
+#
+#    player_list->prev->next = NULL;
+#
+#    while ( player_list != NULL ) {
+#        player_list = player_list->next;
+#        free( player_list->prev );
+#    }
+
+	return 0;
+}    # sub playGame
+
+sub BEGIN {
+    $ENV{'DISPLAY'} = 'localhost:10.0'
+      ;    # Needed for use with PTKDB & SSH & X11 forwarding over SSH.
+}    # sub BEGIN
+
 # End of file.
