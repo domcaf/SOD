@@ -1,5 +1,6 @@
 package SOD::Utilities;
 
+use Math::Complex;
 use Moose;
 use namespace::autoclean;
 
@@ -322,6 +323,50 @@ sub spirals_help {
 
     }
   }    # sub testTrig
+
+#----------------------------------------------------------------------------------
+
+sub polar_to_cartesian_coords {
+
+    my ( $radius, $angle, $x_or_y, $x, $y );
+    $radius = shift;
+    $angle  = shift;
+    $x_or_y = shift;
+
+    # Algorithm at https://www.mathsisfun.com/polar-cartesian-coordinates.html.
+
+    $x = $radius * cos($angle);
+
+    $y = $radius * sin($angle);
+
+    return ( ( $x_or_y eq 'x' ) ? $x : $y );
+
+# Later on we'll change this to return a json obj with the x & y coordinates inside.
+# It's very inefficient to make 2 calls to this .;
+}
+
+#----------------------------------------------------------------------------------
+
+sub cartesian_to_polar_coords {
+
+    my ( $x, $y, $angle_or_radius, $angle, $radius );
+    $x               = shift;
+    $y               = shift;
+    $angle_or_radius = shift;
+
+    # Algorithm at https://www.mathsisfun.com/polar-cartesian-coordinates.html.
+
+    $radius = sqrt( ( $x**2 + $y**2 ) );
+
+    $angle = atan2( $y, $x );    # Return value in radians.
+
+    return ( ( $angle_or_radius eq 'a' ) ? $angle : $radius );
+
+# Later on we'll change this to return a json obj with the x & y coordinates inside.
+# It's very inefficient to make 2 calls to this .;
+}
+
+#----------------------------------------------------------------------------------
 
 # package _utilities
 no Moose;

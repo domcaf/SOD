@@ -280,12 +280,12 @@ void visit_player(players *player)
 
 	#  prototypes for polrcart.c */
 
-		float polar_to_cartesian_coords(float, float, char);
-		float cartesian_to_polar_coords(float, float, char);
+#		float polar_to_cartesian_coords(float, float, char);
+#		float cartesian_to_polar_coords(float, float, char);
 
 	#  prototypes for hit.c */
 	#  prototypes for spirhelp.c */
-		void spirals_help(void);
+		#void spirals_help(void);
 
 # ---------------------------< End Prototypes >------------------------------*/
 

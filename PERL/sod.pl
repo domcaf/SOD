@@ -44,7 +44,7 @@ or modified without the author's express written permission.
                        Spring Trimester 1992
                        TVI - Montoya Campus
 
-				Converted to use PERL/Tk during 4th Quater/2017.
+				Converted to use PERL/Tk during 4th Quarter/2017.
 
 =head2 Description
 
@@ -253,9 +253,9 @@ sub playGame {
 	return 0;
 }    # sub playGame
 
-sub BEGIN {
-    $ENV{'DISPLAY'} = 'localhost:10.0'
-      ;    # Needed for use with PTKDB & SSH & X11 forwarding over SSH.
-}    # sub BEGIN
+#sub BEGIN {
+#    $ENV{'DISPLAY'} = 'localhost:10.0'
+#      ;    # Needed for use with PTKDB & SSH & X11 forwarding over SSH.
+#}    # sub BEGIN
 
 # End of file.
