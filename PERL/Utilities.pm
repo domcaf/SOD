@@ -289,10 +289,13 @@ sub spirals_help {
     $resp = 1;
 
     while ($resp) {
+
         print("\a\a\nEnter float values for x & y ---> ");
         my $vals = <>;
         chomp($vals);
-        ( $x, $y ) = split $vals;
+        my @pt  = split /\s+/, $vals;
+        $x = $pt[0];
+        $y = $pt[1];
         print("\nYou entered the following values: $x\t$y.");
 
         $radius = cartesian_to_polar_coords( $x, $y, 'r' );
@@ -304,7 +307,9 @@ sub spirals_help {
         print("\n\nEnter float values for radius & angle ---> ");
         $vals = <>;
         chomp($vals);
-        ( $radius, $angle ) = split $vals;
+        @pt  = split /\s+/, $vals;
+        $radius = $pt[0];
+        $angle = $pt[1];
 
         print("\nYou entered the following values: $radius\t$angle");
 
@@ -317,9 +322,8 @@ sub spirals_help {
               . "\"" );
 
         print("\nDo you want to run another test (1 for y, 0 for n) ---> ");
-        $vals = <>;
-        chomp($vals);
-        ($resp) = split $vals;
+        $resp = <>;
+        chomp($resp);
 
     }
   }    # sub testTrig
