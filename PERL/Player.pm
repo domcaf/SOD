@@ -1,5 +1,11 @@
                 package SOD::Player;
 
+use Exporter;
+@ISA = ("Exporter");
+@EXPORT = qw(&add_player &delete_player &visit_player);
+
+
+
  # * Description     : This file contains the definition of a player for the **/
  # *                   game "Spirals Of Death". A player can be the goodguy, **/
  # *                   a badguy or a bullet fired by either of the previous. **/

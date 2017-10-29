@@ -1,4 +1,12 @@
 		package SOD::Bullet;
+
+use Exporter;
+@ISA = ("Exporter");
+@EXPORT = qw(&did_bullet_hit_something);
+
+
+
+
 		use Moose;
 use namespace::autoclean;
 

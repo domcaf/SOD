@@ -1,5 +1,11 @@
 package SOD::Utilities;
 
+use Exporter;
+@ISA = ("Exporter");
+@EXPORT = qw(&setup_video_driver_and_mode &restore_pre_game_environment &spirals_help &testTrig &polar_to_cartesian_coords &cartesian_to_polar_coords);
+#@EXPORT = qw(&setup_video_driver_and_mode @card_deck);
+#@card_deck = ( );                       # initialize package global
+
 use Math::Complex;
 use Moose;
 use namespace::autoclean;

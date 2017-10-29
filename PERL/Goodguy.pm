@@ -1,7 +1,11 @@
-		package SOD::Goodguy;
-		use Moose;
+package SOD::Goodguy;
+
+use Exporter;
+@ISA    = ("Exporter");
+@EXPORT = qw(&draw_good_guy &add_good);
+
+use Moose;
 use namespace::autoclean;
-		{
 
 # Good guy constants
 use constant {
@@ -11,30 +15,31 @@ use constant {
     GUN_WIDTH_HALF_ANGLE => 0.1      #  SPECIFIED IN RADIANS */
 
 };
-			int x, y;       #  center of good guy */
-			int radius;	#  radius of good_guy, excluding barrel */
+my ( $x, $y );                       #  center of good guy */
+my ($radius);                        #  radius of good_guy, excluding barrel */
 
-			int gun_length;  #  length as a %age of screen dimensions */
-			int gun_color;
+my ($gun_length);                    #  length as a %age of screen dimensions */
+my ($gun_color);
 
-			float gun_angle; #  angle in radians where gun is pointing */
-			float gun_width_half_angle; #  half the angle width of the gun barrel in radians */
-		} goodguys;
+my ($gun_angle);    #  angle in radians where gun is pointing */
+my ($gun_width_half_angle)
+  ;                 #  half the angle width of the gun barrel in radians */
+
+# goodguys;
 
 # METHODS
 
-	#  prototypes for add_good.c */
+#  prototypes for add_good.c */
 
-		void draw_good_guy(players *, float new_angle);
+void draw_good_guy( players *, float new_angle );
 
+players * add_good(void);
 
-		players *add_good(void);
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
-		no Moose;
-		__PACKAGE__->meta->make_immutable;
-
-		#define GOODGUY_H
+#define GOODGUY_H
 # End of file.
-  
+
 1;
-  
+

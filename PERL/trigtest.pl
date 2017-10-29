@@ -3,7 +3,8 @@
 use lib '/home/domcaf/Documents/GIT-DATA/SOD/PERL';
 use SOD::Utilities;
 
-&SOD::Utilities::testTrig;
+#&SOD::Utilities::testTrig;
+testTrig;
 
 print "\nTesting completed.\n\n";
 
