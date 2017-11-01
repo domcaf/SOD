@@ -20,10 +20,13 @@ use Tk::Animation; # See sect 17.9 of "Mastering PERL/Tk".
 use Tk::WinPhoto; # See sect 17.7.3 of "Mastering PERL/Tk". For grabbing a bitmap off a canvas. BadGuy.
 
 $opt_help = 0;    # Default to not displaying help.
-
 $Data::Dumper::Sortkeys = 1;
 
-Log::Log4perl->easy_init( { level => $DEBUG, file => LOG_FILE } );
+our($canvasWidth, $canvasHeight);
+$canvasWidth = 0;
+$canvasHeight = 0;
+
+Log::Log4perl->easy_init( { level => $INFO, file => LOG_FILE } );
 
 ALWAYS("$0 commencing execution.");
 
@@ -196,6 +199,18 @@ return (ZERO_VALUE);    #  indicate normal program termination */
 # -----------------------------< End Main >----------------------------------*/
 
 sub playGame {
+
+# Get the dimensions of the canvas used to to display game play display.
+# Use the configure method of the canvas object instead of cget so you can 
+# get all configuration items for widget at one time.
+
+my @canvasConfig = $gdc->configure(); # returns list of list refs
+DEBUG "gdc = Game Display Canvas, configuration information as follows:";
+DEBUG "\n" . Dumper(\@canvasConfig) . "\n";
+
+$canvasWidth = $gdc->cget(-width);
+$canvasHeight = $gdc->cget(-height);
+INFO "\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theight = " . $canvasHeight . "\n";
 
     #  initialize the random # generator */
     #randomize();
