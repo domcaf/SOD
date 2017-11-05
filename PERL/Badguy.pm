@@ -26,17 +26,104 @@ use constant {
     BAD_GUY_EYE_ANGLE_4  => 150       #  degrees */
 
 };
-sprites badguy;                       #  badguy inherits qualities of sprite */
 
-int radius;                           #  radial distance from screen center */
+has 'badguy' => (
+    isa => 'Object',    #  badguy inherits qualities of sprite
+    is  => 'ro'
+);
 
-float angle_step;                     #  angle in radians */
-float current_angle;                  #  current angular position in radians */
+has 'radius' => (
+
+    #  radial distance from screen center */
+    isa => 'Int',
+    is  => 'rw'
+);
+
+has 'angle_step' => (
+
+    #  angle in radians */
+    isa => 'Num',
+    is  => 'ro'
+);
+
+has 'current_angle' => (
+
+    #  current angular position in radians */
+    isa => 'Num',
+    is  => 'rw'
+);
 
 # METHODS
 
 ## Please see file perltidy.ERR
 sub draw_bad_guy { $sprites '*'; }
+
+
+
+# ****************************< Start draw_bad_guy >**********************/
+
+# ****************************************************************************/
+# * Function Name   : draw_bad_guy.                                     **/
+# * Description     : Draws an image of a bad guy on the screen and stores  **/
+# *                   it in a sprite that is passed to it from the calling  **/
+# *                   routine.                                              **/
+# * Inputs          : A pointer to a sprite.                                **/
+# * Outputs         : returns 0 if successful and 1 if there was a problem. **/
+# * Programmer(s)   : Dominic Caffey.                                       **/
+# * Notes & Comments: Created on 4-5-1992.                                  **/
+# *                                                                         **/
+# *                                                                         **/
+# ****************************************************************************/
+
+sub draw_bad_guy(sprites *bg)
+{
+	$success = 0;
+
+	#  put the bad guy on the screen */
+
+	setfillstyle(SOLID_FILL,YELLOW);
+
+	fillellipse((getmaxx()/TWO_VALUE),(getmaxy()/TWO_VALUE),(BAD_GUY_BODY_WIDTH * getmaxx()),(BAD_GUY_BODY_HEIGHT * getmaxy()));
+
+	setfillstyle(SOLID_FILL,RED);
+
+	pieslice((getmaxx()/TWO_VALUE),(getmaxy()/TWO_VALUE),BAD_GUY_EYE_ANGLE_1,BAD_GUY_EYE_ANGLE_2,(BAD_GUY_EYE_LENGTH * getmaxx()));
+	pieslice((getmaxx()/TWO_VALUE),(getmaxy()/TWO_VALUE),BAD_GUY_EYE_ANGLE_3,BAD_GUY_EYE_ANGLE_4,(BAD_GUY_EYE_LENGTH * getmaxx()));
+
+	setfillstyle(SOLID_FILL,BLUE);
+
+	fillellipse((getmaxx()/TWO_VALUE),(getmaxy()/TWO_VALUE),(BAD_GUY_MOUTH_WIDTH * getmaxx()),(BAD_GUY_MOUTH_HEIGHT * getmaxy()));
+
+	#  set the bitmap extents */
+
+	bg->x = (getmaxx() / TWO_VALUE) - (BAD_GUY_BODY_WIDTH * getmaxx());
+	bg->y = (getmaxy() / TWO_VALUE) - (BAD_GUY_EYE_LENGTH * getmaxx());
+	bg->width = TWO_VALUE * BAD_GUY_BODY_WIDTH * getmaxx();
+	bg->height = (BAD_GUY_EYE_LENGTH * getmaxx()) + (BAD_GUY_BODY_HEIGHT * getmaxy());
+
+	#  allocate space for the bitmap */
+
+	bg->bitmap = (short unsigned int *) calloc(ONE_VALUE,(bg->width * bg->height * sizeof(short unsigned int)));
+
+	if (bg->bitmap != NULL)
+	{
+		getimage(bg->x,bg->y,(bg->x + bg->width),(bg->y + bg->height),(short unsigned int *) bg->bitmap);
+
+		#  erase image from screen now that it has been captured */
+		putimage(bg->x,bg->y,(short unsigned int *) bg->bitmap,XOR_PUT);
+
+		success = ZERO_VALUE;
+	}
+	else
+		success = ONE_VALUE;
+
+	return(success);
+}
+
+# *************************< End draw_bad_guy >***************************/
+
+
+
 
 # package _badguy;
 

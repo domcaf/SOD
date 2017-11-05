@@ -215,6 +215,7 @@ INFO "\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theight = 
     #  initialize the random # generator */
     #randomize();
 
+	my $Badguy = Badguy->new();
 	my $bad_image;
 
     #  generate and capture bad guy & good guy images */
