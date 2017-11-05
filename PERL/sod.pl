@@ -9,11 +9,11 @@ use namespace::autoclean;
 use Pod::Usage;
 use lib '/home/domcaf/Documents/GIT-DATA/SOD/PERL';
 
-#use SOD::Badguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+use SOD::Badguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 #use SOD::Bullet; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 #use SOD::Goodguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 #use SOD::Player; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
-#use SOD::Sprites; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+use SOD::Sprites; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 use SOD::Utilities; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 use Tk;
 use Tk::Animation; # See sect 17.9 of "Mastering PERL/Tk".
@@ -215,14 +215,16 @@ INFO "\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theight = 
     #  initialize the random # generator */
     #randomize();
 
+	my $bad_image;
+
     #  generate and capture bad guy & good guy images */
-#    if ( draw_bad_guy(&bad_image) ) {
-#        print(
-#"\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated."
-#        );
-#        exit(ONE_VALUE);
-#    }
-#
+    if ( draw_bad_guy(\$bad_image) ) {
+        print(
+"\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated."
+        );
+        exit(ONE_VALUE);
+    }
+
 #   #  load initial conditions into good_guy & bad_guys i.e. build player list */
 #
 #    #  load the good guy into the list */
@@ -248,6 +250,15 @@ INFO "\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theight = 
 #
 #    #endif
 #
+
+  # The following needs to be called after you get all players on the
+  # canvas with the exception of bullets.  Bullets can leave the scrollable
+  # area and we don't care about them once they leave the scrollable area.
+  # Also note that for our purposes the scrollable area is basically static.
+  # This is why we're setting the bounding region BEFORE any bullets get fired.
+  # See section 9.3 of "Mastering Perl/Tk".
+  $gdc->configure(-scrollregion => [ $gdc->bbox("all") ]);
+
 #    #  main processing loop - let the games begin ! */
 #
 #    while ( player_list != NULL ) {
