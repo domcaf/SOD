@@ -23,9 +23,16 @@ use constant {
     BULLET_RADIUS => 2
 
 };
-my ($bitmap);
-my ( $x,     $y );
-my ( $width, $height );
+
+has 'bitmap' => ( is => 'rw', isa => 'Object' );
+
+has 'x' => ( is => 'rw', isa => 'Int' );
+
+has 'y' => ( is => 'rw', isa => 'Int' );
+
+has 'width' => ( is => 'rw', isa => 'Num' );
+
+has 'height' => ( is => 'rw', isa => 'Num' );
 
 no Moose;
 __PACKAGE__->meta->make_immutable;

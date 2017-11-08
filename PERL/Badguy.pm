@@ -7,6 +7,8 @@ use Exporter;
 use Moose;
 use namespace::autoclean;
 
+extends 'Sprites';
+
 # * Description     : Stores constants associated with the description and **/
 # *                   behavior of a bad guy.                               **/
 
@@ -27,10 +29,11 @@ use constant {
 
 };
 
-has 'badguy' => (
-    isa => 'Object',    #  badguy inherits qualities of sprite
-    is  => 'ro'
-);
+# This is a derived class of Sprites so the attribute below is unnecessary.
+#has 'badguy' => (
+#    isa => 'Object',    #  badguy inherits qualities of sprite
+#    is  => 'ro'
+#);
 
 has 'radius' => (
 
@@ -54,13 +57,6 @@ has 'current_angle' => (
 );
 
 # METHODS
-
-## Please see file perltidy.ERR
-sub draw_bad_guy { $sprites '*'; }
-
-
-
-# ****************************< Start draw_bad_guy >**********************/
 
 # ****************************************************************************/
 # * Function Name   : draw_bad_guy.                                     **/
