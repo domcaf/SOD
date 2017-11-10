@@ -7,15 +7,25 @@ use Exporter;
 use Moose;
 use namespace::autoclean;
 
+extends 'Sprites';
+
+
 # Good guy constants
 use constant {
 
-    GOOD_GUY_RADIUS      => 0.05,    #  This is specified as a percentage */
-    GOOD_GUY_GUN_LENGTH  => 0.01,    #  This is specified as a percentage */
-    GUN_WIDTH_HALF_ANGLE => 0.1      #  SPECIFIED IN RADIANS */
+    GOOD_GUY_BULLET_SPEED_FACTOR => 3,
+    GOOD_GUY_GUN_LENGTH          => 0.01,     #  specified as percentage */
+    GOOD_GUY_RADIUS              => 0.05,     #  specified as percentage */
+    GOOD_GUY_ROTATION_INCREMENT  => 0.087,    #  5 degrees in radians */
+    GUN_WIDTH_HALF_ANGLE         => 0.1,      #  specified in radians */
+    MAX_GOOD_GUY_EVENTS =>
+      1,    #  max # of events processed per visit to good guy */
 
 };
-my ( $x, $y );                       #  center of good guy */
+
+# Coordinates of center of good guy are in superclass Sprites.
+#my ( $x, $y );                       #  center of good guy */
+
 my ($radius);                        #  radius of good_guy, excluding barrel */
 
 my ($gun_length);                    #  length as a %age of screen dimensions */

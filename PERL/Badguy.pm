@@ -17,15 +17,17 @@ extends 'Sprites';
 
 use constant {
 
-    BAD_GUY_BODY_HEIGHT  => 0.01,     #  percentage */
-    BAD_GUY_BODY_WIDTH   => 0.02,     #  percentage */
-    BAD_GUY_MOUTH_HEIGHT => 0.006,    #  percentage */
-    BAD_GUY_MOUTH_WIDTH  => 0.01,     #  percentage */
-    BAD_GUY_EYE_LENGTH   => 0.02,     #  percentage */
-    BAD_GUY_EYE_ANGLE_1  => 30,       #  degrees */
-    BAD_GUY_EYE_ANGLE_2  => 50,       #  degrees */
-    BAD_GUY_EYE_ANGLE_3  => 130,      #  degrees */
-    BAD_GUY_EYE_ANGLE_4  => 150       #  degrees */
+    BAD_GUY_BODY_HEIGHT  => 0.01,    #  percentage */
+    BAD_GUY_BODY_WIDTH   => 0.02,    #  percentage */
+    BAD_GUY_EYE_ANGLE_1  => 30,      #  degrees */
+    BAD_GUY_EYE_ANGLE_2  => 50,      #  degrees */
+    BAD_GUY_EYE_ANGLE_3  => 130,     #  degrees */
+    BAD_GUY_EYE_ANGLE_4  => 150      #  degrees */
+      BAD_GUY_EYE_LENGTH => 0.02,    #  percentage */
+    BAD_GUY_MAX_ANGLE_STEP      => 6,        #  This is in degrees */
+    BAD_GUY_MOUTH_HEIGHT        => 0.006,    #  percentage */
+    BAD_GUY_MOUTH_WIDTH         => 0.01,     #  percentage */
+    SHOOTING_PROBABILITY_FACTOR => 101,
 
 };
 
@@ -71,7 +73,7 @@ has 'current_angle' => (
 # *                                                                         **/
 # ****************************************************************************/
 
-sub draw_bad_guy(sprites *bg)
+sub draw_bad_guy(Sprites super.bitmap)
 {
 	$success = 0;
 
