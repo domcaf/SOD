@@ -219,7 +219,7 @@ INFO "\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theight = 
 	my $bad_image;
 
     #  generate and capture bad guy & good guy images */
-    if ( draw_bad_guy(\$bad_image) ) {
+    if ( draw_bad_guy($gdc) ) { # Canvas object ref needed for drawing.
         print(
 "\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated."
         );

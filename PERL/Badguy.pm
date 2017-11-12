@@ -6,6 +6,7 @@ use Exporter;
 
 use Moose;
 use namespace::autoclean;
+use SOD::Utilities;
 
 extends 'Sprites';
 
@@ -17,13 +18,13 @@ extends 'Sprites';
 
 use constant {
 
-    BAD_GUY_BODY_HEIGHT  => 0.01,    #  percentage */
-    BAD_GUY_BODY_WIDTH   => 0.02,    #  percentage */
-    BAD_GUY_EYE_ANGLE_1  => 30,      #  degrees */
-    BAD_GUY_EYE_ANGLE_2  => 50,      #  degrees */
-    BAD_GUY_EYE_ANGLE_3  => 130,     #  degrees */
-    BAD_GUY_EYE_ANGLE_4  => 150      #  degrees */
-      BAD_GUY_EYE_LENGTH => 0.02,    #  percentage */
+    BAD_GUY_BODY_HEIGHT         => 0.01,     #  percentage */
+    BAD_GUY_BODY_WIDTH          => 0.02,     #  percentage */
+    BAD_GUY_EYE_ANGLE_1         => 30,       #  degrees */
+    BAD_GUY_EYE_ANGLE_2         => 50,       #  degrees */
+    BAD_GUY_EYE_ANGLE_3         => 130,      #  degrees */
+    BAD_GUY_EYE_ANGLE_4         => 150,      #  degrees */
+    BAD_GUY_EYE_LENGTH          => 0.02,     #  percentage */
     BAD_GUY_MAX_ANGLE_STEP      => 6,        #  This is in degrees */
     BAD_GUY_MOUTH_HEIGHT        => 0.006,    #  percentage */
     BAD_GUY_MOUTH_WIDTH         => 0.01,     #  percentage */
@@ -73,50 +74,73 @@ has 'current_angle' => (
 # *                                                                         **/
 # ****************************************************************************/
 
-sub draw_bad_guy(Sprites super.bitmap)
-{
-	$success = 0;
+sub draw_bad_guy {
+    my $self    = shift;
+    my $gdc     = shift;    # Game Display Canvas object = gdc.
+	my $maxX = $gdc->cget(-width);
+	my $maxY = $gdc->cget(-height);
+    my $success = 0;
 
-	#  put the bad guy on the screen */
+    #  put the bad guy on the screen */
 
-	setfillstyle(SOLID_FILL,YELLOW);
+    #setfillstyle(SOLID_FILL,YELLOW);
 
-	fillellipse((getmaxx()/TWO_VALUE),(getmaxy()/TWO_VALUE),(BAD_GUY_BODY_WIDTH * getmaxx()),(BAD_GUY_BODY_HEIGHT * getmaxy()));
+    $gdc->createOval(
+        ( $maxX / TWO_VALUE ),
+        ( $maxY / TWO_VALUE ),
+        ( BAD_GUY_BODY_WIDTH * $maxX ),
+        ( BAD_GUY_BODY_HEIGHT * $maxY )
+    );
 
-	setfillstyle(SOLID_FILL,RED);
+    setfillstyle( SOLID_FILL, RED );
 
-	pieslice((getmaxx()/TWO_VALUE),(getmaxy()/TWO_VALUE),BAD_GUY_EYE_ANGLE_1,BAD_GUY_EYE_ANGLE_2,(BAD_GUY_EYE_LENGTH * getmaxx()));
-	pieslice((getmaxx()/TWO_VALUE),(getmaxy()/TWO_VALUE),BAD_GUY_EYE_ANGLE_3,BAD_GUY_EYE_ANGLE_4,(BAD_GUY_EYE_LENGTH * getmaxx()));
+    pieslice(
+        ( $maxX / TWO_VALUE ),
+        ( $maxY / TWO_VALUE ),
+        BAD_GUY_EYE_ANGLE_1, BAD_GUY_EYE_ANGLE_2,
+        ( BAD_GUY_EYE_LENGTH * $maxX )
+    );
+    pieslice(
+        ( $maxX / TWO_VALUE ),
+        ( $maxY / TWO_VALUE ),
+        BAD_GUY_EYE_ANGLE_3, BAD_GUY_EYE_ANGLE_4,
+        ( BAD_GUY_EYE_LENGTH * $maxX )
+    );
 
-	setfillstyle(SOLID_FILL,BLUE);
+    setfillstyle( SOLID_FILL, BLUE );
 
-	fillellipse((getmaxx()/TWO_VALUE),(getmaxy()/TWO_VALUE),(BAD_GUY_MOUTH_WIDTH * getmaxx()),(BAD_GUY_MOUTH_HEIGHT * getmaxy()));
+    $gdc->createOval(
+        ( $maxX / TWO_VALUE ),
+        ( $maxY / TWO_VALUE ),
+        ( BAD_GUY_MOUTH_WIDTH * $maxX ),
+        ( BAD_GUY_MOUTH_HEIGHT * $maxY )
+    );
 
-	#  set the bitmap extents */
+#	#  set the bitmap extents */
+#
+#	$self->super->x = ($maxX / TWO_VALUE) - (BAD_GUY_BODY_WIDTH * $maxX);
+#	$self->super->y = ($maxY / TWO_VALUE) - (BAD_GUY_EYE_LENGTH * $maxX);
+#	$self->super->width = TWO_VALUE * BAD_GUY_BODY_WIDTH * $maxX;
+#	$self->super->height = (BAD_GUY_EYE_LENGTH * $maxX) + (BAD_GUY_BODY_HEIGHT * $maxY);
+#
+#	#  allocate space for the bitmap. See Tk::Window?
+#
+#	$self->super->bitmap = (short unsigned int *) calloc(ONE_VALUE,($self->super->width * $self->super->height * sizeof(short unsigned int)));
+#
+#	if ($self->super->bitmap != NULL)
+#	{
+#		getimage($self->super->x,$self->super->y,($self->super->x + $self->super->width),($self->super->y + $self->super->height),(short unsigned int *) $self->super->bitmap);
+#
+#		#  erase image from screen now that it has been captured */
+#		putimage($self->super->x,$self->super->y,(short unsigned int *) $self->super->bitmap,XOR_PUT);
+#
+#		$success = ZERO_VALUE;
+#	}
+#	else
+#		$success = ONE_VALUE;
 
-	bg->x = (getmaxx() / TWO_VALUE) - (BAD_GUY_BODY_WIDTH * getmaxx());
-	bg->y = (getmaxy() / TWO_VALUE) - (BAD_GUY_EYE_LENGTH * getmaxx());
-	bg->width = TWO_VALUE * BAD_GUY_BODY_WIDTH * getmaxx();
-	bg->height = (BAD_GUY_EYE_LENGTH * getmaxx()) + (BAD_GUY_BODY_HEIGHT * getmaxy());
-
-	#  allocate space for the bitmap */
-
-	bg->bitmap = (short unsigned int *) calloc(ONE_VALUE,(bg->width * bg->height * sizeof(short unsigned int)));
-
-	if (bg->bitmap != NULL)
-	{
-		getimage(bg->x,bg->y,(bg->x + bg->width),(bg->y + bg->height),(short unsigned int *) bg->bitmap);
-
-		#  erase image from screen now that it has been captured */
-		putimage(bg->x,bg->y,(short unsigned int *) bg->bitmap,XOR_PUT);
-
-		success = ZERO_VALUE;
-	}
-	else
-		success = ONE_VALUE;
-
-	return(success);
-}
+    return ($success);
+} # End draw_bad_guy()
 
 # *************************< End draw_bad_guy >***************************/
 
