@@ -1,4 +1,5 @@
-package SOD::Sprites;
+package Sprites;
+#package SOD::Sprites;
 
 use Exporter;
 @ISA    = ("Exporter");

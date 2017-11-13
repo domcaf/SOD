@@ -6,7 +6,11 @@ use Exporter;
 
 use Moose;
 use namespace::autoclean;
-use SOD::Utilities;
+use lib '/home/domcaf/Documents/GIT-DATA/SOD/PERL';
+# use SOD::Utilities;
+
+#with 'SOD::GlobalConstants';
+with 'GlobalConstants';
 
 extends 'Sprites';
 
@@ -86,35 +90,47 @@ sub draw_bad_guy {
     #setfillstyle(SOLID_FILL,YELLOW);
 
     $gdc->createOval(
-        ( $maxX / TWO_VALUE ),
-        ( $maxY / TWO_VALUE ),
+        ( $maxX / $self->TWO_VALUE ),
+        ( $maxY / $self->TWO_VALUE ),
         ( BAD_GUY_BODY_WIDTH * $maxX ),
-        ( BAD_GUY_BODY_HEIGHT * $maxY )
+        ( BAD_GUY_BODY_HEIGHT * $maxY ),
+		-fill => 'yellow'
     );
 
-    setfillstyle( SOLID_FILL, RED );
+    #setfillstyle( SOLID_FILL, RED );
 
-    pieslice(
-        ( $maxX / TWO_VALUE ),
-        ( $maxY / TWO_VALUE ),
-        BAD_GUY_EYE_ANGLE_1, BAD_GUY_EYE_ANGLE_2,
-        ( BAD_GUY_EYE_LENGTH * $maxX )
-    );
-    pieslice(
-        ( $maxX / TWO_VALUE ),
-        ( $maxY / TWO_VALUE ),
-        BAD_GUY_EYE_ANGLE_3, BAD_GUY_EYE_ANGLE_4,
-        ( BAD_GUY_EYE_LENGTH * $maxX )
+	my ($startX, $startY, $endX, $endY);
+
+        $startX = ( $maxX / $self->TWO_VALUE );
+        $startY = ( $maxY / $self->TWO_VALUE );
+        $endX = ( BAD_GUY_EYE_LENGTH * $maxX );
+        $endY = ( BAD_GUY_EYE_LENGTH * $maxY );
+
+    $gdc->createArc(
+        $startX,
+		$startY,
+        $endX,
+		$endY,
+		-fill => 'red',
+		-extent => ( BAD_GUY_EYE_ANGLE_2 - BAD_GUY_EYE_ANGLE_1),
+        -style => 'pieslice'
     );
 
-    setfillstyle( SOLID_FILL, BLUE );
-
-    $gdc->createOval(
-        ( $maxX / TWO_VALUE ),
-        ( $maxY / TWO_VALUE ),
-        ( BAD_GUY_MOUTH_WIDTH * $maxX ),
-        ( BAD_GUY_MOUTH_HEIGHT * $maxY )
-    );
+#    $gdc->createArc(
+#        ( $maxX / $self->TWO_VALUE ),
+#        ( $maxY / $self->TWO_VALUE ),
+#        BAD_GUY_EYE_ANGLE_3, BAD_GUY_EYE_ANGLE_4,
+#        ( BAD_GUY_EYE_LENGTH * $maxX )
+#    );
+#
+#    setfillstyle( SOLID_FILL, BLUE );
+#
+#    $gdc->createOval(
+#        ( $maxX / $self->TWO_VALUE ),
+#        ( $maxY / $self->TWO_VALUE ),
+#        ( BAD_GUY_MOUTH_WIDTH * $maxX ),
+#        ( BAD_GUY_MOUTH_HEIGHT * $maxY )
+#    );
 
 #	#  set the bitmap extents */
 #

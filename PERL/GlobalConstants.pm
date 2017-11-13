@@ -1,8 +1,9 @@
-package SOD::GlobalConstants;
+package GlobalConstants;
+#package SOD::GlobalConstants;
 
-use Exporter;
-@ISA = ("Exporter");
-@EXPORT = qw();
+#use Exporter;
+#@ISA = ("Exporter");
+#@EXPORT = qw();
 
 use Moose::Role;
 #use namespace::autoclean;
@@ -79,7 +80,7 @@ use constant {
     INSERT_KEY => 82,
     DELETE_KEY => 83,
 
-    SPACE_BAR => 32,    #  added by Dominic Caffey on 4-28-92 */,
+    SPACE_BAR => 32,
 
     WAIT      => 0,
     DONT_WAIT => 1
@@ -89,18 +90,27 @@ use constant {
 # int get_keystroke(int pause, int *special_key); # prototype - C language context.
 
 #  integer constants */
-use constant {
+#use constant {
+#
+#    #ZERO_VALUE  => 0,
+#    ONE_VALUE   => 1,
+#    TWO_VALUE   => 2,
+#    THREE_VALUE => 3,
+#    FOUR_VALUE  => 4,
+#    FIVE_VALUE  => 5,
+#    TEN_VALUE   => 10
+#
+#};
 
-    ZERO_VALUE  => 0,
-    ONE_VALUE   => 1,
-    TWO_VALUE   => 2,
-    THREE_VALUE => 3,
-    FOUR_VALUE  => 4,
-    FIVE_VALUE  => 5,
-    TEN_VALUE   => 10
+#our $ZERO_VALUE  = 0;
 
-};
-
+has 'ZERO_VALUE'  => (is => 'ro', default => 0,  isa => 'Int');
+has 'ONE_VALUE'   => (is => 'ro', default => 1,  isa => 'Int');
+has 'TWO_VALUE'   => (is => 'ro', default => 2,  isa => 'Int');
+has 'THREE_VALUE' => (is => 'ro', default => 3,  isa => 'Int');
+has 'FOUR_VALUE'  => (is => 'ro', default => 4,  isa => 'Int');
+has 'FIVE_VALUE'  => (is => 'ro', default => 5,  isa => 'Int');
+has 'TEN_VALUE'   => (is => 'ro', default => 10, isa => 'Int');
 
 # ATTRIBUTES
 #  trigonometry constants */
