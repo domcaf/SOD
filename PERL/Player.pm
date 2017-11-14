@@ -1,8 +1,9 @@
-                package SOD::Player;
+package Player;
+#package SOD::Player;
 
-use Exporter;
-@ISA = ("Exporter");
-@EXPORT = qw(&add_player &delete_player &visit_player);
+#use Exporter;
+#@ISA = ("Exporter");
+#@EXPORT = qw(&add_player &delete_player &visit_player);
 
 
 

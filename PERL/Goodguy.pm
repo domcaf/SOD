@@ -1,8 +1,9 @@
-package SOD::Goodguy;
+package Goodguy;
+#package SOD::Goodguy;
 
-use Exporter;
-@ISA    = ("Exporter");
-@EXPORT = qw(&draw_good_guy &add_good);
+#use Exporter;
+#@ISA    = ("Exporter");
+#@EXPORT = qw(&draw_good_guy &add_good);
 
 use Moose;
 use namespace::autoclean;
@@ -45,8 +46,8 @@ void draw_good_guy( players *, float new_angle );
 
 players * add_good(void);
 
-no Moose;
-__PACKAGE__->meta->make_immutable;
+#no Moose;
+#__PACKAGE__->meta->make_immutable;
 
 #define GOODGUY_H
 # End of file.

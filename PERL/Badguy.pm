@@ -1,8 +1,9 @@
-package SOD::Badguy;
+package Badguy;
+#package SOD::Badguy;
 
-use Exporter;
-@ISA    = ("Exporter");
-@EXPORT = qw(&draw_bad_guy);
+#use Exporter;
+#@ISA    = ("Exporter");
+#@EXPORT = qw(&draw_bad_guy);
 
 use Moose;
 use namespace::autoclean;
@@ -22,16 +23,16 @@ extends 'Sprites';
 
 use constant {
 
-    BAD_GUY_BODY_HEIGHT         => 0.01,     #  percentage */
-    BAD_GUY_BODY_WIDTH          => 0.02,     #  percentage */
+    BAD_GUY_BODY_HEIGHT         => 0.005,     #  percentage */
+    BAD_GUY_BODY_WIDTH          => 0.008,     #  percentage */
     BAD_GUY_EYE_ANGLE_1         => 30,       #  degrees */
     BAD_GUY_EYE_ANGLE_2         => 50,       #  degrees */
     BAD_GUY_EYE_ANGLE_3         => 130,      #  degrees */
     BAD_GUY_EYE_ANGLE_4         => 150,      #  degrees */
     BAD_GUY_EYE_LENGTH          => 0.02,     #  percentage */
     BAD_GUY_MAX_ANGLE_STEP      => 6,        #  This is in degrees */
-    BAD_GUY_MOUTH_HEIGHT        => 0.006,    #  percentage */
-    BAD_GUY_MOUTH_WIDTH         => 0.01,     #  percentage */
+    BAD_GUY_MOUTH_HEIGHT        => 0.001,    #  percentage */
+    BAD_GUY_MOUTH_WIDTH         => 0.003,     #  percentage */
     SHOOTING_PROBABILITY_FACTOR => 101,
 
 };
@@ -66,16 +67,14 @@ has 'current_angle' => (
 # METHODS
 
 # ****************************************************************************/
-# * Function Name   : draw_bad_guy.                                     **/
+# * Function Name   : draw_bad_guy.                                         **/
 # * Description     : Draws an image of a bad guy on the screen and stores  **/
 # *                   it in a sprite that is passed to it from the calling  **/
 # *                   routine.                                              **/
 # * Inputs          : A pointer to a sprite.                                **/
 # * Outputs         : returns 0 if successful and 1 if there was a problem. **/
 # * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 4-5-1992.                                  **/
-# *                                                                         **/
-# *                                                                         **/
+# * Notes & Comments: Created on 4-5-1992. Ajusted for PERL/Tk November 2017**/
 # ****************************************************************************/
 
 sub draw_bad_guy {
@@ -94,7 +93,9 @@ sub draw_bad_guy {
         ( $maxY / $self->TWO_VALUE ),
         ( BAD_GUY_BODY_WIDTH * $maxX ),
         ( BAD_GUY_BODY_HEIGHT * $maxY ),
-		-fill => 'yellow'
+		-fill => 'yellow',
+		-outline => 'magenta',
+		-tags => ['Badguy Body']
     );
 
     #setfillstyle( SOLID_FILL, RED );
@@ -106,31 +107,46 @@ sub draw_bad_guy {
         $endX = ( BAD_GUY_EYE_LENGTH * $maxX );
         $endY = ( BAD_GUY_EYE_LENGTH * $maxY );
 
+	# Draw right eye
     $gdc->createArc(
         $startX,
 		$startY,
         $endX,
 		$endY,
 		-fill => 'red',
+		-start => BAD_GUY_EYE_ANGLE_1,
 		-extent => ( BAD_GUY_EYE_ANGLE_2 - BAD_GUY_EYE_ANGLE_1),
-        -style => 'pieslice'
+        -style => 'pieslice',
+		-outline => 'blue',
+		-tags => ['Badguy Right Eye']
     );
 
-#    $gdc->createArc(
-#        ( $maxX / $self->TWO_VALUE ),
-#        ( $maxY / $self->TWO_VALUE ),
-#        BAD_GUY_EYE_ANGLE_3, BAD_GUY_EYE_ANGLE_4,
-#        ( BAD_GUY_EYE_LENGTH * $maxX )
-#    );
-#
-#    setfillstyle( SOLID_FILL, BLUE );
-#
+	# Draw left eye
+    $gdc->createArc(
+        $startX,
+		$startY,
+        $endX,
+		$endY,
+		-fill => 'red',
+		-start => BAD_GUY_EYE_ANGLE_3,
+		-extent => ( BAD_GUY_EYE_ANGLE_4 - BAD_GUY_EYE_ANGLE_3),
+        -style => 'pieslice',
+		-outline => 'blue',
+		-tags => ['Badguy Left Eye']
+    );
+
+	# Draw mouth
+
 #    $gdc->createOval(
 #        ( $maxX / $self->TWO_VALUE ),
 #        ( $maxY / $self->TWO_VALUE ),
 #        ( BAD_GUY_MOUTH_WIDTH * $maxX ),
-#        ( BAD_GUY_MOUTH_HEIGHT * $maxY )
+#        ( BAD_GUY_MOUTH_HEIGHT * $maxY ),
+#		-fill => 'blue',
+#		-outline => 'red',
+#		-tags => ['Badguy Mouth']
 #    );
+
 
 #	#  set the bitmap extents */
 #
@@ -165,8 +181,8 @@ sub draw_bad_guy {
 
 # package _badguy;
 
-no Moose;
-__PACKAGE__->meta->make_immutable;
+#no Moose;
+#__PACKAGE__->meta->make_immutable;
 
 #define BADGUY_H
 #endif

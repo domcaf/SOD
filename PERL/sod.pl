@@ -9,12 +9,12 @@ use namespace::autoclean;
 use Pod::Usage;
 use lib '/home/domcaf/Documents/GIT-DATA/SOD/PERL';
 
-use SOD::Badguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
-#use SOD::Bullet; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
-#use SOD::Goodguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
-#use SOD::Player; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
-use SOD::Sprites; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
-use SOD::Utilities; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+use Badguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+#use Bullet; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+#use Goodguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+#use Player; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+#use Sprites; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+use Utilities; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 use Tk;
 use Tk::Animation; # See sect 17.9 of "Mastering PERL/Tk".
 use Tk::WinPhoto; # See sect 17.7.3 of "Mastering PERL/Tk". For grabbing a bitmap off a canvas. BadGuy.
@@ -219,8 +219,8 @@ INFO "\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theight = 
 	my $bad_image;
 
     #  generate and capture bad guy & good guy images */
-    if ( draw_bad_guy($gdc) ) { # Canvas object ref needed for drawing.
-        print(
+    if ( $Badguy->draw_bad_guy($gdc) ) { # Canvas object ref needed for drawing.
+        ERROR(
 "\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated."
         );
         exit(ONE_VALUE);

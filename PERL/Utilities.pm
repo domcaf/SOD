@@ -1,8 +1,9 @@
-package SOD::Utilities;
+package Utilities;
+#package SOD::Utilities;
 
-use Exporter;
-@ISA = ("Exporter");
-@EXPORT = qw(&setup_video_driver_and_mode &restore_pre_game_environment &spirals_help &testTrig &polar_to_cartesian_coords &cartesian_to_polar_coords);
+#use Exporter;
+#@ISA = ("Exporter");
+#@EXPORT = qw(&setup_video_driver_and_mode &restore_pre_game_environment &spirals_help &testTrig &polar_to_cartesian_coords &cartesian_to_polar_coords);
 
 use Math::Complex;
 use Moose;
@@ -280,8 +281,8 @@ sub cartesian_to_polar_coords {
 #----------------------------------------------------------------------------------
 
 # package _utilities
-no Moose;
-__PACKAGE__->meta->make_immutable;
+#no Moose;
+#__PACKAGE__->meta->make_immutable;
 
 # End of file.
 

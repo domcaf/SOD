@@ -1,9 +1,9 @@
 package Sprites;
 #package SOD::Sprites;
 
-use Exporter;
-@ISA    = ("Exporter");
-@EXPORT = qw( );
+#use Exporter;
+#@ISA    = ("Exporter");
+#@EXPORT = qw( );
 
 use Moose;
 use namespace::autoclean;
@@ -23,8 +23,8 @@ has 'width' => ( is => 'rw', isa => 'Num' );
 
 has 'height' => ( is => 'rw', isa => 'Num' );
 
-no Moose;
-__PACKAGE__->meta->make_immutable;
+#no Moose;
+#__PACKAGE__->meta->make_immutable;
 
 1;
 

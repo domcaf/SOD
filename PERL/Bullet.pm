@@ -1,8 +1,9 @@
-		package SOD::Bullet;
+package Bullet;
+#package SOD::Bullet;
 
-use Exporter;
-@ISA = ("Exporter");
-@EXPORT = qw(&did_bullet_hit_something);
+#use Exporter;
+#@ISA = ("Exporter");
+#@EXPORT = qw(&did_bullet_hit_something);
 
 
 
@@ -132,8 +133,8 @@ players *did_bullet_hit_something(players *bullet)
 
 		# package _bullet;
 
-		no Moose;
-		__PACKAGE__->meta->make_immutable;
+#		no Moose;
+#		__PACKAGE__->meta->make_immutable;
 
 # End of file.
   
