@@ -146,6 +146,7 @@ pod2usage(
 #  set up the video environment */
 
 my $mw = MainWindow->new;
+$mw->FullScreen; # This is desired when everything is working smoothly.
 
 if ( !defined($mw) ) {
     print(
@@ -183,8 +184,13 @@ my $fgb = $gcf->Button( -text => 'Fire * Gun', -command => sub { exit; } )
 my $rrb = $gcf->Button( -text => 'Rotate Right >', -command => sub { exit; } )
   ->pack( -side => 'left' );      # Rotate right button.
 
-my $gdc = $mw->Canvas( -background => 'black', -borderwidth => 1 )
-  ->pack( -side => 'top', -fill => 'both' );    # Game Display Canvas Widget
+my $gdc = $mw->Canvas( -background => 'black', -borderwidth => 1, -confine => 1 )
+  ->pack( -side => 'top', -fill => 'both' );    # Game Display Canvas Widget - We're limiting scrolling to scroll region established later on.
+
+# Put a grid on the canvas, gdc, to help DEBUG scaling and placement issues. It can be commented out when things are working correctly.
+$gdc->createGrid(0, 0, 10, 10, -fill => 'white');
+$gdc->createGrid(0, 0, 50, 50, -lines => 1, -dash => '-.', -fill => 'white');
+$gdc->createGrid(0, 0, 100, 100, -width => 3, -lines => 1, -fill => 'white');
 
 my $pb = $gof->Button( -text => 'Play', -command => &playGame )
   ->pack( -side => 'top' );    # Play button. This gets all the action going.
