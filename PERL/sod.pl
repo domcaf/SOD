@@ -148,6 +148,18 @@ pod2usage(
 my $mw = MainWindow->new;
 $mw->FullScreen; # This is desired when everything is working smoothly.
 
+# Get the dimensions of the main window.
+
+my @MainWindowConfig = $mw->configure(); # returns list of list refs
+DEBUG "mw = Main Window, configuration information as follows:";
+DEBUG "\n" . Dumper(\@MainWindowConfig) . "\n";
+
+$mainWindowWidth  = $mw->cget(-width);
+$mainWindowHeight = $mw->cget(-height);
+INFO "\nMain Window Dimensions:\twidth = " . $mainWindowWidth . "\theight = " . $mainWindowHeight . "\n";
+
+sleep(10); # Window starts out fullscreen then resizes; gives time to observe behaviour. Debugging.
+
 if ( !defined($mw) ) {
     print(
 "\a\a\a\nVideo driver or screen mode error - program execution terminated."
