@@ -7,7 +7,8 @@ use Getopt::Long;
 use Log::Log4perl qw(:easy);
 use namespace::autoclean;
 use Pod::Usage;
-use lib '/home/domcaf/Documents/GIT-DATA/SOD/PERL';
+#use lib '/home/domcaf/Documents/GIT-DATA/SOD/PERL';
+use lib '.';
 
 use Badguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 #use Bullet; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
@@ -26,7 +27,7 @@ our($canvasWidth, $canvasHeight);
 $canvasWidth = 0;
 $canvasHeight = 0;
 
-Log::Log4perl->easy_init( { level => $INFO, file => LOG_FILE } );
+Log::Log4perl->easy_init( { level => $DEBUG, file => LOG_FILE } );
 
 ALWAYS("$0 commencing execution.");
 
@@ -158,7 +159,7 @@ $mainWindowWidth  = $mw->cget(-width);
 $mainWindowHeight = $mw->cget(-height);
 INFO "\nMain Window Dimensions:\twidth = " . $mainWindowWidth . "\theight = " . $mainWindowHeight . "\n";
 
-sleep(10); # Window starts out fullscreen then resizes; gives time to observe behaviour. Debugging.
+#sleep(10); # Window starts out fullscreen then resizes; gives time to observe behaviour. Debugging.
 
 if ( !defined($mw) ) {
     print(
@@ -196,8 +197,12 @@ my $fgb = $gcf->Button( -text => 'Fire * Gun', -command => sub { exit; } )
 my $rrb = $gcf->Button( -text => 'Rotate Right >', -command => sub { exit; } )
   ->pack( -side => 'left' );      # Rotate right button.
 
+#my $gdc = $mw->Canvas( -background => 'black', -borderwidth => 1, -confine => 1, -setgrid => 1 ) # setgrid apparently not valid canvas option.
 my $gdc = $mw->Canvas( -background => 'black', -borderwidth => 1, -confine => 1 )
-  ->pack( -side => 'top', -fill => 'both' );    # Game Display Canvas Widget - We're limiting scrolling to scroll region established later on.
+  ->pack( -side => 'top', -fill => 'both', -expand => 1 );    # Game Display Canvas Widget - We're limiting scrolling to scroll region established later on.
+
+  my $serverInfo = $gdc->server; # String is returned.
+  DEBUG("Server info for canvas: \"$serverInfo\".");
 
 # Put a grid on the canvas, gdc, to help DEBUG scaling and placement issues. It can be commented out when things are working correctly.
 $gdc->createGrid(0, 0, 10, 10, -fill => 'white');
@@ -276,7 +281,11 @@ INFO "\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theight = 
   # Also note that for our purposes the scrollable area is basically static.
   # This is why we're setting the bounding region BEFORE any bullets get fired.
   # See section 9.3 of "Mastering Perl/Tk".
-  $gdc->configure(-scrollregion => [ $gdc->bbox("all") ]);
+
+  # line below causes window to shrink from maximized so be careful when you call it.
+  # Only call once you've got all graphical game elements on screen.
+  #$gdc->configure(-scrollregion => [ $gdc->bbox("all") ]);
+  DEBUG('Canvas bounding box for all subwidgets currently disabled. It causes maximized window to shrink.');
 
 #    #  main processing loop - let the games begin ! */
 #
