@@ -1,13 +1,20 @@
 #!/usr/bin/env perl
+#!/usr/bin/env perl -d
+
+# You don't want to use ptkdb when debugging other PERL/Tk programs
+# because of problems with event handling per "Mastering PERL/Tk" book.
 #!/usr/bin/env perl -d:ptkdb
 
+# See GlobalConstants.pm for active definitions of few lines below.
+# Hopefully we can remove this line grouping if we get things to
+# work correctly with Moose.
 use constant LOG_FILE => '>/tmp/sod.log';
+use Log::Log4perl qw(:easy);
+
 use Data::Dumper;
 use Getopt::Long;
-use Log::Log4perl qw(:easy);
 use namespace::autoclean;
 use Pod::Usage;
-#use lib '/home/domcaf/Documents/GIT-DATA/SOD/PERL';
 use lib '.';
 
 use Badguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
@@ -15,6 +22,10 @@ use Badguy; # Found using PERL5LIB environment variable or preceeding 'use lib' 
 #use Goodguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 #use Player; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 #use Sprites; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+
+#use Moose;
+#with 'GlobalConstants';
+
 use Utilities; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 use Tk;
 use Tk::Animation; # See sect 17.9 of "Mastering PERL/Tk".
@@ -27,7 +38,8 @@ our($canvasWidth, $canvasHeight);
 $canvasWidth = 0;
 $canvasHeight = 0;
 
-Log::Log4perl->easy_init( { level => $DEBUG, file => LOG_FILE } );
+#Log::Log4perl->easy_init( { level => $DEBUG, file => LOG_FILE } );
+Log::Log4perl->easy_init( { level => $INFO, file => LOG_FILE } );
 
 ALWAYS("$0 commencing execution.");
 
@@ -147,6 +159,7 @@ pod2usage(
 #  set up the video environment */
 
 my $mw = MainWindow->new;
+#$mw->resizeable(1,1); # Booleans for X & Y axes.
 $mw->FullScreen; # This is desired when everything is working smoothly.
 
 # Get the dimensions of the main window.
@@ -155,9 +168,11 @@ my @MainWindowConfig = $mw->configure(); # returns list of list refs
 DEBUG "mw = Main Window, configuration information as follows:";
 DEBUG "\n" . Dumper(\@MainWindowConfig) . "\n";
 
-$mainWindowWidth  = $mw->cget(-width);
-$mainWindowHeight = $mw->cget(-height);
-INFO "\nMain Window Dimensions:\twidth = " . $mainWindowWidth . "\theight = " . $mainWindowHeight . "\n";
+$mainWindowWidth  = $mw->width;
+$mainWindowHeight = $mw->height;
+$mainWindowGeometry = $mw->geometry;
+
+INFO "\nMain Window Dimensions:\twidth = " . $mainWindowWidth . "\theight = " . $mainWindowHeight . "\ngeometry\t" . $mainWindowGeometry . "\n";
 
 #sleep(10); # Window starts out fullscreen then resizes; gives time to observe behaviour. Debugging.
 
@@ -237,6 +252,10 @@ INFO "\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theight = 
 
     #  initialize the random # generator */
     #randomize();
+
+	DEBUG('Attempting to draw bad guy bitmap with graphics primitives.');
+
+	#sleep(5); #DEBUG
 
 	my $Badguy = Badguy->new();
 	my $bad_image;

@@ -7,8 +7,9 @@ package Badguy;
 
 use Moose;
 use namespace::autoclean;
-use lib '/home/domcaf/Documents/GIT-DATA/SOD/PERL';
-# use SOD::Utilities;
+#use lib '/home/domcaf/Documents/GIT-DATA/SOD/PERL';
+#use SOD::Utilities;
+use lib '.';
 
 #with 'SOD::GlobalConstants';
 with 'GlobalConstants';
@@ -19,7 +20,8 @@ extends 'Sprites';
 # *                   behavior of a bad guy.                               **/
 
 #  What follows below are actually radii for the different body parts mentioned */
-# Bad guy constants
+# Bad guy constants. Some of the values may seem reversed but it's because 
+# Borland Graphics Interface primitives work diffrently than Tk's.
 
 use constant {
 
@@ -86,17 +88,27 @@ sub draw_bad_guy {
 
     #  put the bad guy on the screen */
 
-    #setfillstyle(SOLID_FILL,YELLOW);
+	# Bad Guy Body Oval Box = BGBOB
+
+    my $BGBOB_xStart = ( $maxX / $self->FIVE_VALUE );
+    my $BGBOB_yStart = ( $maxY / $self->FIVE_VALUE );
+    my $BGBOB_xEnd = ( BAD_GUY_BODY_WIDTH * $maxX );
+    my $BGBOB_yEnd = ( BAD_GUY_BODY_HEIGHT * $maxY );
 
     $gdc->createOval(
-        ( $maxX / $self->TWO_VALUE ),
-        ( $maxY / $self->TWO_VALUE ),
-        ( BAD_GUY_BODY_WIDTH * $maxX ),
-        ( BAD_GUY_BODY_HEIGHT * $maxY ),
-		-fill => 'yellow',
-		-outline => 'magenta',
-		-tags => ['Badguy Body']
+        $BGBOB_xStart,
+        $BGBOB_yStart,
+        $BGBOB_xEnd,
+        $BGBOB_yEnd,
+        -fill    => 'yellow',
+        -outline => 'magenta',
+        -tags    => ['Badguy Body']
     );
+
+	$self->log_debug('Bad Guy Body Oval box beginning and ending coordinates:');
+	$self->log_debug('Ending coordinates should be concentric/within Start');
+	$self->log_debug("Start:\t( $BGBOB_xStart, $BGBOB_yStart )");
+	$self->log_debug("End:\t( $BGBOB_xEnd, $BGBOB_yEnd )");
 
     #setfillstyle( SOLID_FILL, RED );
 
@@ -137,15 +149,15 @@ sub draw_bad_guy {
 
 	# Draw mouth
 
-#    $gdc->createOval(
-#        ( $maxX / $self->TWO_VALUE ),
-#        ( $maxY / $self->TWO_VALUE ),
-#        ( BAD_GUY_MOUTH_WIDTH * $maxX ),
-#        ( BAD_GUY_MOUTH_HEIGHT * $maxY ),
-#		-fill => 'blue',
-#		-outline => 'red',
-#		-tags => ['Badguy Mouth']
-#    );
+    $gdc->createOval(
+        ( $maxX / $self->THREE_VALUE ),
+        ( $maxY / $self->THREE_VALUE ),
+        ( BAD_GUY_MOUTH_WIDTH * $maxX ),
+        ( BAD_GUY_MOUTH_HEIGHT * $maxY ),
+		-fill => 'blue',
+		-outline => 'red',
+		-tags => 'Badguy Mouth'
+    );
 
 
 #	#  set the bitmap extents */

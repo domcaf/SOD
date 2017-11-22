@@ -1,12 +1,22 @@
 package GlobalConstants;
-#package SOD::GlobalConstants;
-
-#use Exporter;
-#@ISA = ("Exporter");
-#@EXPORT = qw();
 
 use Moose::Role;
 #use namespace::autoclean;
+
+# Log4perl must be initialized in "main" sub for logging to work.
+use Log::Log4perl qw(:easy);
+use constant LOG_FILE => '>/tmp/sod.log';
+#Log::Log4perl->easy_init( { level => $INFO, file => LOG_FILE, utf8 => 1 } );
+
+with 'MooseX::Log::Log4perl::Easy';
+
+BEGIN {
+    Log::Log4perl->easy_init( { level => $INFO, file => LOG_FILE, utf8 => 1 } );
+}
+
+# See http://search.cpan.org/~lammel/MooseX-Log-Log4perl-0.46/lib/MooseX/Log/Log4perl/Easy.pm
+# The above documents a Moose Extension that may help solve your problems to get common logging
+# in all your modules.
 
 # Keyboard constants
 use constant {
@@ -90,19 +100,6 @@ use constant {
 # int get_keystroke(int pause, int *special_key); # prototype - C language context.
 
 #  integer constants */
-#use constant {
-#
-#    #ZERO_VALUE  => 0,
-#    ONE_VALUE   => 1,
-#    TWO_VALUE   => 2,
-#    THREE_VALUE => 3,
-#    FOUR_VALUE  => 4,
-#    FIVE_VALUE  => 5,
-#    TEN_VALUE   => 10
-#
-#};
-
-#our $ZERO_VALUE  = 0;
 
 has 'ZERO_VALUE'  => (is => 'ro', default => 0,  isa => 'Int');
 has 'ONE_VALUE'   => (is => 'ro', default => 1,  isa => 'Int');
@@ -130,9 +127,6 @@ use constant {
 
 
 #----------------------------------------------------------------------------------
-
-#no Moose;
-#__PACKAGE__->meta->make_immutable;
 
 1;
 
