@@ -6,32 +6,42 @@
 #!/usr/bin/env perl -d:ptkdb
 
 # See GlobalConstants.pm for active definitions of few lines below.
-# Hopefully we can remove this line grouping if we get things to
-# work correctly with Moose.
-use constant LOG_FILE => '>/tmp/sod.log';
-use Log::Log4perl qw(:easy);
+# See GlobalsProxy.pm for how to access constants in GlobalConstants.
 
-use Data::Dumper;
-use Getopt::Long;
-use namespace::autoclean;
-use Pod::Usage;
-use lib '.';
+our $gpo; # Globals Proxy Object for getting access to GlobalConstants.
+our $lh; # Global log handle for Log4PERL usage.
+
+use lib '.'; # Needed for access/usage of sod packages/class definitions.
 
 use Badguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 #use Bullet; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+use Data::Dumper;
+use Getopt::Long;
+#use GlobalConstants;
+use GlobalsProxy;
 #use Goodguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+use Log::Log4perl;
+#use namespace::autoclean;
 #use Player; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+use Pod::Usage;
 #use Sprites; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
-
-#use Moose;
-#with 'GlobalConstants';
-
-use Utilities; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 use Tk;
 use Tk::Animation; # See sect 17.9 of "Mastering PERL/Tk".
 use Tk::WinPhoto; # See sect 17.7.3 of "Mastering PERL/Tk". For grabbing a bitmap off a canvas. BadGuy.
+use Utilities; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 
-$opt_help = 0;    # Default to not displaying help.
+# gpo = Globals Proxy Object for getting access to GlobalConstants.
+$gpo = GlobalsProxy->new();
+
+die "Cannot instatiate Globals Proxy Object. No point in continuing."
+  unless ( defined($gpo) );
+
+Log::Log4perl->init_once( $gpo->LOG_CONFIG );
+
+# lh = log handle for Log4PERL usage.
+$lh = Log::Log4perl->get_logger("GlobalConstants");
+
+my $opt_help = 0;    # Default to not displaying help.
 $Data::Dumper::Sortkeys = 1;
 
 our($canvasWidth, $canvasHeight);
@@ -39,9 +49,9 @@ $canvasWidth = 0;
 $canvasHeight = 0;
 
 #Log::Log4perl->easy_init( { level => $DEBUG, file => LOG_FILE } );
-Log::Log4perl->easy_init( { level => $INFO, file => LOG_FILE } );
+#Log::Log4perl->easy_init( { level => $INFO, file => LOG_FILE } );
 
-ALWAYS("$0 commencing execution.");
+$lh->info("$0 commencing execution.");
 
 =pod
 
@@ -153,7 +163,7 @@ pod2usage(
 
 #sprites bad_image;
 #players * player_list = NULL;
-#int bad_guy_count = ZERO_VALUE;
+#int bad_guy_count = gpo;
 #int error_flag;
 
 #  set up the video environment */
@@ -165,14 +175,14 @@ $mw->FullScreen; # This is desired when everything is working smoothly.
 # Get the dimensions of the main window.
 
 my @MainWindowConfig = $mw->configure(); # returns list of list refs
-DEBUG "mw = Main Window, configuration information as follows:";
-DEBUG "\n" . Dumper(\@MainWindowConfig) . "\n";
+$lh->debug("mw = Main Window, configuration information as follows:");
+$lh->debug("\n" . Dumper(\@MainWindowConfig) . "\n");
 
-$mainWindowWidth  = $mw->width;
-$mainWindowHeight = $mw->height;
-$mainWindowGeometry = $mw->geometry;
+my $mainWindowWidth  = $mw->width;
+my $mainWindowHeight = $mw->height;
+my $mainWindowGeometry = $mw->geometry;
 
-INFO "\nMain Window Dimensions:\twidth = " . $mainWindowWidth . "\theight = " . $mainWindowHeight . "\ngeometry\t" . $mainWindowGeometry . "\n";
+$lh->info("\nMain Window Dimensions:\twidth = " . $mainWindowWidth . "\theight = " . $mainWindowHeight . "\ngeometry\t" . $mainWindowGeometry . "\n");
 
 #sleep(10); # Window starts out fullscreen then resizes; gives time to observe behaviour. Debugging.
 
@@ -180,7 +190,7 @@ if ( !defined($mw) ) {
     print(
 "\a\a\a\nVideo driver or screen mode error - program execution terminated."
     );
-    exit(ONE_VALUE);
+    exit($gpo->ONE_VALUE);
 }
 
 $mw->title("Spirals Of Death - $0");
@@ -217,7 +227,7 @@ my $gdc = $mw->Canvas( -background => 'black', -borderwidth => 1, -confine => 1 
   ->pack( -side => 'top', -fill => 'both', -expand => 1 );    # Game Display Canvas Widget - We're limiting scrolling to scroll region established later on.
 
   my $serverInfo = $gdc->server; # String is returned.
-  DEBUG("Server info for canvas: \"$serverInfo\".");
+  $lh->debug("Server info for canvas: \"$serverInfo\".");
 
 # Put a grid on the canvas, gdc, to help DEBUG scaling and placement issues. It can be commented out when things are working correctly.
 $gdc->createGrid(0, 0, 10, 10, -fill => 'white');
@@ -232,7 +242,7 @@ MainLoop;    # This starts the graphics subsystem and causes UI to be displayed.
 #  restore the pregame video environment */
 restore_pre_game_environment();
 
-return (ZERO_VALUE);    #  indicate normal program termination */
+return ($gpo->ZERO_VALUE);    #  indicate normal program termination */
 
 # -----------------------------< End Main >----------------------------------*/
 
@@ -243,17 +253,17 @@ sub playGame {
 # get all configuration items for widget at one time.
 
 my @canvasConfig = $gdc->configure(); # returns list of list refs
-DEBUG "gdc = Game Display Canvas, configuration information as follows:";
-DEBUG "\n" . Dumper(\@canvasConfig) . "\n";
+$lh->debug("gdc = Game Display Canvas, configuration information as follows:");
+$lh->debug("\n" . Dumper(\@canvasConfig) . "\n");
 
 $canvasWidth = $gdc->cget(-width);
 $canvasHeight = $gdc->cget(-height);
-INFO "\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theight = " . $canvasHeight . "\n";
+$lh->info("\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theight = " . $canvasHeight . "\n");
 
     #  initialize the random # generator */
     #randomize();
 
-	DEBUG('Attempting to draw bad guy bitmap with graphics primitives.');
+	$lh->info('Attempting to draw bad guy bitmap with graphics primitives.');
 
 	#sleep(5); #DEBUG
 
@@ -262,10 +272,10 @@ INFO "\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theight = 
 
     #  generate and capture bad guy & good guy images */
     if ( $Badguy->draw_bad_guy($gdc) ) { # Canvas object ref needed for drawing.
-        ERROR(
+        $lh->error(
 "\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated."
         );
-        exit(ONE_VALUE);
+        exit($gpo->ONE_VALUE);
     }
 
 #   #  load initial conditions into good_guy & bad_guys i.e. build player list */
@@ -278,11 +288,11 @@ INFO "\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theight = 
 #        print(
 #"\a\a\a\nCouldn't create good guy to add to list.\nProgram execution terminated."
 #        );
-#        exit(ONE_VALUE);
+#        exit($gpo->ONE_VALUE);
 #    }
 #
 #    #  display the good guy */
-#    draw_good_guy( player_list, ZERO_VALUE );
+#    draw_good_guy( player_list, $gpo->ZERO_VALUE );
 #
 #    #ifndef good_debug
 #    #  load the bad guys into the list */
@@ -304,7 +314,7 @@ INFO "\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theight = 
   # line below causes window to shrink from maximized so be careful when you call it.
   # Only call once you've got all graphical game elements on screen.
   #$gdc->configure(-scrollregion => [ $gdc->bbox("all") ]);
-  DEBUG('Canvas bounding box for all subwidgets currently disabled. It causes maximized window to shrink.');
+  $lh->debug('Canvas bounding box for all subwidgets currently disabled. It causes maximized window to shrink.');
 
 #    #  main processing loop - let the games begin ! */
 #

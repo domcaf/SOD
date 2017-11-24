@@ -1,18 +1,32 @@
 package GlobalConstants;
 
+# Usage of this package is predominantly as a Moose Role as opposed to
+# a regular PERL package. Note that this role consumes another role
+# of MooseX::Log::Log4perl.
+
 use Moose::Role;
-#use namespace::autoclean;
+with 'MooseX::Log::Log4perl';
 
-# Log4perl must be initialized in "main" sub for logging to work.
-use Log::Log4perl qw(:easy);
-use constant LOG_FILE => '>/tmp/sod.log';
-#Log::Log4perl->easy_init( { level => $INFO, file => LOG_FILE, utf8 => 1 } );
+# See the following regarding log4perl usage:
+#	http://search.cpan.org/~mschilli/Log-Log4perl-1.49/lib/Log/Log4perl.pm#Initialize_via_a_configuration_file
+#	and
+#	http://search.cpan.org/~mschilli/Log-Log4perl-1.49/lib/Log/Log4perl.pm#Initialize_once_and_only_once
 
-with 'MooseX::Log::Log4perl::Easy';
+use Log::Log4perl;
+use constant LOG_CONFIG => '/home/domcaf/Documents/GIT-DATA/SOD/PERL/log.conf';
+has 'LOG_CONFIG' => (is => 'ro', default => '/home/domcaf/Documents/GIT-DATA/SOD/PERL/log.conf', isa => 'Str');
 
-BEGIN {
-    Log::Log4perl->easy_init( { level => $INFO, file => LOG_FILE, utf8 => 1 } );
-}
+
+# lh = log handle for Log4PERL usage.
+our $lh;
+#
+#BEGIN {
+#    Log::Log4perl->init_once(LOG_CONFIG);
+#
+#    # lh = log handle for Log4PERL usage.
+#    $lh = Log::Log4perl->get_logger("GlobalConstants");
+#}
+#
 
 # See http://search.cpan.org/~lammel/MooseX-Log-Log4perl-0.46/lib/MooseX/Log/Log4perl/Easy.pm
 # The above documents a Moose Extension that may help solve your problems to get common logging
@@ -100,6 +114,8 @@ use constant {
 # int get_keystroke(int pause, int *special_key); # prototype - C language context.
 
 #  integer constants */
+
+#has 'LOG_CONFIG' => (is => 'ro', default => '/home/domcaf/Documents/GIT-DATA/SOD/PERL/log.conf', isa => 'Str');
 
 has 'ZERO_VALUE'  => (is => 'ro', default => 0,  isa => 'Int');
 has 'ONE_VALUE'   => (is => 'ro', default => 1,  isa => 'Int');

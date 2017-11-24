@@ -105,10 +105,10 @@ sub draw_bad_guy {
         -tags    => ['Badguy Body']
     );
 
-	$self->log_debug('Bad Guy Body Oval box beginning and ending coordinates:');
-	$self->log_debug('Ending coordinates should be concentric/within Start');
-	$self->log_debug("Start:\t( $BGBOB_xStart, $BGBOB_yStart )");
-	$self->log_debug("End:\t( $BGBOB_xEnd, $BGBOB_yEnd )");
+	$self->log->debug('Bad Guy Body Oval box beginning and ending coordinates:');
+	$self->log->debug('Ending coordinates should be concentric/within Start');
+	$self->log->debug("Start:\t( $BGBOB_xStart, $BGBOB_yStart )");
+	$self->log->debug("End:\t( $BGBOB_xEnd, $BGBOB_yEnd )");
 
     #setfillstyle( SOLID_FILL, RED );
 
