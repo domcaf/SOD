@@ -5,20 +5,20 @@ package GlobalConstants;
 # of MooseX::Log::Log4perl.
 
 use Moose::Role;
-with 'MooseX::Log::Log4perl';
+#with 'MooseX::Log::Log4perl';
 
 # See the following regarding log4perl usage:
 #	http://search.cpan.org/~mschilli/Log-Log4perl-1.49/lib/Log/Log4perl.pm#Initialize_via_a_configuration_file
 #	and
 #	http://search.cpan.org/~mschilli/Log-Log4perl-1.49/lib/Log/Log4perl.pm#Initialize_once_and_only_once
 
-use Log::Log4perl;
-use constant LOG_CONFIG => '/home/domcaf/Documents/GIT-DATA/SOD/PERL/log.conf';
+#use Log::Log4perl;
+#use constant LOG_CONFIG => '/home/domcaf/Documents/GIT-DATA/SOD/PERL/log.conf';
 has 'LOG_CONFIG' => (is => 'ro', default => '/home/domcaf/Documents/GIT-DATA/SOD/PERL/log.conf', isa => 'Str');
 
 
 # lh = log handle for Log4PERL usage.
-our $lh;
+#our $lh;
 #
 #BEGIN {
 #    Log::Log4perl->init_once(LOG_CONFIG);
@@ -27,6 +27,7 @@ our $lh;
 #    $lh = Log::Log4perl->get_logger("GlobalConstants");
 #}
 #
+
 
 # See http://search.cpan.org/~lammel/MooseX-Log-Log4perl-0.46/lib/MooseX/Log/Log4perl/Easy.pm
 # The above documents a Moose Extension that may help solve your problems to get common logging

@@ -1,20 +1,26 @@
 package Badguy;
-#package SOD::Badguy;
-
-#use Exporter;
-#@ISA    = ("Exporter");
-#@EXPORT = qw(&draw_bad_guy);
 
 use Moose;
 use namespace::autoclean;
-#use lib '/home/domcaf/Documents/GIT-DATA/SOD/PERL';
-#use SOD::Utilities;
+#use Log::Log4perl;
 use lib '.';
+#use Utilities;
 
-#with 'SOD::GlobalConstants';
-with 'GlobalConstants';
+with 'GlobalConstants', 'MooseX::Log::Log4perl';
+#with 'GlobalConstants', 'Log';
 
 extends 'Sprites';
+
+# lh = log handle for Log4PERL usage.
+our $lh;
+
+#BEGIN {
+#    #Log::Log4perl->init_once( $self->LOG_CONFIG ); # This line may be unnecessary.
+#
+#    # lh = log handle for Log4PERL usage.
+#    $lh = Log::Log4perl->get_logger("GlobalConstants");
+#}
+
 
 # * Description     : Stores constants associated with the description and **/
 # *                   behavior of a bad guy.                               **/
@@ -81,6 +87,10 @@ has 'current_angle' => (
 
 sub draw_bad_guy {
     my $self    = shift;
+
+#    Log::Log4perl->init( $self->LOG_CONFIG ); # Make sure log configured for append mode or this will overwrite log contents.
+#    $lh = Log::Log4perl->get_logger("GlobalConstants");
+
     my $gdc     = shift;    # Game Display Canvas object = gdc.
 	my $maxX = $gdc->cget(-width);
 	my $maxY = $gdc->cget(-height);

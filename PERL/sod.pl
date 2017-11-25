@@ -20,7 +20,10 @@ use Getopt::Long;
 #use GlobalConstants;
 use GlobalsProxy;
 #use Goodguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
-use Log::Log4perl;
+
+#use Log::Log4perl;
+use Log::Log4perl qw(:easy);
+
 #use namespace::autoclean;
 #use Player; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 use Pod::Usage;
@@ -36,8 +39,15 @@ $gpo = GlobalsProxy->new();
 die "Cannot instatiate Globals Proxy Object. No point in continuing."
   unless ( defined($gpo) );
 
-Log::Log4perl->init_once( $gpo->LOG_CONFIG );
+Log::Log4perl->easy_init(); # Doing anything other than this causes MooseX::Log::Log4perl to fail. :^(
+#(
+#    {
+#        level => $INFO, # Using modifiers other than default doesn't work.
+#        # file  => ">sod.log" # MooseX::Log::Log4perl doesn't handle files well.
+#    }
+#);
 
+#Log::Log4perl->init_once( $gpo->LOG_CONFIG );
 # lh = log handle for Log4PERL usage.
 $lh = Log::Log4perl->get_logger("GlobalConstants");
 
