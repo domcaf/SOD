@@ -1,11 +1,8 @@
 package GlobalConstants;
 
-# Usage of this package is predominantly as a Moose Role as opposed to
-# a regular PERL package. Note that this role consumes another role
-# of MooseX::Log::Log4perl.
+# This package is a Moose Role.
 
 use Moose::Role;
-#with 'MooseX::Log::Log4perl';
 
 # See the following regarding log4perl usage:
 #	http://search.cpan.org/~mschilli/Log-Log4perl-1.49/lib/Log/Log4perl.pm#Initialize_via_a_configuration_file
@@ -118,13 +115,18 @@ use constant {
 
 #has 'LOG_CONFIG' => (is => 'ro', default => '/home/domcaf/Documents/GIT-DATA/SOD/PERL/log.conf', isa => 'Str');
 
-has 'ZERO_VALUE'  => (is => 'ro', default => 0,  isa => 'Int');
-has 'ONE_VALUE'   => (is => 'ro', default => 1,  isa => 'Int');
-has 'TWO_VALUE'   => (is => 'ro', default => 2,  isa => 'Int');
-has 'THREE_VALUE' => (is => 'ro', default => 3,  isa => 'Int');
-has 'FOUR_VALUE'  => (is => 'ro', default => 4,  isa => 'Int');
-has 'FIVE_VALUE'  => (is => 'ro', default => 5,  isa => 'Int');
-has 'TEN_VALUE'   => (is => 'ro', default => 10, isa => 'Int');
+has 'ZERO_VALUE'    => ( is => 'ro', default => 0,  isa => 'Int' );
+has 'ONE_VALUE'     => ( is => 'ro', default => 1,  isa => 'Int' );
+has 'TWO_VALUE'     => ( is => 'ro', default => 2,  isa => 'Int' );
+has 'THREE_VALUE'   => ( is => 'ro', default => 3,  isa => 'Int' );
+has 'FOUR_VALUE'    => ( is => 'ro', default => 4,  isa => 'Int' );
+has 'FIVE_VALUE'    => ( is => 'ro', default => 5,  isa => 'Int' );
+has 'TEN_VALUE'     => ( is => 'ro', default => 10, isa => 'Int' );
+has 'TWENTY_VALUE'  => ( is => 'ro', default => 20, isa => 'Int' );
+has 'THIRTY_VALUE'  => ( is => 'ro', default => 30, isa => 'Int' );
+has 'FORTY_VALUE'   => ( is => 'ro', default => 40, isa => 'Int' );
+has 'FIFTY_VALUE'   => ( is => 'ro', default => 50, isa => 'Int' );
+has 'HUNDRED_VALUE' => ( is => 'ro', default => 10, isa => 'Int' );
 
 # ATTRIBUTES
 #  trigonometry constants */

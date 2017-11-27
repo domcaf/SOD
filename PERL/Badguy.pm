@@ -88,22 +88,52 @@ has 'current_angle' => (
 sub draw_bad_guy {
     my $self    = shift;
 
-#    Log::Log4perl->init( $self->LOG_CONFIG ); # Make sure log configured for append mode or this will overwrite log contents.
-#    $lh = Log::Log4perl->get_logger("GlobalConstants");
-
     my $gdc     = shift;    # Game Display Canvas object = gdc.
 	my $maxX = $gdc->cget(-width);
 	my $maxY = $gdc->cget(-height);
     my $success = 0;
 
     #  put the bad guy on the screen */
+	# Because PERL/Tk works so much differently from BGI, calculating the bounding
+	# box coordinates will be easiest by making sure they all are on the same
+	# line represented by equation, y = mx + b. Start with upper left and work
+	# your way down to lower right. Using a constant scaling factor will make it
+	# easier to do point calculations.
 
 	# Bad Guy Body Oval Box = BGBOB
+	# Bad Guy Mouth Oval Box = BGMOB
 
-    my $BGBOB_xStart = ( $maxX / $self->FIVE_VALUE );
-    my $BGBOB_yStart = ( $maxY / $self->FIVE_VALUE );
-    my $BGBOB_xEnd = ( BAD_GUY_BODY_WIDTH * $maxX );
-    my $BGBOB_yEnd = ( BAD_GUY_BODY_HEIGHT * $maxY );
+	# per standard line equation, y = mx + b
+	# m = slope
+	my $m = 0.45;
+	# b = y offset
+	my $b = $self->FIVE_VALUE;
+
+# Old calculations used with BGI
+#    my $BGBOB_xStart = ( $maxX / $self->FIVE_VALUE );
+#    my $BGBOB_yStart = ( $maxY / $self->FIVE_VALUE );
+#
+#	my $BGMOB_xStart = ( $maxX / $self->THREE_VALUE );
+#	my $BGMOB_yStart = ( $maxY / $self->THREE_VALUE );
+#	
+#	my $BGMOB_xEnd   = ( BAD_GUY_MOUTH_WIDTH * $maxX );
+#	my $BGMOB_yEnd   = ( BAD_GUY_MOUTH_HEIGHT * $maxY );
+#
+#    my $BGBOB_xEnd = ( BAD_GUY_BODY_WIDTH * $maxX );
+#    my $BGBOB_yEnd = ( BAD_GUY_BODY_HEIGHT * $maxY );
+
+# New calculations used with PERL/Tk
+    my $BGBOB_xStart = ( $maxX / $self->THIRTY_VALUE );
+    my $BGBOB_yStart = $m * $BGBOB_xStart + $b;
+
+	my $BGMOB_xStart = $BGBOB_xStart + $self->TEN_VALUE;
+	my $BGMOB_yStart = $m * $BGMOB_xStart + $b;
+	
+	my $BGMOB_xEnd   = $BGMOB_xStart + $self->TEN_VALUE;
+	my $BGMOB_yEnd   = $m * $BGMOB_xEnd + $b;
+
+    my $BGBOB_xEnd = $BGMOB_xEnd + $self->TEN_VALUE;
+    my $BGBOB_yEnd = $m * $BGBOB_xEnd + $b;
 
     $gdc->createOval(
         $BGBOB_xStart,
@@ -120,55 +150,63 @@ sub draw_bad_guy {
 	$self->log->debug("Start:\t( $BGBOB_xStart, $BGBOB_yStart )");
 	$self->log->debug("End:\t( $BGBOB_xEnd, $BGBOB_yEnd )");
 
-    #setfillstyle( SOLID_FILL, RED );
-
-	my ($startX, $startY, $endX, $endY);
-
-        $startX = ( $maxX / $self->TWO_VALUE );
-        $startY = ( $maxY / $self->TWO_VALUE );
-        $endX = ( BAD_GUY_EYE_LENGTH * $maxX );
-        $endY = ( BAD_GUY_EYE_LENGTH * $maxY );
-
-	# Draw right eye
-    $gdc->createArc(
-        $startX,
-		$startY,
-        $endX,
-		$endY,
-		-fill => 'red',
-		-start => BAD_GUY_EYE_ANGLE_1,
-		-extent => ( BAD_GUY_EYE_ANGLE_2 - BAD_GUY_EYE_ANGLE_1),
-        -style => 'pieslice',
-		-outline => 'blue',
-		-tags => ['Badguy Right Eye']
-    );
-
-	# Draw left eye
-    $gdc->createArc(
-        $startX,
-		$startY,
-        $endX,
-		$endY,
-		-fill => 'red',
-		-start => BAD_GUY_EYE_ANGLE_3,
-		-extent => ( BAD_GUY_EYE_ANGLE_4 - BAD_GUY_EYE_ANGLE_3),
-        -style => 'pieslice',
-		-outline => 'blue',
-		-tags => ['Badguy Left Eye']
-    );
-
 	# Draw mouth
 
     $gdc->createOval(
-        ( $maxX / $self->THREE_VALUE ),
-        ( $maxY / $self->THREE_VALUE ),
-        ( BAD_GUY_MOUTH_WIDTH * $maxX ),
-        ( BAD_GUY_MOUTH_HEIGHT * $maxY ),
-		-fill => 'blue',
-		-outline => 'red',
-		-tags => 'Badguy Mouth'
+        $BGMOB_xStart,
+        $BGMOB_yStart,
+        $BGMOB_xEnd,
+        $BGMOB_yEnd,
+        -fill    => 'blue',
+        -outline => 'red',
+        -tags    => 'Badguy Mouth'
     );
 
+	$self->log->debug("\nBad Guy Mouth Oval box should be entirely within Bad Guy Body Oval Box.\n");
+
+	$self->log->debug('Bad Guy Mouth Oval box beginning and ending coordinates:');
+	$self->log->debug('Ending coordinates should be concentric/within Start');
+	$self->log->debug("Start:\t( $BGMOB_xStart, $BGMOB_yStart )");
+	$self->log->debug("End:\t( $BGMOB_xEnd, $BGMOB_yEnd )");
+
+    #setfillstyle( SOLID_FILL, RED );
+
+# Draw bad guy eyes
+
+#	my ($startX, $startY, $endX, $endY);
+#
+#        $startX = ( $maxX / $self->TWO_VALUE );
+#        $startY = ( $maxY / $self->TWO_VALUE );
+#        $endX = ( BAD_GUY_EYE_LENGTH * $maxX );
+#        $endY = ( BAD_GUY_EYE_LENGTH * $maxY );
+#
+#	# Draw right eye
+#    $gdc->createArc(
+#        $startX,
+#		$startY,
+#        $endX,
+#		$endY,
+#		-fill => 'red',
+#		-start => BAD_GUY_EYE_ANGLE_1,
+#		-extent => ( BAD_GUY_EYE_ANGLE_2 - BAD_GUY_EYE_ANGLE_1),
+#        -style => 'pieslice',
+#		-outline => 'blue',
+#		-tags => ['Badguy Right Eye']
+#    );
+#
+#	# Draw left eye
+#    $gdc->createArc(
+#        $startX,
+#		$startY,
+#        $endX,
+#		$endY,
+#		-fill => 'red',
+#		-start => BAD_GUY_EYE_ANGLE_3,
+#		-extent => ( BAD_GUY_EYE_ANGLE_4 - BAD_GUY_EYE_ANGLE_3),
+#        -style => 'pieslice',
+#		-outline => 'blue',
+#		-tags => ['Badguy Left Eye']
+#    );
 
 #	#  set the bitmap extents */
 #

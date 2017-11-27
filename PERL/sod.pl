@@ -185,8 +185,8 @@ $mw->FullScreen; # This is desired when everything is working smoothly.
 # Get the dimensions of the main window.
 
 my @MainWindowConfig = $mw->configure(); # returns list of list refs
-$lh->debug("mw = Main Window, configuration information as follows:");
-$lh->debug("\n" . Dumper(\@MainWindowConfig) . "\n");
+$lh->trace("mw = Main Window, configuration information as follows:");
+$lh->trace("\n" . Dumper(\@MainWindowConfig) . "\n");
 
 my $mainWindowWidth  = $mw->width;
 my $mainWindowHeight = $mw->height;
@@ -263,8 +263,8 @@ sub playGame {
 # get all configuration items for widget at one time.
 
 my @canvasConfig = $gdc->configure(); # returns list of list refs
-$lh->debug("gdc = Game Display Canvas, configuration information as follows:");
-$lh->debug("\n" . Dumper(\@canvasConfig) . "\n");
+$lh->trace("gdc = Game Display Canvas, configuration information as follows:");
+$lh->trace("\n" . Dumper(\@canvasConfig) . "\n");
 
 $canvasWidth = $gdc->cget(-width);
 $canvasHeight = $gdc->cget(-height);
@@ -282,7 +282,7 @@ $lh->info("\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theig
 
     #  generate and capture bad guy & good guy images */
     if ( $Badguy->draw_bad_guy($gdc) ) { # Canvas object ref needed for drawing.
-        $lh->error(
+        $lh->fatal(
 "\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated."
         );
         exit($gpo->ONE_VALUE);
