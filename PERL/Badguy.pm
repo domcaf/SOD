@@ -107,20 +107,8 @@ sub draw_bad_guy {
 	# m = slope
 	my $m = 0.45;
 	# b = y offset
-	my $b = $self->FIVE_VALUE;
+	my $b = $self->TWENTY_VALUE;
 
-# Old calculations used with BGI
-#    my $BGBOB_xStart = ( $maxX / $self->FIVE_VALUE );
-#    my $BGBOB_yStart = ( $maxY / $self->FIVE_VALUE );
-#
-#	my $BGMOB_xStart = ( $maxX / $self->THREE_VALUE );
-#	my $BGMOB_yStart = ( $maxY / $self->THREE_VALUE );
-#	
-#	my $BGMOB_xEnd   = ( BAD_GUY_MOUTH_WIDTH * $maxX );
-#	my $BGMOB_yEnd   = ( BAD_GUY_MOUTH_HEIGHT * $maxY );
-#
-#    my $BGBOB_xEnd = ( BAD_GUY_BODY_WIDTH * $maxX );
-#    my $BGBOB_yEnd = ( BAD_GUY_BODY_HEIGHT * $maxY );
 
 # New calculations used with PERL/Tk
     my $BGBOB_xStart = ( $maxX / $self->THIRTY_VALUE );
@@ -173,40 +161,56 @@ sub draw_bad_guy {
 
 # Draw bad guy eyes
 
-#	my ($startX, $startY, $endX, $endY);
-#
+	my ($startX, $startY, $endX, $endY);
+
 #        $startX = ( $maxX / $self->TWO_VALUE );
 #        $startY = ( $maxY / $self->TWO_VALUE );
 #        $endX = ( BAD_GUY_EYE_LENGTH * $maxX );
 #        $endY = ( BAD_GUY_EYE_LENGTH * $maxY );
-#
-#	# Draw right eye
-#    $gdc->createArc(
-#        $startX,
-#		$startY,
-#        $endX,
-#		$endY,
-#		-fill => 'red',
-#		-start => BAD_GUY_EYE_ANGLE_1,
-#		-extent => ( BAD_GUY_EYE_ANGLE_2 - BAD_GUY_EYE_ANGLE_1),
-#        -style => 'pieslice',
-#		-outline => 'blue',
-#		-tags => ['Badguy Right Eye']
-#    );
-#
-#	# Draw left eye
-#    $gdc->createArc(
-#        $startX,
-#		$startY,
-#        $endX,
-#		$endY,
-#		-fill => 'red',
-#		-start => BAD_GUY_EYE_ANGLE_3,
-#		-extent => ( BAD_GUY_EYE_ANGLE_4 - BAD_GUY_EYE_ANGLE_3),
-#        -style => 'pieslice',
-#		-outline => 'blue',
-#		-tags => ['Badguy Left Eye']
-#    );
+
+        $startX = $BGBOB_xStart;
+        $startY = $BGMOB_yEnd - $self->TWENTY_VALUE;
+        $endX = $BGBOB_xEnd;
+        $endY = $BGMOB_yEnd + $self->TEN_VALUE;
+
+	$self->log->debug("Bad Guy Eyes Bounding Box coordinates:\n\t" .
+		"($startX, $startY) and ($endX, $endY)");
+
+	# The rectangle below is just for visualizing the bounding box for the eyes.
+	# It's not part of the Bad Guy; it's for debugging.
+
+    if (0) {
+        $gdc->createRectangle( $startX, $startY, $endX,
+            $endY, -fill => 'green' );
+    }
+
+	# Draw right eye
+    $gdc->createArc(
+        $startX,
+		$startY,
+        $endX,
+		$endY,
+		-fill => 'red',
+		-start => BAD_GUY_EYE_ANGLE_1,
+		-extent => ( BAD_GUY_EYE_ANGLE_2 - BAD_GUY_EYE_ANGLE_1),
+        -style => 'pieslice',
+		-outline => 'green',
+		-tags => ['Badguy Right Eye']
+    );
+
+	# Draw left eye
+    $gdc->createArc(
+        $startX,
+		$startY,
+        $endX,
+		$endY,
+		-fill => 'red',
+		-start => BAD_GUY_EYE_ANGLE_3,
+		-extent => ( BAD_GUY_EYE_ANGLE_4 - BAD_GUY_EYE_ANGLE_3),
+        -style => 'pieslice',
+		-outline => 'green',
+		-tags => ['Badguy Left Eye']
+    );
 
 #	#  set the bitmap extents */
 #
