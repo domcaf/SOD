@@ -870,6 +870,10 @@ Contents of MOVE_PL.C below:
 
 void move_player(players *mm)  #  mm = move me */
 {
+
+	# The following may be useful for player movement in context of PERL/Tk:
+	# http://search.cpan.org/~srezic/Tk-804.034/pod/Canvas.pod#TRANSFORMATIONS
+
 	players *player_who_shot_bullet;
 
 	static float reference_radius;
@@ -892,6 +896,9 @@ void move_player(players *mm)  #  mm = move me */
 	reference_angle = atan(getmaxy()/getmaxx());
 
 	setfillstyle(SOLID_FILL,getbkcolor());
+
+	# The following may be useful for player movement in context of PERL/Tk:
+	# http://search.cpan.org/~srezic/Tk-804.034/pod/Canvas.pod#TRANSFORMATIONS
 
 	if(mm->pt == bad)
 	{

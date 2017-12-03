@@ -220,6 +220,12 @@ sub draw_bad_guy {
 #	$self->super->height = (BAD_GUY_EYE_LENGTH * $maxX) + (BAD_GUY_BODY_HEIGHT * $maxY);
 #
 #	#  allocate space for the bitmap. See Tk::Window?
+#	# # See sect 17.7.3 of "Mastering PERL/Tk" from grabbing a bitmap off a canvas.
+#	# You may also need to work with a thumbnail per MPTk section: 17.7.4. Tk::Thumbnail
+#	# See also:
+#	#	http://search.cpan.org/~srezic/Tk-804.034/WinPhoto/WinPhoto.pm
+#	#	http://search.cpan.org/~kryde/Image-Base-Tk-3/lib/Image/Base/Tk/Canvas.pm
+#	#	http://www.perlmonks.org/?node_id=361299  # Has good Tk::Photo examples.
 #
 #	$self->super->bitmap = (short unsigned int *) calloc(ONE_VALUE,($self->super->width * $self->super->height * sizeof(short unsigned int)));
 #
