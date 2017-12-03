@@ -217,20 +217,25 @@ sub draw_bad_guy {
 #	#	http://search.cpan.org/~srezic/Tk-804.034/WinPhoto/WinPhoto.pm
 #	#	http://search.cpan.org/~kryde/Image-Base-Tk-3/lib/Image/Base/Tk/Canvas.pm
 #	#	http://www.perlmonks.org/?node_id=361299  # Has good Tk::Photo examples.
+#	#	See also section 17.7 of MPTk, photo has several methods that may be useful.
 #
 #	$self->super->bitmap = (short unsigned int *) calloc(ONE_VALUE,($self->super->width * $self->super->height * sizeof(short unsigned int)));
 
-$self->log->debug('Attempting to get bitmap image of BadGuy.');
-
-# Get parent window of gdc canvas
+# Get parent window of gdc canvas - it's passed in as param when this method is called.
 #my $mw = $gdc->cget();
-$mw = $gdc->parent; # See Mastering-PERL-Tk-book_html-format/ch13_02.htm, "Parent of a Widget".
+#$mw = $gdc->parent; # See Mastering-PERL-Tk-book_html-format/ch13_02.htm, "Parent of a Widget".
+
+$self->log->debug("Attempting to get bitmap image of BadGuy. Parameters used in \"window->Photo\" call:\n"
+	. "\tMain window id:\t\"" . $mw->id . "\"\n"
+	. "\tCanvas id octal:\t\"" . oct($gdc->id) . "\"\n"
+);
 
 $self->super->bitmap = $mw->Photo(
     -format => 'Window',
     -data   => oct( $gdc->id )
 );
 
+$self->log->debug('Attempting to write image grabbed to a file.');
 $self->super->bitmap->write( './badguy.png', -format => 'PNG' ); # Let's see what we're grabbing?
 
 # After you are successfully capturing the image, see 9.6.3. The Image Item. It might help with
