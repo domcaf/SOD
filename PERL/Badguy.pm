@@ -1,10 +1,12 @@
 package Badguy;
 
+use lib '.';
 use Moose;
 use namespace::autoclean;
 #use Log::Log4perl;
-use lib '.';
 #use Utilities;
+use Tk::PNG;
+use Tk::WinPhoto;
 
 with 'GlobalConstants', 'MooseX::Log::Log4perl';
 #with 'GlobalConstants', 'Log';
@@ -14,18 +16,11 @@ extends 'Sprites';
 # lh = log handle for Log4PERL usage.
 our $lh;
 
-#BEGIN {
-#    #Log::Log4perl->init_once( $self->LOG_CONFIG ); # This line may be unnecessary.
-#
-#    # lh = log handle for Log4PERL usage.
-#    $lh = Log::Log4perl->get_logger("GlobalConstants");
-#}
-
 
 # * Description     : Stores constants associated with the description and **/
 # *                   behavior of a bad guy.                               **/
 
-#  What follows below are actually radii for the different body parts mentioned */
+# What follows below are actually radii for the different body parts mentioned */
 # Bad guy constants. Some of the values may seem reversed but it's because 
 # Borland Graphics Interface primitives work diffrently than Tk's.
 
@@ -87,8 +82,9 @@ has 'current_angle' => (
 
 sub draw_bad_guy {
     my $self    = shift;
-
+	my $mw = shift; # Main window of program.
     my $gdc     = shift;    # Game Display Canvas object = gdc.
+
 	my $maxX = $gdc->cget(-width);
 	my $maxY = $gdc->cget(-height);
     my $success = 0;
@@ -163,11 +159,6 @@ sub draw_bad_guy {
 
 	my ($startX, $startY, $endX, $endY);
 
-#        $startX = ( $maxX / $self->TWO_VALUE );
-#        $startY = ( $maxY / $self->TWO_VALUE );
-#        $endX = ( BAD_GUY_EYE_LENGTH * $maxX );
-#        $endY = ( BAD_GUY_EYE_LENGTH * $maxY );
-
         $startX = $BGBOB_xStart;
         $startY = $BGMOB_yEnd - $self->TWENTY_VALUE;
         $endX = $BGBOB_xEnd;
@@ -228,6 +219,23 @@ sub draw_bad_guy {
 #	#	http://www.perlmonks.org/?node_id=361299  # Has good Tk::Photo examples.
 #
 #	$self->super->bitmap = (short unsigned int *) calloc(ONE_VALUE,($self->super->width * $self->super->height * sizeof(short unsigned int)));
+
+$self->log->debug('Attempting to get bitmap image of BadGuy.');
+
+# Get parent window of gdc canvas
+#my $mw = $gdc->cget();
+$mw = $gdc->parent; # See Mastering-PERL-Tk-book_html-format/ch13_02.htm, "Parent of a Widget".
+
+$self->super->bitmap = $mw->Photo(
+    -format => 'Window',
+    -data   => oct( $gdc->id )
+);
+
+$self->super->bitmap->write( './badguy.png', -format => 'PNG' ); # Let's see what we're grabbing?
+
+# After you are successfully capturing the image, see 9.6.3. The Image Item. It might help with
+# subsequent display in different locations.
+
 #
 #	if ($self->super->bitmap != NULL)
 #	{

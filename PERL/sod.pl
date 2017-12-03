@@ -239,11 +239,26 @@ my $gdc = $mw->Canvas( -background => 'black', -borderwidth => 1, -confine => 1 
   my $serverInfo = $gdc->server; # String is returned.
   $lh->debug("Server info for canvas: \"$serverInfo\".");
 
+if (0) {
+
 # Put a grid on the canvas, gdc, to help DEBUG scaling and placement issues. It can be commented out when things are working correctly.
-$gdc->createGrid(0, 0, 10, 10, -fill => 'white');
-$gdc->createGrid(0, 0, 50, 50, -lines => 1, -dash => '-.', -fill => 'white');
-$gdc->createGrid(0, 0, 100, 100, -width => 3, -lines => 1, -fill => 'white');
-$lh->debug("Grid Info in pixels:\n\tDots every 10\n\tDashed lines every 50\n\tSolid lines every 100");
+    $gdc->createGrid( 0, 0, 10, 10, -fill => 'white' );
+    $gdc->createGrid(
+        0, 0, 50, 50,
+        -lines => 1,
+        -dash  => '-.',
+        -fill  => 'white'
+    );
+    $gdc->createGrid(
+        0, 0, 100, 100,
+        -width => 3,
+        -lines => 1,
+        -fill  => 'white'
+    );
+    $lh->debug(
+"Grid Info in pixels:\n\tDots every 10\n\tDashed lines every 50\n\tSolid lines every 100"
+    );
+}
 
 my $pb = $gof->Button( -text => 'Play', -command => &playGame )
   ->pack( -side => 'top' );    # Play button. This gets all the action going.
@@ -282,7 +297,7 @@ $lh->info("\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theig
 	my $bad_image;
 
     #  generate and capture bad guy & good guy images */
-    if ( $Badguy->draw_bad_guy($gdc) ) { # Canvas object ref needed for drawing.
+    if ( $Badguy->draw_bad_guy($mw, $gdc) ) { # Main Window and Canvas object ref needed for drawing.
         $lh->fatal(
 "\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated."
         );
@@ -324,8 +339,18 @@ $lh->info("\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theig
 
   # line below causes window to shrink from maximized so be careful when you call it.
   # Only call once you've got all graphical game elements on screen.
-  #$gdc->configure(-scrollregion => [ $gdc->bbox("all") ]);
-  $lh->debug('Canvas bounding box for all subwidgets currently disabled. It causes maximized window to shrink.');
+
+if (1) {
+    $gdc->configure( -scrollregion => [ $gdc->bbox("all") ] );
+    $lh->debug(
+'Canvas bounding box for all subwidgets is active. It causes maximized window to shrink.'
+    );
+}
+else {
+    $lh->debug(
+'Canvas bounding box for all subwidgets currently disabled. It causes maximized window to shrink.'
+    );
+}
 
 #    #  main processing loop - let the games begin ! */
 #
