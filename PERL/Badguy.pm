@@ -3,18 +3,16 @@ package Badguy;
 use lib '.';
 use Moose;
 use namespace::autoclean;
-#use Log::Log4perl;
-#use Utilities;
+use Data::Dumper;
+use Tk::Photo;
 use Tk::PNG;
-use Tk::WinPhoto;
+#use Utilities;
 
 with 'GlobalConstants', 'MooseX::Log::Log4perl';
-#with 'GlobalConstants', 'Log';
-
 extends 'Sprites';
 
 # lh = log handle for Log4PERL usage.
-our $lh;
+#our $lh;
 
 
 # * Description     : Stores constants associated with the description and **/
@@ -225,18 +223,75 @@ sub draw_bad_guy {
 #my $mw = $gdc->cget();
 #$mw = $gdc->parent; # See Mastering-PERL-Tk-book_html-format/ch13_02.htm, "Parent of a Widget".
 
-$self->log->debug("Attempting to get bitmap image of BadGuy. Parameters used in \"window->Photo\" call:\n"
-	. "\tMain window id:\t\"" . $mw->id . "\"\n"
-	. "\tCanvas id octal:\t\"" . oct($gdc->id) . "\"\n"
-);
+$self->log->debug("Attempting to get bitmap image of BadGuy.");
 
-$self->super->bitmap = $mw->Photo(
-    -format => 'Window',
-    -data   => oct( $gdc->id )
-);
+if (0) {
 
-$self->log->debug('Attempting to write image grabbed to a file.');
-$self->super->bitmap->write( './badguy.png', -format => 'PNG' ); # Let's see what we're grabbing?
+ # If you go with alternate method of using canvas->postscript() then remove $mw
+ # from this sub's param list and from call in sod.pl to keep interface clean.
+
+    $self->log->debug(
+"Attempting to get bitmap image of BadGuy. Parameters used in \"window->Photo\" call:\n"
+          . "\tMain window id:\t\""
+          . $mw->id . "\"\n"
+          . "\tCanvas id octal:\t\""
+          . oct( $gdc->id )
+          . "\"\n" );
+
+    $self->super->bitmap = $mw->Photo(
+        -format => 'Window',
+        -data   => oct( $gdc->id )
+    );
+
+}
+
+# See article at http://www.perlmonks.org/?node_id=361299 especially the last comment that
+# demonstrates a better way to get image with the canvas->postscript() method.
+# See http://search.cpan.org/~srezic/Tk-804.034/pod/Canvas.pod for parameter explanation
+# for canvas->postscript() call.
+
+    #$self->SUPER::bitmap = $gdc->postscript  # This gets an error and see https://metacpan.org/pod/distribution/Moose/lib/Moose/Manual/Attributes.pod#ATTRIBUTE-INHERITANCE
+	# regarding superclass attribute access.
+
+    $gdc->postscript
+	(
+        -colormode => 'color',
+        -file      => $self->BAD_GUY_PS_LOC, #file in which to write Postscript. If not specified method returns string of postscript.
+        -height => $BGBOB_yEnd,
+        -width  => $BGBOB_xEnd,
+        -x      => $startX,
+        -y      => $startY,
+    );
+
+	# So we can see what we're grabbing. See also if you don't want to make a system call:  http://search.cpan.org/~cjm/PostScript-Convert-0.03/lib/PostScript/Convert.pm
+
+        my $convCmd = 'convert ' . $self->BAD_GUY_PS_LOC . ' ' . $self->BAD_GUY_PNG_LOC;
+        $self->log->debug(
+            'Attempting to write image grabbed to a file with command: '
+              . $convCmd );
+        system("$convCmd");
+
+        # Load converted file and store image in Sprites superclass
+		# When trying to store in superclass an exception is thrown.
+        #$self->bitmap = $gdc->Photo(
+        my $thingie   = $gdc->Photo(
+            -format  => 'PNG',
+            -file    => $self->BAD_GUY_PNG_LOC,
+            -palette => '1/1/1'
+        );
+
+$self->log->debug('Attempting to read png image grabbed from a file: ' .
+	$self->BAD_GUY_PNG_LOC);
+
+$thingie->read($self->BAD_GUY_PNG_LOC, -format => 'PNG');
+
+
+	$Data::Dumper::Sortkeys = 1;
+	$self->log->debug("BadGuy bitmap is a \"" . ref( $thingie ) . "\" whose contents is:\n"
+	. Dumper($thingie) . "\n");
+
+
+#$self->super->bitmap->write( './badguy.png', -format => 'PNG' ); # Let's see what we're grabbing?
 
 # After you are successfully capturing the image, see 9.6.3. The Image Item. It might help with
 # subsequent display in different locations.
@@ -271,4 +326,3 @@ $self->super->bitmap->write( './badguy.png', -format => 'PNG' ); # Let's see wha
 #endif
 
 1;
-

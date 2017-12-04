@@ -29,9 +29,12 @@ use Log::Log4perl qw(:easy);
 use Pod::Usage;
 #use Sprites; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 use Tk;
-use Tk::Animation; # See sect 17.9 of "Mastering PERL/Tk".
-use Tk::WinPhoto; # See sect 17.7.3 of "Mastering PERL/Tk". For grabbing a bitmap off a canvas. BadGuy.
+use Tk::PNG;
+#use Tk::Animation; # See sect 17.9 of "Mastering PERL/Tk".
+#use Tk::WinPhoto; # See sect 17.7.3 of "Mastering PERL/Tk". For grabbing a bitmap off a canvas. BadGuy.
 use Utilities; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+
+#$splash->Update(0.1);
 
 # gpo = Globals Proxy Object for getting access to GlobalConstants.
 $gpo = GlobalsProxy->new();
@@ -239,6 +242,9 @@ my $gdc = $mw->Canvas( -background => 'black', -borderwidth => 1, -confine => 1 
   my $serverInfo = $gdc->server; # String is returned.
   $lh->debug("Server info for canvas: \"$serverInfo\".");
 
+#$splash->Update(0.5);
+
+
 if (0) {
 
 # Put a grid on the canvas, gdc, to help DEBUG scaling and placement issues. It can be commented out when things are working correctly.
@@ -262,6 +268,11 @@ if (0) {
 
 my $pb = $gof->Button( -text => 'Play', -command => &playGame )
   ->pack( -side => 'top' );    # Play button. This gets all the action going.
+
+# See the following for displaying a splashscreen: http://search.cpan.org/~srezic/Tk-Splash-0.16/lib/Tk/Splash.pm
+#$splash->Update(1.0);
+#sleep(5);
+#$splash->Destroy();
 
 MainLoop;    # This starts the graphics subsystem and causes UI to be displayed.
 
@@ -373,8 +384,25 @@ else {
 }    # sub playGame
 
 #sub BEGIN {
-#    $ENV{'DISPLAY'} = 'localhost:10.0'
-#      ;    # Needed for use with PTKDB & SSH & X11 forwarding over SSH.
+#
+##	# Using ptkdb to debug Tk PERL code often doesn't work because of event handling
+##	# issues between debugger and code being debugged.
+##    $ENV{'DISPLAY'} = 'localhost:10.0'
+##      ;    # Needed for use with PTKDB & SSH & X11 forwarding over SSH.
+#
+#    #require Tk::ProgressSplash;
+#    #require Tk::Splash;
+#    #our $splash = Tk::ProgressSplash->Show
+##    our $splash = Tk::Splash->Show
+##	(
+##        -splashtype => 'normal',
+##        '/tmp/Badguy.png', 
+##		UNDEF, # $width, can be left undefined.
+##		UNDEF, # $height, can be left undefined.
+##		'SOD: Spirals Of Death',
+##        1 # $overrideredirect, set to true = 1 to display without window manager decoration.
+##    );
+#
 #}    # sub BEGIN
 
 # End of file.
