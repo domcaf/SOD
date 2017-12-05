@@ -271,19 +271,20 @@ if (0) {
               . $convCmd );
         system("$convCmd");
 
+$self->log->debug('Attempting to read png image grabbed from a file: ' .
+	$self->BAD_GUY_PNG_LOC);
+
         # Load converted file and store image in Sprites superclass
 		# When trying to store in superclass an exception is thrown.
-        #$self->bitmap = $gdc->Photo(
-        my $thingie   = $gdc->Photo(
+        #$self->bitmap = $gdc->Photo()
+        #my $thingie   = $gdc->Photo()
+        my $thingie   = $mw->Photo(
             -format  => 'PNG',
             -file    => $self->BAD_GUY_PNG_LOC,
             -palette => '1/1/1'
         );
 
-$self->log->debug('Attempting to read png image grabbed from a file: ' .
-	$self->BAD_GUY_PNG_LOC);
-
-$thingie->read($self->BAD_GUY_PNG_LOC, -format => 'PNG');
+$thingie->read($self->BAD_GUY_PNG_LOC, -format => 'PNG'); # This may be unnecessary.
 
 
 	$Data::Dumper::Sortkeys = 1;
