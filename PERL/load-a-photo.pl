@@ -8,35 +8,13 @@ use Tk::PNG;
 
 $Data::Dumper::Sortkeys = 1;
 
-#our($canvasWidth, $canvasHeight);
-#$canvasWidth = 0;
-#$canvasHeight = 0;
 
 my $mw = MainWindow->new;
 warn "created mainwindow";
 
-#$mw->Resizeable(1,1); # Booleans for X & Y axes.
-#$mw->FullScreen;    # This is desired when everything is working smoothly.
-
-# Get the dimensions of the main window.
-
-#my @MainWindowConfig = $mw->configure(); # returns list of list refs
-#$lh->trace("mw = Main Window, configuration information as follows:");
-#$lh->trace("\n" . Dumper(\@MainWindowConfig) . "\n");
 
 $mw->title("$0");
 
-# Layout top widgets of game.
-#my $gof = $mw->Frame(
-#    -label       => 'Game Options',
-#    -background  => 'black',
-#    -borderwidth => 1,
-#    -relief      => 'raised'
-#)->pack( -side => 'right' );    # Game Options Frame
-#
-#my $qb = $gof->Button( -text => 'Quit', -command => sub { exit; } )
-#  ->pack( -side => 'bottom' );    # Quit button.
-#
 
 my $gdc =
   $mw->Canvas( -background => 'black', -borderwidth => 1, -confine => 1 )
@@ -51,23 +29,16 @@ my $badGuyImgObj = $gdc->Photo('BadGuy',
 );
 warn "created image object of type photo";
 
-#$thingie->pack(-side => 'top', -fill => 'both', -expand => 1 );
-#$thingie->update();
+warn(  "BadGuy image object is a \""
+      . ref($badGuyImgObj)
+      . "\" whose contents is:\n"
+      . Dumper($badGuyImgObj)
+      . "\n" );
 
-#$mw->update();
-#print "Photo, \"\" "
-#  . ( ( $thingie->visible ) ? 'visible' : 'NOT visible' ) . "\n";
-#
-##$thingie->read($self->BAD_GUY_PNG_LOC, -format => 'PNG');
-#
-#$Data::Dumper::Sortkeys = 1;
-#print(  "BadGuy bitmap is a \""
-#      . ref($thingie)
-#      . "\" whose contents is:\n"
-#      . Dumper($thingie)
-#      . "\n" );
-
-#--------------------------------------------------------------------------------------------------
+#########################################################################
+# NOTE: The name 'BadGuy' is what ties the $badGuyImgObj created above
+#	to the image item on the canvas below depending on it's state.
+#########################################################################
 
 # $canvas->createImage(x, y, ?option, value, option, value, ...?)
 $gdc->createImage(
