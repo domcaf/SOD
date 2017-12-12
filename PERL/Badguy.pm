@@ -80,7 +80,6 @@ has 'current_angle' => (
 
 sub draw_bad_guy {
     my $self    = shift;
-	my $mw = shift; # Main window of program.
     my $gdc     = shift;    # Game Display Canvas object = gdc.
 
 	my $maxX = $gdc->cget(-width);
@@ -225,26 +224,6 @@ sub draw_bad_guy {
 
 $self->log->debug("Attempting to get bitmap image of BadGuy.");
 
-if (0) {
-
- # If you go with alternate method of using canvas->postscript() then remove $mw
- # from this sub's param list and from call in sod.pl to keep interface clean.
-
-    $self->log->debug(
-"Attempting to get bitmap image of BadGuy. Parameters used in \"window->Photo\" call:\n"
-          . "\tMain window id:\t\""
-          . $mw->id . "\"\n"
-          . "\tCanvas id octal:\t\""
-          . oct( $gdc->id )
-          . "\"\n" );
-
-    $self->super->bitmap = $mw->Photo(
-        -format => 'Window',
-        -data   => oct( $gdc->id )
-    );
-
-}
-
 # See article at http://www.perlmonks.org/?node_id=361299 especially the last comment that
 # demonstrates a better way to get image with the canvas->postscript() method.
 # See http://search.cpan.org/~srezic/Tk-804.034/pod/Canvas.pod for parameter explanation
@@ -271,6 +250,8 @@ if (0) {
               . $convCmd );
         system("$convCmd");
 
+#=============================================================================
+
 $self->log->debug('Attempting to read png image grabbed from a file: ' .
 	$self->BAD_GUY_PNG_LOC);
 
@@ -278,19 +259,45 @@ $self->log->debug('Attempting to read png image grabbed from a file: ' .
 		# When trying to store in superclass an exception is thrown.
         #$self->bitmap = $gdc->Photo()
         #my $thingie   = $gdc->Photo()
-        my $thingie   = $mw->Photo(
-            -format  => 'PNG',
-            -file    => $self->BAD_GUY_PNG_LOC,
-            -palette => '1/1/1'
-        );
+#        my $thingie   = $mw->Photo(
+#            -format  => 'PNG',
+#            -file    => $self->BAD_GUY_PNG_LOC,
+#            -palette => '1/1/1'
+#        );
+#
+#$thingie->read($self->BAD_GUY_PNG_LOC, -format => 'PNG'); # This may be unnecessary.
 
-$thingie->read($self->BAD_GUY_PNG_LOC, -format => 'PNG'); # This may be unnecessary.
 
+my $badGuyImgObj = $gdc->Photo('BadGuy',
+    -file    =>   $self->BAD_GUY_PNG_LOC,
+    -format  => 'PNG',
+    -palette => '1/1/1'
+);
+$self->log->debug( "created image object of type photo");
 
 	$Data::Dumper::Sortkeys = 1;
-	$self->log->debug("BadGuy bitmap is a \"" . ref( $thingie ) . "\" whose contents is:\n"
-	. Dumper($thingie) . "\n");
+$self->log->debug(  "BadGuy image object is a \""
+      . ref($badGuyImgObj)
+      . "\" whose contents is:\n"
+      . Dumper($badGuyImgObj)
+      . "\n" );
 
+#########################################################################
+# NOTE: The name 'BadGuy' is what ties the $badGuyImgObj created above
+#	to the image item on the canvas below depending on it's state.
+#########################################################################
+
+$gdc->createImage(
+    200, 200,
+    -anchor        => 'center',
+    -image         => 'BadGuy',
+    -activeimage   => 'BadGuy',
+    -disabledimage => 'BadGuy',
+    -state         => 'normal'
+);
+$self->log->debug( "Created image item for canvas");
+
+#=============================================================================
 
 #$self->super->bitmap->write( './badguy.png', -format => 'PNG' ); # Let's see what we're grabbing?
 

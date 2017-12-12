@@ -308,7 +308,7 @@ $lh->info("\nGame Display Canvas Dimensions:\twidth = " . $canvasWidth . "\theig
 	my $bad_image;
 
     #  generate and capture bad guy & good guy images */
-    if ( $Badguy->draw_bad_guy($mw, $gdc) ) { # Main Window and Canvas object ref needed for drawing.
+    if ( $Badguy->draw_bad_guy($gdc) ) { # Canvas object ref needed for drawing.
         $lh->fatal(
 "\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated."
         );
