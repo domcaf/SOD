@@ -255,25 +255,18 @@ $self->log->debug("Attempting to get bitmap image of BadGuy.");
 $self->log->debug('Attempting to read png image grabbed from a file: ' .
 	$self->BAD_GUY_PNG_LOC);
 
-        # Load converted file and store image in Sprites superclass
-		# When trying to store in superclass an exception is thrown.
-        #$self->bitmap = $gdc->Photo()
-        #my $thingie   = $gdc->Photo()
-#        my $thingie   = $mw->Photo(
-#            -format  => 'PNG',
-#            -file    => $self->BAD_GUY_PNG_LOC,
-#            -palette => '1/1/1'
-#        );
-#
-#$thingie->read($self->BAD_GUY_PNG_LOC, -format => 'PNG'); # This may be unnecessary.
-
-
 my $badGuyImgObj = $gdc->Photo('BadGuy',
     -file    =>   $self->BAD_GUY_PNG_LOC,
     -format  => 'PNG',
     -palette => '1/1/1'
 );
 $self->log->debug( "created image object of type photo");
+
+# Store image object in Sprites superclass.
+# When trying to store in superclass an exception is thrown.
+$self->log->debug("Attempting to store badGuyImgObj in Sprites base class.");
+$self->bitmap($badGuyImgObj);
+$self->log->debug("Storage of badGuyImgObj in Sprites base class completed.");
 
 	$Data::Dumper::Sortkeys = 1;
 $self->log->debug(  "BadGuy image object is a \""
@@ -322,15 +315,5 @@ $self->log->debug( "Created image item for canvas");
 
 # *************************< End draw_bad_guy >***************************/
 
-
-
-
-# package _badguy;
-
-#no Moose;
-#__PACKAGE__->meta->make_immutable;
-
-#define BADGUY_H
-#endif
 
 1;
