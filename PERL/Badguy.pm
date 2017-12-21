@@ -242,6 +242,14 @@ $self->log->debug("Attempting to get bitmap image of BadGuy.");
         -y      => $startY,
     );
 
+sleep(5); # Give a couple of moments to see what was put up on screen before erasing.
+#-----------------------------------------------------------------------------------
+# Clear the bad guy image previously generated on screen.
+$gdc->createRectangle($startX, $startY, $BGBOB_xEnd, $BGBOB_yEnd, -fill => 'black');
+
+sleep(5); # Give a couple of moments to see that erasure was successful.
+#-----------------------------------------------------------------------------------
+
 	# So we can see what we're grabbing. See also if you don't want to make a system call:  http://search.cpan.org/~cjm/PostScript-Convert-0.03/lib/PostScript/Convert.pm
 
         my $convCmd = 'convert ' . $self->BAD_GUY_PS_LOC . ' ' . $self->BAD_GUY_PNG_LOC;
@@ -281,8 +289,8 @@ $self->log->debug(  "BadGuy image object is a \""
 #########################################################################
 
 $gdc->createImage(
-    200, 200,
-    -anchor        => 'center',
+    0, 0,
+    -anchor        => 'nw',
     -image         => 'BadGuy',
     -activeimage   => 'BadGuy',
     -disabledimage => 'BadGuy',
@@ -290,7 +298,13 @@ $gdc->createImage(
 );
 $self->log->debug( "Created image item for canvas");
 
-#=============================================================================
+sleep(5); # Give a couple of moments to see what was put up on screen before erasing.
+#-----------------------------------------------------------------------------------
+# Clear the bad guy image previously placed on screen.
+$gdc->createRectangle(0, 0, $maxX, $maxY, -fill => 'black');
+
+sleep(5); # Give a couple of moments to see that erasure was successful.
+#-----------------------------------------------------------------------------------
 
 #$self->super->bitmap->write( './badguy.png', -format => 'PNG' ); # Let's see what we're grabbing?
 
