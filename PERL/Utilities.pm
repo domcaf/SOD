@@ -1,16 +1,10 @@
 package Utilities;
-#package SOD::Utilities;
 
-#use Exporter;
-#@ISA = ("Exporter");
-#@EXPORT = qw(&setup_video_driver_and_mode &restore_pre_game_environment &spirals_help &testTrig &polar_to_cartesian_coords &cartesian_to_polar_coords);
-
+use lib '.';
 use Math::Complex;
 use Moose;
 use namespace::autoclean;
-use lib '/home/domcaf/Documents/GIT-DATA/SOD/PERL';
 
-#with 'SOD::GlobalConstants';
 with 'GlobalConstants';
 
 
