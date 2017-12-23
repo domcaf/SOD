@@ -1,8 +1,10 @@
 package Player;
-#package SOD::Player;
 
-#use Exporter;
-#@ISA = ("Exporter");
+use lib '.';
+use Moose;
+use namespace::autoclean;
+use Data::Dumper;
+
 #@EXPORT = qw(&add_player &delete_player &visit_player);
 
 
@@ -11,8 +13,6 @@ package Player;
  # *                   game "Spirals Of Death". A player can be the goodguy, **/
  # *                   a badguy or a bullet fired by either of the previous. **/
 
-                use Moose;
-use namespace::autoclean;
 
                     #enum player_type { good, bad, bullet } pt;
 					has player_type (
@@ -282,8 +282,8 @@ void visit_player(players *player)
 	#  prototypes for draw_pl.c */
 	#  prototypes for setclean.c */
 
-		int  setup_video_driver_and_mode(void);
-		void restore_pre_game_environment(void);
+		#int  setup_video_driver_and_mode(void);
+		#void restore_pre_game_environment(void);
 
 	#  prototypes for polrcart.c */
 
@@ -675,38 +675,38 @@ Contents of DRAW_PL.C below:
 # *                                                                         **/
 # *                                                                         **/
 # ****************************************************************************/
-
-void draw_good_guy(players *gg, float new_angle)
-{
-	static int background_color;
-	int x_barrel, y_barrel;
-
-	background_color = getbkcolor();
-
-	setcolor(background_color);
-
-	#  erase the gun barrel from its current location */
-	setfillstyle(SOLID_FILL,background_color);
-
-	x_barrel = (int) polar_to_cartesian_coords(gg->pd.gg.radius,gg->pd.gg.gun_angle,'x') + gg->pd.gg.x;
-	y_barrel = (int) polar_to_cartesian_coords(gg->pd.gg.radius,gg->pd.gg.gun_angle,'y') + gg->pd.gg.y;
-
-	fillellipse(x_barrel,y_barrel,gg->pd.gg.gun_length,gg->pd.gg.gun_length);
-
-	#  redraw gun barrel at its new location */
-
-	setfillstyle(SOLID_FILL,gg->pd.gg.gun_color);
-	gg->pd.gg.gun_angle+= new_angle;
-
-	x_barrel = (int) polar_to_cartesian_coords(gg->pd.gg.radius,gg->pd.gg.gun_angle,'x') + gg->pd.gg.x;
-	y_barrel = (int) polar_to_cartesian_coords(gg->pd.gg.radius,gg->pd.gg.gun_angle,'y') + gg->pd.gg.y;
-
-	fillellipse(x_barrel,y_barrel,gg->pd.gg.gun_length,gg->pd.gg.gun_length);
-
-	#  redraw the gun turret body - maybe this should only be done when a hit is taken */
-	fillellipse(gg->pd.gg.x,gg->pd.gg.y,gg->pd.gg.radius,gg->pd.gg.radius);
-
-}
+#
+#void draw_good_guy(players *gg, float new_angle)
+#{
+#	static int background_color;
+#	int x_barrel, y_barrel;
+#
+#	background_color = getbkcolor();
+#
+#	setcolor(background_color);
+#
+#	#  erase the gun barrel from its current location */
+#	setfillstyle(SOLID_FILL,background_color);
+#
+#	x_barrel = (int) polar_to_cartesian_coords(gg->pd.gg.radius,gg->pd.gg.gun_angle,'x') + gg->pd.gg.x;
+#	y_barrel = (int) polar_to_cartesian_coords(gg->pd.gg.radius,gg->pd.gg.gun_angle,'y') + gg->pd.gg.y;
+#
+#	fillellipse(x_barrel,y_barrel,gg->pd.gg.gun_length,gg->pd.gg.gun_length);
+#
+#	#  redraw gun barrel at its new location */
+#
+#	setfillstyle(SOLID_FILL,gg->pd.gg.gun_color);
+#	gg->pd.gg.gun_angle+= new_angle;
+#
+#	x_barrel = (int) polar_to_cartesian_coords(gg->pd.gg.radius,gg->pd.gg.gun_angle,'x') + gg->pd.gg.x;
+#	y_barrel = (int) polar_to_cartesian_coords(gg->pd.gg.radius,gg->pd.gg.gun_angle,'y') + gg->pd.gg.y;
+#
+#	fillellipse(x_barrel,y_barrel,gg->pd.gg.gun_length,gg->pd.gg.gun_length);
+#
+#	#  redraw the gun turret body - maybe this should only be done when a hit is taken */
+#	fillellipse(gg->pd.gg.x,gg->pd.gg.y,gg->pd.gg.radius,gg->pd.gg.radius);
+#
+#}
 
 # ****************************< End draw_good_guy >***********************/
 
