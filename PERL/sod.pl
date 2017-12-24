@@ -23,7 +23,7 @@ use Getopt::Long;
 #use GlobalConstants;
 use GlobalsProxy;
 
-#use Goodguy; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+use Goodguy; # Found using preceeding 'use lib' pragma.
 
 #use Log::Log4perl;
 use Log::Log4perl qw(:easy);
@@ -38,8 +38,7 @@ use Tk::PNG;
 
 #use Tk::Animation; # See sect 17.9 of "Mastering PERL/Tk".
 #use Tk::WinPhoto; # See sect 17.7.3 of "Mastering PERL/Tk". For grabbing a bitmap off a canvas. BadGuy.
-use Utilities
-  ;  # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
+use Utilities;  # Found using preceeding 'use lib' pragma.
 
 #$splash->Update(0.1);
 
@@ -328,15 +327,24 @@ sub playGame {
 
     my $Badguy = Badguy->new();
 
-    #my $bad_image;
-
-    #  generate and capture bad guy & good guy images */
+    #  generate and capture bad guy image
     if ( $Badguy->draw_bad_guy($gdc) ) { # Canvas object ref needed for drawing.
         $lh->fatal(
-"\a\a\a\nMemory allocation problem in draw_bad_guy.\nProgram execution terminated."
+"\a\a\a\nSomething bad happened in draw_bad_guy.\nProgram execution terminated."
         );
         exit( $gpo->ONE_VALUE );
     }
+
+	my $Goodguy = Goodguy->new();
+	$Goodguy->good_guy_post_constructor($gdc); # Do additional initialization.
+
+    if ( $Goodguy->draw_good_guy($gdc, 0.8) ) { # Canvas object ref needed for drawing.
+        $lh->fatal(
+"\a\a\a\nSomething bad happened in draw_good_guy.\nProgram execution terminated."
+        );
+        exit( $gpo->ONE_VALUE );
+    }
+
 
 #   #  load initial conditions into good_guy & bad_guys i.e. build player list */
 #

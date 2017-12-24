@@ -37,6 +37,48 @@ my ($gun_width_half_angle)
 
 # METHODS
 
+#-----------------------------------------------------------------------------------
+
+sub good_guy_post_constructor {
+
+  # DESCRIPTION     : Moose manual strongly discourages overriding default free
+  #					constructor so this method should be called AFTER constructor
+  #					to set some values in the Sprites superclass. It should only
+  #					be called once immediately after free constructor is called.
+  # INPUTS          : A ref to Game Display Canvas.
+  # OUTPUTS         : Int value. Zero, 0, means ok otherwise a problem occurred.
+
+    my $self = shift;
+
+    $self->log->debug('Entered good_guy_post_constructor method.');
+
+    my $gdc = shift;    # Game Display Canvas object = gdc.
+
+  #my $new_angle = shift; # Gun barrel adjustment angle for good guy in radians.
+
+    my $maxX = $gdc->cget( -width );
+    my $maxY = $gdc->cget( -height );
+
+    $self->x( $maxX / $self->TWO_VALUE );
+    $self->y( $maxY / $self->TWO_VALUE );
+
+    # Because good guy is circular height and width are the same.
+    $self->width( GOOD_GUY_RADIUS * ( ( $maxX + $maxY ) / 2 ) );
+    $self->height( $self->width );
+
+    my $success = $self->ZERO_VALUE;
+
+    #my $background_color = $gdc->cget(-background);
+
+    #setcolor($background_color);
+    #$gdc->configure(-insertBackground => $background_color);
+
+    $self->log->debug('Leaving good_guy_post_constructor method.');
+    return ($success);
+}
+
+#-----------------------------------------------------------------------------------
+
 sub draw_good_guy {
 #void draw_good_guy(players *gg, float new_angle)
 
@@ -54,7 +96,7 @@ sub draw_good_guy {
     $self->log->debug( 'Entered draw_good_guy method.');
 
     my $gdc  = shift;    # Game Display Canvas object = gdc.
-	my $new_angle = shift; # Gun barrel adjustment angle for good guy.
+	my $new_angle = shift; # Gun barrel adjustment angle for good guy in radians.
 
     my $maxX    = $gdc->cget( -width );
     my $maxY    = $gdc->cget( -height );
@@ -68,8 +110,11 @@ sub draw_good_guy {
 	#  erase the gun barrel from its current location */
 	#setfillstyle(SOLID_FILL,$background_color);
 
-	my $x_barrel = $self->polar_to_cartesian_coords(gg->pd.gg.radius,gg->pd.gg.gun_angle,'x') + gg->pd.gg.x;
-	my $y_barrel = $self->polar_to_cartesian_coords(gg->pd.gg.radius,gg->pd.gg.gun_angle,'y') + gg->pd.gg.y;
+	$radius = GOOD_GUY_RADIUS * (($maxX + $maxY) / 2); # put in Sprites superclass?
+	$gun_angle = $new_angle;
+
+	my $x_barrel = $self->polar_to_cartesian_coords($radius,$gun_angle,'x') + $self->x;
+	my $y_barrel = $self->polar_to_cartesian_coords($radius,$gun_angle,'y') + $self->y;
 
 	# fillellipse(x_barrel,y_barrel,gg->pd.gg.gun_length,gg->pd.gg.gun_length);
 	 $gdc->createOval($x_barrel,$y_barrel,gg->pd.gg.gun_length,gg->pd.gg.gun_length);

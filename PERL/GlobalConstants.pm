@@ -11,8 +11,11 @@ use Moose::Role;
 
 #use Log::Log4perl;
 #use constant LOG_CONFIG => '/home/domcaf/Documents/GIT-DATA/SOD/PERL/log.conf';
-has 'LOG_CONFIG' => (is => 'ro', default => '/home/domcaf/Documents/GIT-DATA/SOD/PERL/log.conf', isa => 'Str');
-
+has 'LOG_CONFIG' => (
+    is      => 'ro',
+    default => '/home/domcaf/Documents/GIT-DATA/SOD/PERL/log.conf',
+    isa     => 'Str'
+);
 
 # lh = log handle for Log4PERL usage.
 #our $lh;
@@ -24,7 +27,6 @@ has 'LOG_CONFIG' => (is => 'ro', default => '/home/domcaf/Documents/GIT-DATA/SOD
 #    $lh = Log::Log4perl->get_logger("GlobalConstants");
 #}
 #
-
 
 # See http://search.cpan.org/~lammel/MooseX-Log-Log4perl-0.46/lib/MooseX/Log/Log4perl/Easy.pm
 # The above documents a Moose Extension that may help solve your problems to get common logging
@@ -132,22 +134,17 @@ has 'TWENTY_VALUE'  => ( is => 'ro', default => 20, isa => 'Int' );
 has 'TWO_VALUE'     => ( is => 'ro', default => 2,  isa => 'Int' );
 has 'ZERO_VALUE'    => ( is => 'ro', default => 0,  isa => 'Int' );
 
-# ATTRIBUTES
-#  trigonometry constants */
-use constant {
-    HALF_CIRCLE_DEGREES => 180,          #  # of degrees in half circle */
-    HALF_CIRCLE_RADIANS => 3.1415927,    #  # of radians in half circle */
-    MAX_BAD_GUYS        => 3,
-    MAX_BULLETS         => 1,
-    PI                  => 3.1415927,
+#  trigonometry and player constants
 
-    #PI                  => HALF_CIRCLE_RADIANS,
-};
+has 'HALF_CIRCLE_DEGREES' => ( default => 180,       is => 'ro', isa => 'Int' );
+has 'HALF_CIRCLE_RADIANS' => ( default => 3.1415927, is => 'ro', isa => 'Num' );
+has 'MAX_BAD_GUYS'        => ( default => 3,         is => 'ro', isa => 'Int' );
+has 'MAX_BULLETS'         => ( default => 1,         is => 'ro', isa => 'Int' );
+has 'PI'                  => ( default => 3.1415927, is => 'ro', isa => 'Num' );
 
 # METHODS
 
 #----------------------------------------------------------------------------------
-
 
 #----------------------------------------------------------------------------------
 
