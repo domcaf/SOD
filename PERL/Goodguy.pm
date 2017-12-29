@@ -48,6 +48,61 @@ sub good_guy_post_constructor {
   # INPUTS          : A ref to Game Display Canvas.
   # OUTPUTS         : Int value. Zero, 0, means ok otherwise a problem occurred.
 
+
+#
+## ****************************< Start add_good >*************************/
+#
+## ****************************************************************************/
+## * Function Name   : add_good.												   		 **/
+## * Description     : Add a good guy  into the player list.                 **/
+## * Inputs          : None.                                                 **/
+## * Outputs         : Returns the addess of the player that was just added. **/
+## * Programmer(s)   : Dominic Caffey.                                       **/
+## * Notes & Comments: Created on 5/7/92.                                    **/
+## *                                                                         **/
+## *                                                                         **/
+## ****************************************************************************/
+#
+#players *add_good(void)
+#{
+#	players *new_player;
+#
+#	new_player = (players *) calloc(ONE_VALUE,sizeof(players));
+#
+#	if(new_player != NULL)
+#	{
+#		#  initialize the good guy */
+#		#  center of good guy */
+#		new_player->pd.gg.x = getmaxx()/TWO_VALUE;
+#		new_player->pd.gg.y = getmaxy()/TWO_VALUE;
+#
+#		#  radius of good_guy, excluding barrel, as %age of screen dimensions */
+#		new_player->pd.gg.radius = getmaxx() * GOOD_GUY_RADIUS;
+#
+#		#  length as a %age of screen dimensions */
+#		new_player->pd.gg.gun_length = getmaxx() * GOOD_GUY_GUN_LENGTH;
+#		new_player->pd.gg.gun_color = GREEN;
+#
+#		#  angle in radians where gun is pointing */
+#		new_player->pd.gg.gun_angle = ZERO_VALUE;
+#
+#		#  half the angle width of the gun barrel in radians */
+#		new_player->pd.gg.gun_width_half_angle = GUN_WIDTH_HALF_ANGLE;
+#
+#		#  set the next & previous pointers */
+#		new_player->next = new_player;
+#
+#		new_player->prev = new_player;
+#	}
+#
+#	return(new_player);
+#}
+## ****************************< End add_good >***************************/
+#
+
+
+
+
     my $self = shift;
 
     $self->log->debug('Entered good_guy_post_constructor method.');
@@ -107,7 +162,8 @@ sub draw_good_guy {
 	#setcolor($background_color);
 	$gdc->configure(-insertBackground => $background_color);
 
-	#  erase the gun barrel from its current location */
+	# erase the gun barrel from its current location -----------------------------------------------------------
+
 	#setfillstyle(SOLID_FILL,$background_color);
 
 	$radius = GOOD_GUY_RADIUS * (($maxX + $maxY) / 2); # put in Sprites superclass?
@@ -115,11 +171,12 @@ sub draw_good_guy {
 
 	my $x_barrel = $self->polar_to_cartesian_coords($radius,$gun_angle,'x') + $self->x;
 	my $y_barrel = $self->polar_to_cartesian_coords($radius,$gun_angle,'y') + $self->y;
+	my $gun_length = GOOD_GUY_GUN_LENGTH * (($maxX + $maxY) / 2); # put in Sprites superclass?
 
-	# fillellipse(x_barrel,y_barrel,gg->pd.gg.gun_length,gg->pd.gg.gun_length);
-	 $gdc->createOval($x_barrel,$y_barrel,gg->pd.gg.gun_length,gg->pd.gg.gun_length);
+	# fillellipse(x_barrel,y_barrel,$gun_length,$gun_length);
+	 $gdc->createOval($x_barrel,$y_barrel,$gun_length,$gun_length);
 
-	#  redraw gun barrel at its new location */
+	#  redraw gun barrel at its new location -----------------------------------------------------------
 
 	setfillstyle(SOLID_FILL,gg->pd.gg.gun_color);
 	gg->pd.gg.gun_angle+= new_angle;
@@ -130,7 +187,7 @@ sub draw_good_guy {
 	fillellipse(x_barrel,y_barrel,gg->pd.gg.gun_length,gg->pd.gg.gun_length);
 
 	#  redraw the gun turret body - maybe this should only be done when a hit is taken */
-	fillellipse(gg->pd.gg.x,gg->pd.gg.y,gg->pd.gg.radius,gg->pd.gg.radius);
+	# fillellipse(gg->pd.gg.x,gg->pd.gg.y,gg->pd.gg.radius,gg->pd.gg.radius);
 
     $self->log->debug('Leaving draw_good_guy method.');
 
