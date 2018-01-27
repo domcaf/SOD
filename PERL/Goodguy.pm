@@ -24,7 +24,7 @@ use constant {
 # Coordinates of center of good guy are in superclass Sprites.
 #my ( $x, $y );                       #  center of good guy */
 
-my ($radius);                        #  radius of good_guy, excluding barrel */
+my ($radius);                        #  radius of good_guy, excluding barrel. implies bounding box is square.
 
 my ($gun_length);                    #  length as a %age of screen dimensions */
 my ($gun_color);
@@ -174,6 +174,10 @@ sub draw_good_guy {
 	my $gun_length = GOOD_GUY_GUN_LENGTH * (($maxX + $maxY) / 2); # put in Sprites superclass?
 
 	# fillellipse(x_barrel,y_barrel,$gun_length,$gun_length);
+	# It might be easiest to have a bounding box for the gun barrel slightly larger than the good guy
+	# body centered on the same point as the good guy body. Store the good guy body color in good guy
+	# object and use same color for drawing its gun barrel.
+
 	 $gdc->createOval($x_barrel,$y_barrel,$gun_length,$gun_length);
 
 	#  redraw gun barrel at its new location -----------------------------------------------------------
