@@ -23,8 +23,8 @@ has 'gbbo' => (is => 'rw', isa => 'Num');
 use constant {
 
     GOOD_GUY_BULLET_SPEED_FACTOR => 3,
-    GOOD_GUY_GUN_LENGTH          => 0.01,     #  specified as percentage 
-    GOOD_GUY_RADIUS              => 0.05,     #  specified as percentage 
+    GOOD_GUY_GUN_LENGTH          => 0.03,     #  specified as percentage 
+    GOOD_GUY_RADIUS              => 0.08,     #  specified as percentage 
     GOOD_GUY_ROTATION_INCREMENT  => 5,    #  degrees
     GUN_WIDTH_HALF_ANGLE         => 0.1,      #  specified in radians 
     GUN_WIDTH_FULL_ANGLE	=> 5,			# specified in degrees
@@ -161,7 +161,7 @@ sub draw_good_guy {
   #                   in the good guy's data structure as to what its
   #                   current gun angle is.
   # INPUTS          : A ref to Game Display Canvas and the gun barrel adjustment
-  #                   angle specified in radians.
+  #                   angle specified in degrees.
   # OUTPUTS         : The good guy's new gun angle via the parameter list.
 
     my $self = shift;
@@ -170,7 +170,7 @@ sub draw_good_guy {
 
     my $gdc = shift;    # Game Display Canvas object = gdc.
     my $new_angle =
-      shift;            # Gun barrel adjustment angle for good guy in radians.
+      shift;            # Gun barrel adjustment angle for good guy in degrees.
 
     my $maxX    = $gdc->cget( -width );
     my $maxY    = $gdc->cget( -height );
@@ -235,8 +235,18 @@ sub draw_good_guy {
 	#  redraw the gun turret body - maybe this should only be done when a hit is taken */
 	# createArc(gg->pd.gg.x,gg->pd.gg.y,gg->pd.gg.radius,gg->pd.gg.radius);
 
-## Please see file perltidy.ERR
-## Please see file perltidy.ERR
+    $gdc->createArc(
+        ( $bbc->{ul_x} - $self->gbbo ),
+        ( $bbc->{ul_y} - $self->gbbo ),
+        ( $bbc->{lr_x} + $self->gbbo ),
+        ( $bbc->{lr_y} + $self->gbbo ),
+	-start => $new_angle,
+	-extent => GUN_WIDTH_FULL_ANGLE,
+	-fill => 'red',
+	-outline => 'yellow',
+	-style => 'pieslice'
+    );
+
       $self->log->debug('Leaving draw_good_guy method.');
 
     return ($success);

@@ -338,7 +338,7 @@ sub playGame {
 	my $Goodguy = Goodguy->new();
 	$Goodguy->good_guy_post_constructor($gdc); # Do additional initialization.
 
-    if ( $Goodguy->draw_good_guy($gdc, 0.8) ) { # Canvas object ref needed for drawing.
+    if ( $Goodguy->draw_good_guy($gdc, 45) ) { # Canvas object ref needed for drawing; gun angle is in degrees.
         $lh->fatal(
 "\a\a\a\nSomething bad happened in draw_good_guy.\nProgram execution terminated."
         );
