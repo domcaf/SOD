@@ -1,0 +1,44 @@
+FOR GENERAL ARROW KEY USAGE:
+
+Up arrow:
+	keysym=Up, numeric=65362
+
+Down arrow (Use for shields in future):
+	keysym=Down, numeric=65364
+
+Left arrow:
+	keysym=Left, numeric=65361
+
+Right arrow:
+	keysym=Right, numeric=65363
+
+Space/Fire bar:
+	keysym=space, numeric=32
+
+f key for Fire:
+	keysym=f, numeric=102
+
+"WASD" ARROW KEY ANALOGUE ALSO IN POPULAR USAGE:
+
+
+w key:
+	keysym=w, numeric=119
+
+a key:
+	keysym=a, numeric=97
+
+s key (Use for shields in future):
+	keysym=s, numeric=115
+
+d key:
+	keysym=d, numeric=100
+
+QUIT/PLAY KEYS:
+
+q key:
+	keysym=q, numeric=113
+
+p key:
+	keysym=p, numeric=112
+
+END OF FILE.

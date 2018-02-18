@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 #!/usr/bin/env perl -d
 
+
 # The purpose of this script is to analyze keyboard/keystroke events
 # under PERL/Tk.
 
@@ -26,7 +27,7 @@ use Getopt::Long;
 #use GlobalConstants;
 use GlobalsProxy;
 
-use Goodguy; # Found using preceeding 'use lib' pragma.
+use Goodguy;    # Found using preceeding 'use lib' pragma.
 
 #use Log::Log4perl;
 use Log::Log4perl qw(:easy);
@@ -41,7 +42,7 @@ use Tk::PNG;
 
 #use Tk::Animation; # See sect 17.9 of "Mastering PERL/Tk".
 #use Tk::WinPhoto; # See sect 17.7.3 of "Mastering PERL/Tk". For grabbing a bitmap off a canvas. BadGuy.
-use Utilities;  # Found using preceeding 'use lib' pragma.
+use Utilities;    # Found using preceeding 'use lib' pragma.
 
 #$splash->Update(0.1);
 
@@ -76,110 +77,6 @@ $canvasHeight = 0;
 #Log::Log4perl->easy_init( { level => $INFO, file => LOG_FILE } );
 
 $lh->info("$0 commencing execution.");
-
-=pod
-
-=head1 S P I R A L S    O F    D E A T H
-
-=head3 copyright 1992, 2017
-
-No portion of this software package may be altered, distributed
-or modified without the author's express written permission.
-
-                               By
-
-               Dominic Caffey a.k.a Thurlow Dominic Vigil Caffey
-                    Advanced C Programming Class
-                     Instructor:  David Conger
-                       Spring Trimester 1992
-                       TVI - Montoya Campus
-
-				Converted to use PERL/Tk during 4th Quarter/2017.
-
-=head2 Description
-
-"Spirals of Death" is a game in which bad guys, who move in a
-decaying spirals, shoot at the good guy who's located in the center
-of the screen.  The good guy can rotate his gun and fire back.  The
-user assumes the role of the good guy.  The object of the game is
-to destroy all the bad guys before being destroyed.  The good guy
-can take 3 hits before dying; he will change to a different color
-each time he's hit in the following color progression:  Green ->
-Yellow -> Red -> Background Color.  The game is over when the good
-guy's color is the same as that of the game background.  The good
-guy fires green bullets and the bad guys fire yellow bullets.
-
-=head2 C O M M A N D    K E Y S
-
-=over 4
-
-=item * Key         | Function
-
-=item * ------------+------------------------------
-
-=item * "<-"        = Rotate gun counter clockwise.
-
-=item * "->"        = Rotate gun clockwise.
-
-=item * "space bar" = fire gun.
-
-=item * "h" or "H"  = display this help screen.
-
-=item * "p" or "P"  = pause the game.
-
-=item * "q" or "Q"  = quit the game.
-
-=back
-
-=head2 Known Bugs:
-
-=over 4
-
-=item * Program does not free up memory correctly when it ends or is quit by the user thus causing the machine upon which it is run to periodically crash.
-
-=item * Acknowledgement of successful kills by either the good guy or bad guys needs to be refined as it doesn't always work correctly.
-
-=back
-
-=head2 Future Features for possible implementation:
-
-=over 4
-
-=item * Use Moose object framework.
-
-=item * Convert to use "P-threads".
-
-=item * Create unit tests for code.
-
-=item * Create functional tests for code.
-
-=item * Store score history in an sqlite database.
-
-=item * Display score statistics such as averages for: shots fired by good, time played, shots fired by bad, etc.
-
-=item * Display graphs of statistics.
-
-=item * Enable the ability to control the bad guys and allow user to chose whether to play as good guy or bad guys.
-
-=item * Enable the ability to play with another game instance over a network within the same subnet. Use UDP sockets?
-
-=item * Explore what can be done in 3D?
-
-=back
-
-=head4 Dominic Caffey, Author - "Spirals of Death".
-
-=cut
-
-GetOptions("help|?");
-
-pod2usage(
-    {
-        -exitval => 0,
-        -message => "$0 help requested.",
-        -verbose => 2
-    }
-) if ($opt_help);
 
 # Description     : This is the main module for the game "Spirals Of Death
 # Programmer(s)   : Dominic Caffey.
@@ -271,44 +168,37 @@ my $tW = $mw->Text(
     -highlightcolor      => 'green'
 )->pack( -side => 'top', -fill => 'both', -expand => 1 );
 
-$tW->insert('begin', "Keyboard and keypress event info displayed here.");
+#$tW->insert( '1.0', "Keyboard and keypress event info displayed here." );
+$tW->insert( 'end', "Keyboard and keypress event info displayed here." );
 
+$mw->bind(
+    '<KeyPress>' => sub {
+        my ($widget) = @_;
+        my $e = $widget->XEvent;    # get event object
+        my ( $keysym_text, $keysym_decimal ) = ( $e->K, $e->N );
+        print "KEYPRESS keysym=$keysym_text, numeric=$keysym_decimal\n";
+        $lh->debug( Dumper( \$e ) );
+        #$tW->insert( '1.0', Dumper( \$e ) );
+        $tW->insert( 'end', ( "\n\nKEYPRESS " . Dumper( \$e ) ) );
+    }
+);
+
+$mw->bind(
+    '<KeyPress>' => sub {
+        my ($widget) = @_;
+        my $e = $widget->XEvent;    # get event object
+        my ( $keysym_text, $keysym_decimal ) = ( $e->K, $e->N );
+        print "KEYRELEASE keysym=$keysym_text, numeric=$keysym_decimal\n";
+        $lh->debug( Dumper( \$e ) );
+        #$tW->insert( '1.0', Dumper( \$e ) );
+        $tW->insert( 'end', ( "\n\nKEYRELEASE " . Dumper( \$e ) ) );
+    }
+);
 
 #####################################################################################
 
-my $serverInfo = $gdc->server;    # String is returned.
-$lh->debug("Server info for canvas: \"$serverInfo\".");
-
-#$splash->Update(0.5);
-
-if (0) {
-
-# Put a grid on the canvas, gdc, to help DEBUG scaling and placement issues. It can be commented out when things are working correctly.
-    $gdc->createGrid( 0, 0, 10, 10, -fill => 'white' );
-    $gdc->createGrid(
-        0, 0, 50, 50,
-        -lines => 1,
-        -dash  => '-.',
-        -fill  => 'white'
-    );
-    $gdc->createGrid(
-        0, 0, 100, 100,
-        -width => 3,
-        -lines => 1,
-        -fill  => 'white'
-    );
-    $lh->debug(
-"Grid Info in pixels:\n\tDots every 10\n\tDashed lines every 50\n\tSolid lines every 100"
-    );
-}
-
 my $pb = $gof->Button( -text => 'Play', -command => &playGame )
-  ->pack( -side => 'top' );    # Play button. This gets all the action going.
-
-# See the following for displaying a splashscreen: http://search.cpan.org/~srezic/Tk-Splash-0.16/lib/Tk/Splash.pm
-#$splash->Update(1.0);
-#sleep(5);
-#$splash->Destroy();
+  ->pack( -side => 'top' );       # Play button. This gets all the action going.
 
 MainLoop;    # This starts the graphics subsystem and causes UI to be displayed.
 
@@ -321,139 +211,9 @@ return ( $gpo->ZERO_VALUE );    #  indicate normal program termination */
 
 sub playGame {
 
-    # Get the dimensions of the canvas used to to display game play display.
-    # Use the configure method of the canvas object instead of cget so you can
-    # get all configuration items for widget at one time.
-
-    my @canvasConfig = $gdc->configure();    # returns list of list refs
-    $lh->trace(
-        "gdc = Game Display Canvas, configuration information as follows:");
-    $lh->trace( "\n" . Dumper( \@canvasConfig ) . "\n" );
-
-    $canvasWidth  = $gdc->cget( -width );
-    $canvasHeight = $gdc->cget( -height );
-    $lh->info( "\nGame Display Canvas Dimensions:\twidth = "
-          . $canvasWidth
-          . "\theight = "
-          . $canvasHeight
-          . "\n" );
-
-    #  initialize the random # generator */
-    #randomize();
-
-    $lh->info('Attempting to draw bad guy bitmap with graphics primitives.');
-
-    #sleep(5); #DEBUG
-
-    my $Badguy = Badguy->new();
-
-    #  generate and capture bad guy image
-    if ( $Badguy->draw_bad_guy($gdc) ) { # Canvas object ref needed for drawing.
-        $lh->fatal(
-"\a\a\a\nSomething bad happened in draw_bad_guy.\nProgram execution terminated."
-        );
-        exit( $gpo->ONE_VALUE );
-    }
-
-	my $Goodguy = Goodguy->new();
-	$Goodguy->good_guy_post_constructor($gdc); # Do additional initialization.
-
-    if ( $Goodguy->draw_good_guy($gdc, 45) ) { # Canvas object ref needed for drawing; gun angle is in degrees.
-        $lh->fatal(
-"\a\a\a\nSomething bad happened in draw_good_guy.\nProgram execution terminated."
-        );
-        exit( $gpo->ONE_VALUE );
-    }
-
-
-#   #  load initial conditions into good_guy & bad_guys i.e. build player list */
-#
-#    #  load the good guy into the list */
-#
-#    player_list = add_good();
-#
-#    if ( player_list == NULL ) {
-#        print(
-#"\a\a\a\nCouldn't create good guy to add to list.\nProgram execution terminated."
-#        );
-#        exit($gpo->ONE_VALUE);
-#    }
-#
-#    #  display the good guy */
-#    draw_good_guy( player_list, $gpo->ZERO_VALUE );
-#
-#    #ifndef good_debug
-#    #  load the bad guys into the list */
-#    do {
-#        error_flag = add_player( player_list, bad, &bad_image, NULL );
-#        bad_guy_count++;
-#    } while ( ( bad_guy_count < MAX_BAD_GUYS ) && ( !error_flag ) );
-#
-#    #endif
-#
-
-   # The following needs to be called after you get all players on the
-   # canvas with the exception of bullets.  Bullets can leave the scrollable
-   # area and we don't care about them once they leave the scrollable area.
-   # Also note that for our purposes the scrollable area is basically static.
-   # This is why we're setting the bounding region BEFORE any bullets get fired.
-   # See section 9.3 of "Mastering Perl/Tk".
-
-# line below causes window to shrink from maximized so be careful when you call it.
-# Only call once you've got all graphical game elements on screen.
-
-    if (0) {
-        $gdc->configure( -scrollregion => [ $gdc->bbox("all") ] );
-        $lh->debug(
-'Canvas bounding box for all subwidgets is active. It causes maximized window to shrink.'
-        );
-    }
-    else {
-        $lh->debug(
-'Canvas bounding box for all subwidgets currently disabled because it causes maximized window to shrink.'
-        );
-    }
-
-  #    #  main processing loop - let the games begin ! */
-  #
-  #    while ( player_list != NULL ) {
-  #        visit_player(player_list);
-  #
-  #        player_list = player_list->next;
-  #    }
-  #
-  #    #  the game's over so free up the memory that was previously allocated */
-  #
-  #    player_list->prev->next = NULL;
-  #
-  #    while ( player_list != NULL ) {
-  #        player_list = player_list->next;
-  #        free( player_list->prev );
-  #    }
+    $lh->debug( 'Entered and leaving playGame subroutine.' );
 
     return 0;
-}    # sub playGame
-
-#sub BEGIN {
-#
-##	# Using ptkdb to debug Tk PERL code often doesn't work because of event handling
-##	# issues between debugger and code being debugged.
-##    $ENV{'DISPLAY'} = 'localhost:10.0'
-##      ;    # Needed for use with PTKDB & SSH & X11 forwarding over SSH.
-#
-#    #require Tk::ProgressSplash;
-#    #require Tk::Splash;
-#    #our $splash = Tk::ProgressSplash->Show
-##    our $splash = Tk::Splash->Show
-##	(
-##        -splashtype => 'normal',
-##        '/tmp/Badguy.png',
-##		UNDEF, # $width, can be left undefined.
-##		UNDEF, # $height, can be left undefined.
-##		'SOD: Spirals Of Death',
-##        1 # $overrideredirect, set to true = 1 to display without window manager decoration.
-##    );
-#
-#}    # sub BEGIN
+}                               # sub playGame
 
 # End of file.
