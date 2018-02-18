@@ -39,6 +39,7 @@ use constant {
 
 #my ($gun_length);                    #  length as a %age of screen dimensions. Handled by ggbb & gbbo.
 
+our $bbc; # Used to hold 'b'ounding 'b'ox 'c'oordinates for good guy body in global private instance variable.
 
 # METHODS
 
@@ -122,7 +123,7 @@ sub good_guy_post_constructor {
     $self->x( $maxX / $self->TWO_VALUE );
     $self->y( $maxY / $self->TWO_VALUE );
 
-    # Because good guy is circular height and width are the same.
+    # Because good guy is circular, height and width are the same.
     $self->width( GOOD_GUY_RADIUS * ( ( $maxX + $maxY ) / 2 ) );
     $self->half_width($self->width / 2);
 
@@ -139,7 +140,7 @@ sub good_guy_post_constructor {
     #$gdc->configure(-insertBackground => $background_color);
 
     # Draw good guy's body.
-    my $bbc = $self->calculateBoundingBoxCoordinates();
+    $bbc = $self->calculateBoundingBoxCoordinates();
     $self->ggbb( $bbc );
     $gdc->createOval( $bbc->{ul_x}, $bbc->{ul_y}, $bbc->{lr_x}, $bbc->{lr_y}, -fill => 'green', -outline => 'green');
     $self->color( 'green' );
@@ -232,9 +233,6 @@ sub draw_good_guy {
 #
 #	createArc(x_barrel,y_barrel,gg->pd.gg.gun_length,gg->pd.gg.gun_length);
 
-	#  redraw the gun turret body - maybe this should only be done when a hit is taken */
-	# createArc(gg->pd.gg.x,gg->pd.gg.y,gg->pd.gg.radius,gg->pd.gg.radius);
-
     my $currentGunAngle = $self->gun_angle;
 
     if ( $gun_direction =~ /^(Left|a)$/ ) {
@@ -259,7 +257,10 @@ sub draw_good_guy {
 	-style => 'pieslice'
     );
 
-      $self->log->debug('Leaving draw_good_guy method.');
+    # redraw the gun turret body or we'll end up with an empty one from redrawing gun barrel at its new angle.
+    $gdc->createOval( $bbc->{ul_x}, $bbc->{ul_y}, $bbc->{lr_x}, $bbc->{lr_y}, -fill => $self->color, -outline => $self->color);
+
+    $self->log->debug('Leaving draw_good_guy method.');
 
     return ($success);
 }    # draw_good_guy()
