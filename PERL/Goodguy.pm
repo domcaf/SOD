@@ -114,7 +114,7 @@ sub good_guy_post_constructor {
 
     my $gdc = shift;    # Game Display Canvas object = gdc.
 
-  #my $new_angle = shift; # Gun barrel adjustment angle for good guy in radians.
+  #my $gun_direction = shift; # Gun barrel adjustment angle for good guy in radians.
 
     my $maxX = $gdc->cget( -width );
     my $maxY = $gdc->cget( -height );
@@ -153,7 +153,7 @@ sub good_guy_post_constructor {
 
 sub draw_good_guy {
 
-    #void draw_good_guy(players *gg, float new_angle)
+    #void draw_good_guy(players *gg, float gun_direction)
 
   # DESCRIPTION     : Draws the good guy's gun turrent and gun barrel at
   #                   its current location plus or minus the adjustment
@@ -169,7 +169,7 @@ sub draw_good_guy {
     $self->log->debug('Entered draw_good_guy method.');
 
     my $gdc = shift;    # Game Display Canvas object = gdc.
-    my $new_angle =
+    my $gun_direction =
       shift;            # Gun barrel adjustment angle for good guy in degrees.
 
     my $maxX    = $gdc->cget( -width );
@@ -187,7 +187,7 @@ sub draw_good_guy {
 
 #    $radius =
 #      GOOD_GUY_RADIUS * ( ( $maxX + $maxY ) / 2 );  # put in Sprites superclass?
-#    $gun_angle = $new_angle;
+#    $gun_angle = $gun_direction;
 #
 #    my $x_barrel =
 #      $self->polar_to_cartesian_coords( $radius, $gun_angle, 'x' ) + $self->x;
@@ -220,7 +220,7 @@ sub draw_good_guy {
 #  redraw gun barrel at its new location -----------------------------------------------------------
 
 #    setfillstyle( SOLID_FILL, gg->pd . gg . gun_color );
-#    gg->pd . gg . gun_angle += new_angle;
+#    gg->pd . gg . gun_angle += gun_direction;
 #
 #    x_barrel = polar_to_cartesian_coords( gg->pd . gg . radius,
 #        gg->pd . gg . gun_angle, 'x' ) + gg->pd
@@ -235,12 +235,24 @@ sub draw_good_guy {
 	#  redraw the gun turret body - maybe this should only be done when a hit is taken */
 	# createArc(gg->pd.gg.x,gg->pd.gg.y,gg->pd.gg.radius,gg->pd.gg.radius);
 
+    my $currentGunAngle = $self->gun_angle;
+
+    if ( $gun_direction =~ /^(Left|a)$/ ) {
+        $currentGunAngle +=
+          GOOD_GUY_ROTATION_INCREMENT;    # left - counterclockwise
+    }
+    else {
+        $currentGunAngle -= GOOD_GUY_ROTATION_INCREMENT;    # right - clockwise
+    }
+
+    $self->gun_angle( $currentGunAngle );
+
     $gdc->createArc(
         ( $bbc->{ul_x} - $self->gbbo ),
         ( $bbc->{ul_y} - $self->gbbo ),
         ( $bbc->{lr_x} + $self->gbbo ),
         ( $bbc->{lr_y} + $self->gbbo ),
-	-start => $new_angle,
+	-start => $self->gun_angle,
 	-extent => GUN_WIDTH_FULL_ANGLE,
 	-fill => 'red',
 	-outline => 'yellow',

@@ -289,18 +289,6 @@ my $pb = $gof->Button( -text => 'Play', -command => &playGame )
 #$splash->Update(1.0);
 #sleep(5);
 #$splash->Destroy();
-
-MainLoop;    # This starts the graphics subsystem and causes UI to be displayed.
-
-#  restore the pregame video environment */
-restore_pre_game_environment();
-
-return ( $gpo->ZERO_VALUE );    #  indicate normal program termination */
-
-# -----------------------------< End Main >----------------------------------*/
-
-sub playGame {
-
     # Get the dimensions of the canvas used to to display game play display.
     # Use the configure method of the canvas object instead of cget so you can
     # get all configuration items for widget at one time.
@@ -338,7 +326,7 @@ sub playGame {
 	my $Goodguy = Goodguy->new();
 	$Goodguy->good_guy_post_constructor($gdc); # Do additional initialization.
 
-    if ( $Goodguy->draw_good_guy($gdc, 45) ) { # Canvas object ref needed for drawing; gun angle is in degrees.
+    if ( $Goodguy->draw_good_guy($gdc, 'l') ) { # Canvas object ref needed for drawing; gun angle is in degrees.
         $lh->fatal(
 "\a\a\a\nSomething bad happened in draw_good_guy.\nProgram execution terminated."
         );
@@ -411,6 +399,30 @@ sub playGame {
   #        free( player_list->prev );
   #    }
 
+# Define event handler for keyboard events/commands; must be done AFTER game assets instantiated.
+
+$mw->bind(
+    '<KeyRelease>' => sub {
+        my ($widget) = @_; 
+        my $e = $widget->XEvent;    # get event object
+        my ( $keysym_text, $keysym_decimal ) = ( $e->K, $e->N );
+        $lh->debug( "KEYRELEASE EVENT: keysym=$keysym_text, numeric=$keysym_decimal" );
+        #$lh->debug( Dumper( \$e ) ); # Event object has some binary data that makes Dumping messy.
+
+        $Goodguy->draw_good_guy($gdc, $keysym_text) if($keysym_text =~ /^(Left|a|Right|d)$/);
+    }   
+);
+
+MainLoop;    # This starts the graphics subsystem and causes UI to be displayed. EVENT HANDLING LOOP.
+
+#  restore the pregame video environment */
+restore_pre_game_environment();
+
+exit ( $gpo->ZERO_VALUE );    #  indicate normal program termination */
+
+# -----------------------------< End Main >----------------------------------*/
+
+sub playGame {
     return 0;
 }    # sub playGame
 

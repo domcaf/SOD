@@ -184,7 +184,7 @@ $mw->bind(
 );
 
 $mw->bind(
-    '<KeyPress>' => sub {
+    '<KeyRelease>' => sub {
         my ($widget) = @_;
         my $e = $widget->XEvent;    # get event object
         my ( $keysym_text, $keysym_decimal ) = ( $e->K, $e->N );
