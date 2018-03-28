@@ -382,6 +382,12 @@ my $pb = $gof->Button( -text => 'Play', -command => &playGame )
         );
     }
 
+# Build the player list and add players except for bullets.
+
+# Add good guy to player list.
+
+# Add bad guys to player list.
+
   #    #  main processing loop - let the games begin ! */
   #
   #    while ( player_list != NULL ) {
@@ -390,14 +396,6 @@ my $pb = $gof->Button( -text => 'Play', -command => &playGame )
   #        player_list = player_list->next;
   #    }
   #
-  #    #  the game's over so free up the memory that was previously allocated */
-  #
-  #    player_list->prev->next = NULL;
-  #
-  #    while ( player_list != NULL ) {
-  #        player_list = player_list->next;
-  #        free( player_list->prev );
-  #    }
 
 # Define event handler for keyboard events/commands; must be done AFTER game assets instantiated.
 
@@ -414,6 +412,15 @@ $mw->bind(
 );
 
 MainLoop;    # This starts the graphics subsystem and causes UI to be displayed. EVENT HANDLING LOOP.
+
+  #    #  the game's over so free up the memory that was previously allocated */
+  #
+  #    player_list->prev->next = NULL;
+  #
+  #    while ( player_list != NULL ) {
+  #        player_list = player_list->next;
+  #        free( player_list->prev );
+  #    }
 
 #  restore the pregame video environment */
 restore_pre_game_environment();

@@ -5,9 +5,7 @@ use Moose;
 use namespace::autoclean;
 use Data::Dumper;
 
-#@EXPORT = qw(&add_player &delete_player &visit_player);
-
-
+with 'GlobalConstants', 'MooseX::Log::Log4perl', 'Utilities';
 
  # * Description     : This file contains the definition of a player for the **/
  # *                   game "Spirals Of Death". A player can be the goodguy, **/
@@ -950,7 +948,6 @@ void move_player(players *mm)  #  mm = move me */
 
 # ****************************< End move_player >************************/
 
-# End of file.
-  
 1;
   
+# End of file.
