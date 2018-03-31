@@ -1,2 +1,2 @@
 # SOD
-Project for me learning JavaScript.
+Project for coding language practice from common project frame of reference i.e. same project implemented in different languages.
