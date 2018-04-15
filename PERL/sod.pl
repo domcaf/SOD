@@ -24,6 +24,7 @@ use Getopt::Long;
 use GlobalsProxy;
 
 use Goodguy; # Found using preceeding 'use lib' pragma.
+use Bullet;
 
 #use Log::Log4perl;
 use Log::Log4perl qw(:easy);
@@ -314,9 +315,11 @@ my $pb = $gof->Button( -text => 'Play', -command => &playGame )
     #sleep(5); #DEBUG
 
     my $Badguy = Badguy->new();
+    $Badguy->bad_guy_post_constructor($gdc); # Do additional initialization.
 
     #  generate and capture bad guy image
-    if ( $Badguy->draw_bad_guy($gdc) ) { # Canvas object ref needed for drawing.
+    #if ( $Badguy->draw_bad_guy($gdc) ) { # Canvas object ref needed for drawing.
+    if ( $Badguy->draw_bad_guy() ) { 
         $lh->fatal(
 "\a\a\a\nSomething bad happened in draw_bad_guy.\nProgram execution terminated."
         );
@@ -326,7 +329,8 @@ my $pb = $gof->Button( -text => 'Play', -command => &playGame )
 	my $Goodguy = Goodguy->new();
 	$Goodguy->good_guy_post_constructor($gdc); # Do additional initialization.
 
-    if ( $Goodguy->draw_good_guy($gdc, 'l') ) { # Canvas object ref needed for drawing; gun angle is in degrees.
+    #if ( $Goodguy->draw_good_guy($gdc, 'l') ) { # Canvas object ref needed for drawing; gun angle is in degrees.
+    if ( $Goodguy->draw_good_guy('l') ) { # gun angle is in degrees.
         $lh->fatal(
 "\a\a\a\nSomething bad happened in draw_good_guy.\nProgram execution terminated."
         );
@@ -401,14 +405,41 @@ my $pb = $gof->Button( -text => 'Play', -command => &playGame )
 
 $mw->bind(
     '<KeyRelease>' => sub {
-        my ($widget) = @_; 
+        my ($widget) = @_;
         my $e = $widget->XEvent;    # get event object
         my ( $keysym_text, $keysym_decimal ) = ( $e->K, $e->N );
-        $lh->debug( "KEYRELEASE EVENT: keysym=$keysym_text, numeric=$keysym_decimal" );
-        #$lh->debug( Dumper( \$e ) ); # Event object has some binary data that makes Dumping messy.
+        $lh->debug(
+            "KEYRELEASE EVENT: keysym=$keysym_text, numeric=$keysym_decimal");
 
-        $Goodguy->draw_good_guy($gdc, $keysym_text) if($keysym_text =~ /^(Left|a|Right|d)$/);
-    }   
+#$lh->debug( Dumper( \$e ) ); # Event object has some binary data that makes Dumping messy.
+
+#$Goodguy->draw_good_guy($keysym_text) if($keysym_text =~ /^(Left|a|Right|d)$/);
+
+        if ( $keysym_text =~ /^(Left|a|Right|d)$/ ) {
+            $Goodguy->draw_good_guy($keysym_text);
+        }
+        elsif ( $keysym_text =~ /^(Space| |w)$/ ) {
+
+            # Center of bullet when fired by the good guy; use center of Goodguy. */
+
+            # new_player->pd.b.x = polar_to_cartesian_coords((float) (from->pd.gg.radius + from->pd.gg.gun_length + (TWO_VALUE * BULLET_RADIUS)),from->pd.gg.gun_angle,'x') + from->pd.gg.x;
+            # new_player->pd.b.y = polar_to_cartesian_coords((float) (from->pd.gg.radius + from->pd.gg.gun_length + (TWO_VALUE * BULLET_RADIUS)),from->pd.gg.gun_angle,'y') + from->pd.gg.y;
+
+            #  movement step increments for bullet when fired by the good guy */
+
+		my $bulletGood = Bullet->new();
+                $bulletGood->bullet_post_constructor($gdc,
+			$Goodguy->x,
+			$Goodguy->y,  
+			(BULLET_RADIUS * cos($Goodguy->gun_angle) * $Goodguy->GOOD_GUY_BULLET_SPEED_FACTOR), # x_step
+			(BULLET_RADIUS * sin($Goodguy->gun_angle) * $Goodguy->GOOD_GUY_BULLET_SPEED_FACTOR), # y_step
+		);
+        }
+        else {
+            ;    # Null statement until we can decide on suitable default.
+        }
+
+    }
 );
 
 MainLoop;    # This starts the graphics subsystem and causes UI to be displayed. EVENT HANDLING LOOP.

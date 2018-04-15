@@ -59,7 +59,34 @@ has 'current_angle' => (
     is  => 'rw'
 );
 
+our $gdc; # This should be set in post constructor method so "Game Display Canvas" doesn't have to be passed all other the place.
+
 # METHODS
+
+sub bad_guy_post_constructor {
+
+# DESCRIPTION     : Moose manual strongly discourages overriding default free
+#                                     constructor so this method should be called AFTER constructor
+#                                     to set some values in the Sprites superclass. It should only
+#                                     be called once immediately after free constructor is called.
+# INPUTS          : A ref to Game Display Canvas.
+# OUTPUTS         : Int value. Zero, 0, means ok otherwise a problem occurred.
+
+    my $self = shift;
+
+    $self->log->debug('Entered bad_guy_post_constructor method.');
+
+    $gdc = shift;    # gdc is a class global scoped with "our".
+
+    my $success = $self->ZERO_VALUE;
+
+    $self->log->debug('Leaving bad_guy_post_constructor method.');
+    return ($success);
+
+}    # bad_guy_post_constructor()
+
+
+
 
 # ****************************************************************************/
 # * Function Name   : draw_bad_guy.                                         **/
@@ -74,7 +101,7 @@ has 'current_angle' => (
 
 sub draw_bad_guy {
     my $self = shift;
-    my $gdc  = shift;    # Game Display Canvas object = gdc.
+    #my $gdc  = shift;    # Game Display Canvas object = gdc.
 
     my $maxX    = $gdc->cget( -width );
     my $maxY    = $gdc->cget( -height );
@@ -331,5 +358,67 @@ sub draw_bad_guy {
 }    # End draw_bad_guy()
 
 # *************************< End draw_bad_guy >***************************/
+
+#sub move_bad_guy {
+#
+#
+#	# Player type specific functionality has been moved into class methods
+#	# for specific player types.
+#
+#	# The following may be useful for player movement in context of PERL/Tk:
+#	# http://search.cpan.org/~srezic/Tk-804.034/pod/Canvas.pod#TRANSFORMATIONS
+#
+#	players *player_who_shot_bullet;
+#
+#	static float reference_radius;
+#	static float reference_angle;
+#
+#	static int screen_max_x;
+#	static int screen_max_y;
+#	static int two_pi_rads = TWO_VALUE * PI;
+#	static int screen_center_x;
+#	static int screen_center_y;
+#
+#	screen_max_x = getmaxx();
+#	screen_max_y = getmaxy();
+#
+#	screen_center_x = (int) screen_max_x / TWO_VALUE;
+#	screen_center_y = (int) screen_max_y / TWO_VALUE;
+#
+#
+#	reference_radius = sqrt(pow((getmaxx()/TWO_VALUE),TWO_VALUE) + pow((getmaxy()/TWO_VALUE),TWO_VALUE));
+#	reference_angle = atan(getmaxy()/getmaxx());
+#
+#	setfillstyle(SOLID_FILL,getbkcolor());
+#
+#	# The following may be useful for player movement in context of PERL/Tk:
+#	# http://search.cpan.org/~srezic/Tk-804.034/pod/Canvas.pod#TRANSFORMATIONS
+#
+#	if(mm->pt == bad)
+#	{
+#		#  erase mm from its old location */
+#		bar(mm->pd.bg.badguy.x,mm->pd.bg.badguy.y,(mm->pd.bg.badguy.x + mm->pd.bg.badguy.width),(mm->pd.bg.badguy.y + mm->pd.bg.badguy.height));
+#
+#		#  update the current angle of the bad guy */
+#		mm->pd.bg.current_angle += mm->pd.bg.angle_step;
+#
+#		#  calculate the new polar radius for the bad guy's new location */
+#		if(mm->pd.bg.current_angle > two_pi_rads)
+#		{
+#			mm->pd.bg.radius-= FIVE_VALUE;
+#			mm->pd.bg.current_angle-= two_pi_rads;
+#		}
+#
+#		#  convert the polar angle into cartesian coordinates for the bad guy's new location */
+#		mm->pd.bg.badguy.x = (int) polar_to_cartesian_coords(mm->pd.bg.radius,mm->pd.bg.current_angle,'x') + screen_center_x;
+#		mm->pd.bg.badguy.y = (int) polar_to_cartesian_coords(mm->pd.bg.radius,mm->pd.bg.current_angle,'y') + screen_center_y;
+#
+#		#  redisplay mm at its new position */
+#		putimage(mm->pd.bg.badguy.x,mm->pd.bg.badguy.y,(short unsigned int *) mm->pd.bg.badguy.bitmap,COPY_PUT);
+#
+#	}
+#
+#
+#} # move_bad_guy() 
 
 1;

@@ -9,8 +9,13 @@ use Data::Dumper;
 with 'GlobalConstants', 'MooseX::Log::Log4perl';
 extends 'Sprites';
 
+#has 'gdc' => (is => 'rw', isa => 'Object'); # gdc = game display canvas. Using "our $gdc" instead; shorter to type in code.
+has 'maxX' => (is => 'rw', isa => 'Int', default => 0); # Maximum size of game display canvas in X dimension.
+has 'maxY' => (is => 'rw', isa => 'Int', default => 0); # Maximum size of game display canvas in Y dimension.
+
 has 'color' => (is => 'rw', isa => 'Str', default => 'blue');
 has 'gun_angle' => (is => 'rw', isa => 'Int', default => 0); # Degrees
+has 'GOOD_GUY_BULLET_SPEED_FACTOR' => (is => 'ro', isa => 'Int', default => 3);
 
 # ggbb = Good Guy Bounding Box
 has 'ggbb' => (is => 'rw', isa => 'HashRef'); # Can be populated by calling Sprites->calculateBoundingBoxCoordinates().
@@ -22,7 +27,7 @@ has 'gbbo' => (is => 'rw', isa => 'Num');
 # Good guy constants
 use constant {
 
-    GOOD_GUY_BULLET_SPEED_FACTOR => 3,
+    #GOOD_GUY_BULLET_SPEED_FACTOR => 3,
     GOOD_GUY_GUN_LENGTH          => 0.03,     #  specified as percentage 
     GOOD_GUY_RADIUS              => 0.08,     #  specified as percentage 
     GOOD_GUY_ROTATION_INCREMENT  => 5,    #  degrees
@@ -38,6 +43,9 @@ use constant {
 #my ($radius);                        #  radius of good_guy, excluding barrel. Implies bounding box is square. See ggbb
 
 #my ($gun_length);                    #  length as a %age of screen dimensions. Handled by ggbb & gbbo.
+
+our $gdc; # Used so we don't have to pass handle to "Game Display Canvas" all over the place. We set it once
+	# in good_guy_post_constructor() and then we can use it in all class methods as needed.
 
 our $bbc; # Used to hold 'b'ounding 'b'ox 'c'oordinates for good guy body in global private instance variable.
 
@@ -113,24 +121,25 @@ sub good_guy_post_constructor {
 
     $self->log->debug('Entered good_guy_post_constructor method.');
 
-    my $gdc = shift;    # Game Display Canvas object = gdc.
+    $gdc = shift; # gdc is a class global scoped with "our".
+    #$self->gdc( $gdc );    # Game Display Canvas object = gdc.
 
   #my $gun_direction = shift; # Gun barrel adjustment angle for good guy in radians.
 
-    my $maxX = $gdc->cget( -width );
-    my $maxY = $gdc->cget( -height );
+    $self->maxX( $gdc->cget( -width  ) );
+    $self->maxY( $gdc->cget( -height ) );
 
-    $self->x( $maxX / $self->TWO_VALUE );
-    $self->y( $maxY / $self->TWO_VALUE );
+    $self->x( $self->maxX / $self->TWO_VALUE );
+    $self->y( $self->maxY / $self->TWO_VALUE );
 
     # Because good guy is circular, height and width are the same.
-    $self->width( GOOD_GUY_RADIUS * ( ( $maxX + $maxY ) / 2 ) );
+    $self->width( GOOD_GUY_RADIUS * ( ( $self->maxX + $self->maxY ) / 2 ) );
     $self->half_width($self->width / 2);
 
     $self->height( $self->width );
     $self->half_height($self->height / 2);
 
-    $self->gbbo(GOOD_GUY_GUN_LENGTH * ( ( $maxX + $maxY ) / 2 ));
+    $self->gbbo(GOOD_GUY_GUN_LENGTH * ( ( $self->maxX + $self->maxY ) / 2 ));
 
     my $success = $self->ZERO_VALUE;
 
@@ -169,48 +178,50 @@ sub draw_good_guy {
 
     $self->log->debug('Entered draw_good_guy method.');
 
-    my $gdc = shift;    # Game Display Canvas object = gdc.
+    #my $gdc = shift;    # Game Display Canvas object = gdc. Now in "our $gdc" as class/instance global.
     my $gun_direction =
       shift;            # Gun barrel adjustment angle for good guy in degrees.
 
-    my $maxX    = $gdc->cget( -width );
-    my $maxY    = $gdc->cget( -height );
+    my $maxX    = $gdc->cget( -width ); # Already doing this in good_guy_post_constructor method
+    my $maxY    = $gdc->cget( -height ); # Already doing this in good_guy_post_constructor method
+
     my $success = $self->ZERO_VALUE;
 
-    my $background_color = $gdc->cget( -background );
-
-    #setcolor($background_color);
-    #$gdc->configure( -insertBackground => $background_color );
+    my $background_color = $gdc->cget( -background ); # Already doing this in good_guy_post_constructor method
 
 # erase the gun barrel from its current location -----------------------------------------------------------
-
-    #setfillstyle(SOLID_FILL,$background_color);
-
-#    $radius =
-#      GOOD_GUY_RADIUS * ( ( $maxX + $maxY ) / 2 );  # put in Sprites superclass?
-#    $gun_angle = $gun_direction;
-#
-#    my $x_barrel =
-#      $self->polar_to_cartesian_coords( $radius, $gun_angle, 'x' ) + $self->x;
-#    my $y_barrel =
-#      $self->polar_to_cartesian_coords( $radius, $gun_angle, 'y' ) + $self->y;
-#    my $gun_length = GOOD_GUY_GUN_LENGTH * ( ( $maxX + $maxY ) / 2 )
-#      ;    # Put in Sprites superclass? No because specific to good guy.
 
     my $bbc =
       $self->ggbb;   # Get good guy's bounding box coordinates as a hashref.
 
-    $gdc->createArc(
-        ( $bbc->{ul_x} - $self->gbbo ),
-        ( $bbc->{ul_y} - $self->gbbo ),
-        ( $bbc->{lr_x} + $self->gbbo ),
-        ( $bbc->{lr_y} + $self->gbbo ),
-	-start => $self->gun_angle,
-	-extent => GUN_WIDTH_FULL_ANGLE,
-	-fill => 'black',
-	-outline => 'black',
-	-style => 'pieslice'
-    );
+    # OLD
+    # TODO - consider replacing with new below
+#    $gdc->createArc(
+#        ( $bbc->{ul_x} - $self->gbbo ),
+#        ( $bbc->{ul_y} - $self->gbbo ),
+#        ( $bbc->{lr_x} + $self->gbbo ),
+#        ( $bbc->{lr_y} + $self->gbbo ),
+#	-start => $self->gun_angle,
+#	-extent => GUN_WIDTH_FULL_ANGLE,
+#	-fill => 'black',
+#	-outline => 'black',
+#	-style => 'pieslice'
+#    );
+
+
+    # NEW
+     $gdc->createArc(
+         ( $self->ggbb->{ul_x} - $self->gbbo ),
+         ( $self->ggbb->{ul_y} - $self->gbbo ),
+         ( $self->ggbb->{lr_x} + $self->gbbo ),
+         ( $self->ggbb->{lr_y} + $self->gbbo ),
+ 	-start => $self->gun_angle,
+ 	-extent => GUN_WIDTH_FULL_ANGLE,
+ 	-fill => 'black',
+ 	-outline => 'black',
+ 	-style => 'pieslice'
+     );
+
 
 # It might be easiest to have a bounding box for the gun barrel slightly larger than the good guy
 # body centered on the same point as the good guy body. Store the good guy body color in good guy

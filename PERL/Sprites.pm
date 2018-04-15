@@ -7,8 +7,6 @@ use lib '.';
 use Moose;
 use namespace::autoclean;
 
-use constant { BULLET_RADIUS => 2 };
-
 #with 'GlobalConstants', 'MooseX::Log::Log4perl', 'Utilities';
 with 'MooseX::Log::Log4perl';
 

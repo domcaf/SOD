@@ -1,15 +1,10 @@
 package Bullet;
-#package SOD::Bullet;
-
-#use Exporter;
-#@ISA = ("Exporter");
-#@EXPORT = qw(&did_bullet_hit_something);
-
 
 use lib '.';
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
+use constant { BULLET_RADIUS => 0.02 }; # percentage of average screen dimensions.
 
 #with 'GlobalConstants', 'MooseX::Log::Log4perl', 'Utilities';
 with 'GlobalConstants', 'MooseX::Log::Log4perl';
@@ -24,33 +19,163 @@ has 'color' => (is => 'rw', isa => 'Str', default => 'blue');
 
 # y-coordinate of center of circular bullet; defined in super class Sprites.
 
-# Radius of bullet as %age of screen dimensions; if it's tiny then it can be a squary bullet
+# Radius of bullet as %age of screen dimensions; if it's tiny then it can be a square bullet
 # defined with width, half_width, height and half_height attributes defined in super
-# class Sprites.
+# class Sprites. See constant BULLET_RADIUS defined above.
 
 			#  movement increments */
 			has 'x_step' => (
 				isa => 'Num',
-				is => 'ro'
+				is => 'rw'
 			);
 
 			#  movement increments */
 			has 'y_step' => (
 				isa => 'Num',
-				is => 'ro'
+				is => 'rw'
 			);
 
 			# reference to player who shot bullet */
 			has 'from' => (
 				isa => 'Object', # This actually a reference to an object.
-				is => 'ro'
+				is => 'rw'
 			);
+
+our $gdc; # Used so we don't have to pass handle to "Game Display Canvas" all over the place. We set it once
+        # in bullet_post_constructor() and then we can use it in all class/instance methods as needed.
 
 # methods go here
 
+sub bullet_post_constructor {
+
+  # DESCRIPTION     : Moose manual strongly discourages overriding default free
+  #                                     constructor so this method should be called AFTER constructor
+  #                                     to set some values in the Sprites superclass. It should only
+  #                                     be called once immediately after free constructor is called.
+  # INPUTS          : - A ref to Game Display Canvas.
+  #                   - initial X coordinate of bullet.
+  #                   - initial Y coordinate of bullet.
+  # OUTPUTS         : Int value. Zero, 0, means ok otherwise a problem occurred.
+
+    my $self = shift;
+
+    $self->log->debug('Entered bullet_post_constructor method.');
+
+    $gdc = shift; # gdc is a class global scoped with "our".
+
+#    my $x = shift;
+#    $self->x( $x );
+#
+#    my $y = shift;
+#    $self->y( $y );
+
+    $self->x( shift );
+    $self->y( shift );
+    $self->x_step( shift );
+    $self->y_step( shift );
+
+# Might need these later for collision detection.
+#     $self->maxX( $gdc->cget( -width  ) );
+#     $self->maxY( $gdc->cget( -height ) );
+
+    # Because bullet is circular, height and width are the same.
+    $self->width( BULLET_RADIUS * ( ( $gdc->cget( -width  ) + $gdc->cget( -height ) ) / 2 ) );
+    $self->half_width($self->width / 2);
+
+    $self->height( $self->width );
+    $self->half_height($self->height / 2);
+
+    #$self->gbbo(GOOD_GUY_GUN_LENGTH * ( ( $self->maxX + $self->maxY ) / 2 ));
+
+    my $success = $self->ZERO_VALUE;
+
+    #my $background_color = $gdc->cget(-background);
+
+    #setcolor($background_color);
+    #$gdc->configure(-insertBackground => $background_color);
+
+    # Draw bullet
+
+    $bbc = $self->calculateBoundingBoxCoordinates();
+    #$self->ggbb( $bbc );
+
+    $gdc->createOval( $bbc->{ul_x}, $bbc->{ul_y}, $bbc->{lr_x}, $bbc->{lr_y}, -fill => 'green', -outline => 'green');
+    #$self->color( 'green' );
+
+
+
+    $self->log->debug('Leaving bullet_post_constructor method.');
+    return ($success);
+
+
+} # bullet_post_constructor()
+
 sub draw_bullet {
 
-# you might find a lot of the code for this inside player.pm.
+  # DESCRIPTION: Draws a bullet at an (x,y) location.
+  # INPUTS     : A ref to Game Display Canvas and the new (x,y) location at which to draw bullet.
+  # OUTPUTS    : None.
+
+    my $self = shift;
+
+    $self->log->debug('Entered draw_bullet method.');
+
+    my $gdc = shift;    # Game Display Canvas object = gdc.
+    my $gun_direction =
+      shift;            # Gun barrel adjustment angle for good guy in degrees.
+
+    my $maxX    = $gdc->cget( -width );
+    my $maxY    = $gdc->cget( -height );
+    my $success = $self->ZERO_VALUE;
+
+    my $background_color = $gdc->cget( -background );
+
+
+
+# you might find a lot of the code for this inside player.pm in add_player.
+
+
+#			case bullet:
+#				if ((from->pt == good) || (from->pt == bad))
+#				{
+#					new_player->pd.b.radius = BULLET_RADIUS;
+#
+#					#  figure out where the bullet came from */
+#					new_player->pd.b.from = from;
+#
+#					if (from->pt == good)
+#					{
+#						#  center of bullet when fired by the good guy */
+#						new_player->pd.b.x = polar_to_cartesian_coords((float) (from->pd.gg.radius + from->pd.gg.gun_length + (TWO_VALUE * BULLET_RADIUS)),from->pd.gg.gun_angle,'x') + from->pd.gg.x;
+#						new_player->pd.b.y = polar_to_cartesian_coords((float) (from->pd.gg.radius + from->pd.gg.gun_length + (TWO_VALUE * BULLET_RADIUS)),from->pd.gg.gun_angle,'y') + from->pd.gg.y;
+#
+#
+#						#  movement step increments for bullet when fired by the good guy */
+#						new_player->pd.b.x_step = BULLET_RADIUS * cos(from->pd.gg.gun_angle) * GOOD_GUY_BULLET_SPEED_FACTOR;
+#						new_player->pd.b.y_step = BULLET_RADIUS * sin(from->pd.gg.gun_angle) * GOOD_GUY_BULLET_SPEED_FACTOR;
+#					}
+#					else
+#					{
+#						#  center of bullet when fired by a bad guy */
+#						new_player->pd.b.x = from->pd.bg.badguy.x;
+#						new_player->pd.b.y = from->pd.bg.badguy.y;
+#
+#
+#						#  movement step increments for bullet when fired by a bad guy */
+#						new_player->pd.b.x_step = -BULLET_RADIUS * cos(from->pd.bg.current_angle);
+#						new_player->pd.b.y_step = -BULLET_RADIUS * sin(from->pd.bg.current_angle);
+#					}
+#				}
+#				else
+#				{
+#						success = ONE_VALUE;
+#						free(new_player);
+#				}
+#				break;
+
+
+
+    $self->log->debug('Exited draw_bullet method.');
 
 } # sub draw_bullet
 
@@ -132,6 +257,69 @@ sub draw_bullet {
 #
 # ****************************< End did_bullet_hit_something >***********/
   
+
+  sub move_bullet {
+
+	# Keep in mind that bullets will move in a linear fashion according to 
+	# equation, y = mx + b.
+
+	# The following may be useful for player movement in context of PERL/Tk:
+	# http://search.cpan.org/~srezic/Tk-804.034/pod/Canvas.pod#TRANSFORMATIONS
+
+#	players *player_who_shot_bullet;
+#
+#	static float reference_radius;
+#	static float reference_angle;
+#
+#	static int screen_max_x;
+#	static int screen_max_y;
+#	static int two_pi_rads = TWO_VALUE * PI;
+#	static int screen_center_x;
+#	static int screen_center_y;
+#
+#	screen_max_x = getmaxx();
+#	screen_max_y = getmaxy();
+#
+#	screen_center_x = (int) screen_max_x / TWO_VALUE;
+#	screen_center_y = (int) screen_max_y / TWO_VALUE;
+#
+#
+#	reference_radius = sqrt(pow((getmaxx()/TWO_VALUE),TWO_VALUE) + pow((getmaxy()/TWO_VALUE),TWO_VALUE));
+#	reference_angle = atan(getmaxy()/getmaxx());
+#
+#	setfillstyle(SOLID_FILL,getbkcolor());
+
+	# The following may be useful for player movement in context of PERL/Tk:
+	# http://search.cpan.org/~srezic/Tk-804.034/pod/Canvas.pod#TRANSFORMATIONS
+
+
+#	else if(mm->pt == bullet)
+#	{
+#		#  erase mm from its old location */
+#		fillellipse((int) mm->pd.b.x,(int) mm->pd.b.y,mm->pd.b.radius,mm->pd.b.radius);
+#
+#		#  setup mm's new position */
+#		mm->pd.b.x += mm->pd.b.x_step;
+#		mm->pd.b.y += mm->pd.b.y_step;
+#
+#		if((mm->pd.b.x <= screen_max_x) && (mm->pd.b.x >= ZERO_VALUE) && (mm->pd.b.y <= screen_max_y) && (mm->pd.b.y >= ZERO_VALUE))
+#		{
+#			#  identify the type of player who shot the bullet */
+#			player_who_shot_bullet = (players *) mm->pd.b.from;  #  this is necessary because "from" is a void pointer */
+#
+#			#  redisplay mm at its new position  - choose appropriate bullet color */
+#			setfillstyle(SOLID_FILL,(player_who_shot_bullet->pt == good) ? GREEN : YELLOW);
+#
+#			fillellipse((int) mm->pd.b.x,(int) mm->pd.b.y,mm->pd.b.radius,mm->pd.b.radius);
+#		}
+#		else
+#			delete_player(mm);
+#
+#	}
+
+
+  } # move_bullet()
+
 1;
   
 # End of file.
