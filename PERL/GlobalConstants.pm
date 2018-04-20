@@ -121,18 +121,18 @@ has 'BAD_GUY_PNG_LOC' =>
   ( is => 'ro', default => '/tmp/Bad_guy.png', isa => 'Str' );
 has 'BAD_GUY_PS_LOC' =>
   ( is => 'ro', default => '/tmp/Bad_guy.ps', isa => 'Str' );
-has 'FIFTY_VALUE'   => ( is => 'ro', default => 50, isa => 'Int' );
-has 'FIVE_VALUE'    => ( is => 'ro', default => 5,  isa => 'Int' );
-has 'FORTY_VALUE'   => ( is => 'ro', default => 40, isa => 'Int' );
-has 'FOUR_VALUE'    => ( is => 'ro', default => 4,  isa => 'Int' );
-has 'HUNDRED_VALUE' => ( is => 'ro', default => 10, isa => 'Int' );
-has 'ONE_VALUE'     => ( is => 'ro', default => 1,  isa => 'Int' );
-has 'TEN_VALUE'     => ( is => 'ro', default => 10, isa => 'Int' );
-has 'THIRTY_VALUE'  => ( is => 'ro', default => 30, isa => 'Int' );
-has 'THREE_VALUE'   => ( is => 'ro', default => 3,  isa => 'Int' );
-has 'TWENTY_VALUE'  => ( is => 'ro', default => 20, isa => 'Int' );
-has 'TWO_VALUE'     => ( is => 'ro', default => 2,  isa => 'Int' );
-has 'ZERO_VALUE'    => ( is => 'ro', default => 0,  isa => 'Int' );
+has 'FIFTY_VALUE'   => ( is => 'ro', default => 50,  isa => 'Int' );
+has 'FIVE_VALUE'    => ( is => 'ro', default => 5,   isa => 'Int' );
+has 'FORTY_VALUE'   => ( is => 'ro', default => 40,  isa => 'Int' );
+has 'FOUR_VALUE'    => ( is => 'ro', default => 4,   isa => 'Int' );
+has 'HUNDRED_VALUE' => ( is => 'ro', default => 100, isa => 'Int' );
+has 'ONE_VALUE'     => ( is => 'ro', default => 1,   isa => 'Int' );
+has 'TEN_VALUE'     => ( is => 'ro', default => 10,  isa => 'Int' );
+has 'THIRTY_VALUE'  => ( is => 'ro', default => 30,  isa => 'Int' );
+has 'THREE_VALUE'   => ( is => 'ro', default => 3,   isa => 'Int' );
+has 'TWENTY_VALUE'  => ( is => 'ro', default => 20,  isa => 'Int' );
+has 'TWO_VALUE'     => ( is => 'ro', default => 2,   isa => 'Int' );
+has 'ZERO_VALUE'    => ( is => 'ro', default => 0,   isa => 'Int' );
 
 #  trigonometry and player constants
 
