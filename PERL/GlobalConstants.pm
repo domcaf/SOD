@@ -136,6 +136,8 @@ has 'ZERO_VALUE'    => ( is => 'ro', default => 0,   isa => 'Int' );
 
 #  trigonometry and player constants
 
+has 'FULL_CIRCLE_DEGREES' => ( default => 360,       is => 'ro', isa => 'Int' );
+has 'FULL_CIRCLE_RADIANS' => ( default => 6.282,     is => 'ro', isa => 'Num' );
 has 'HALF_CIRCLE_DEGREES' => ( default => 180,       is => 'ro', isa => 'Int' );
 has 'HALF_CIRCLE_RADIANS' => ( default => 3.1415927, is => 'ro', isa => 'Num' );
 has 'MAX_BAD_GUYS'        => ( default => 3,         is => 'ro', isa => 'Int' );

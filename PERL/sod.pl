@@ -18,19 +18,17 @@ use Badguy
 
 #use Bullet; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 use Data::Dumper;
+use Data::Uniqid;    # Used for unique keys in the %playerHash below.
 use Getopt::Long;
 
 #use GlobalConstants;
 use GlobalsProxy;
 
-use Goodguy; # Found using preceeding 'use lib' pragma.
+use Goodguy;         # Found using preceeding 'use lib' pragma.
 use Bullet;
 
-#use Log::Log4perl;
 use Log::Log4perl qw(:easy);
 
-#use namespace::autoclean;
-#use Player; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
 use Pod::Usage;
 
 #use Sprites; # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
@@ -39,7 +37,7 @@ use Tk::PNG;
 
 #use Tk::Animation; # See sect 17.9 of "Mastering PERL/Tk".
 #use Tk::WinPhoto; # See sect 17.7.3 of "Mastering PERL/Tk". For grabbing a bitmap off a canvas. BadGuy.
-use Utilities;  # Found using preceeding 'use lib' pragma.
+use Utilities;    # Found using preceeding 'use lib' pragma.
 
 #$splash->Update(0.1);
 
@@ -184,13 +182,23 @@ pod2usage(
 # Notes & Comments: Created on 3/31/1992. Converted to PERL beginning Oct/2017.
 
 #sprites bad_image;
-#players * player_list = NULL;
+
+# Instead of using a doubly linked list as in the C version of this game, we're going
+# to use a hash/associative-array in large part because it will make managing the game
+# players much simpler. It will not be perfectly fair to all players like the the linked list
+# implementation however the tradeoff makes things easier and this isn't a realtime control system
+# where people's safety depends on it so the "fairness" necessity is a reasonable tradeoff.
+# Also, the Goodguy is event driven because of Tk so basically we're just managing bullets and
+# Badguys in the playerHash.
+
+our %playerHash = ();
+
 #int bad_guy_count = gpo;
 #int error_flag;
 
 #  set up the video environment */
 
-my $mw = MainWindow->new;
+our $mw = MainWindow->new;
 
 #$mw->resizeable(1,1); # Booleans for X & Y axes.
 $mw->FullScreen;    # This is desired when everything is working smoothly.
@@ -290,53 +298,51 @@ my $pb = $gof->Button( -text => 'Play', -command => &playGame )
 #$splash->Update(1.0);
 #sleep(5);
 #$splash->Destroy();
-    # Get the dimensions of the canvas used to to display game play display.
-    # Use the configure method of the canvas object instead of cget so you can
-    # get all configuration items for widget at one time.
+# Get the dimensions of the canvas used to to display game play display.
+# Use the configure method of the canvas object instead of cget so you can
+# get all configuration items for widget at one time.
 
-    my @canvasConfig = $gdc->configure();    # returns list of list refs
-    $lh->trace(
-        "gdc = Game Display Canvas, configuration information as follows:");
-    $lh->trace( "\n" . Dumper( \@canvasConfig ) . "\n" );
+my @canvasConfig = $gdc->configure();    # returns list of list refs
+$lh->trace("gdc = Game Display Canvas, configuration information as follows:");
+$lh->trace( "\n" . Dumper( \@canvasConfig ) . "\n" );
 
-    $canvasWidth  = $gdc->cget( -width );
-    $canvasHeight = $gdc->cget( -height );
-    $lh->info( "\nGame Display Canvas Dimensions:\twidth = "
-          . $canvasWidth
-          . "\theight = "
-          . $canvasHeight
-          . "\n" );
+$canvasWidth  = $gdc->cget( -width );
+$canvasHeight = $gdc->cget( -height );
+$lh->info( "\nGame Display Canvas Dimensions:\twidth = "
+      . $canvasWidth
+      . "\theight = "
+      . $canvasHeight
+      . "\n" );
 
-    #  initialize the random # generator */
-    #randomize();
+#  initialize the random # generator */
+#randomize();
 
-    $lh->info('Attempting to draw bad guy bitmap with graphics primitives.');
+$lh->info('Attempting to draw bad guy bitmap with graphics primitives.');
 
-    #sleep(5); #DEBUG
+#sleep(5); #DEBUG
 
-    my $Badguy = Badguy->new();
-    $Badguy->bad_guy_post_constructor($gdc); # Do additional initialization.
+my $Badguy = Badguy->new();
+$Badguy->bad_guy_post_constructor($gdc);    # Do additional initialization.
 
-    #  generate and capture bad guy image
-    #if ( $Badguy->draw_bad_guy($gdc) ) { # Canvas object ref needed for drawing.
-    if ( $Badguy->draw_bad_guy() ) { 
-        $lh->fatal(
+#  generate and capture bad guy image
+#if ( $Badguy->draw_bad_guy($gdc) ) { # Canvas object ref needed for drawing.
+if ( $Badguy->draw_bad_guy() ) {
+    $lh->fatal(
 "\a\a\a\nSomething bad happened in draw_bad_guy.\nProgram execution terminated."
-        );
-        exit( $gpo->ONE_VALUE );
-    }
+    );
+    exit( $gpo->ONE_VALUE );
+}
 
-	my $Goodguy = Goodguy->new();
-	$Goodguy->good_guy_post_constructor($gdc); # Do additional initialization.
+my $Goodguy = Goodguy->new();
+$Goodguy->good_guy_post_constructor($gdc);    # Do additional initialization.
 
-    #if ( $Goodguy->draw_good_guy($gdc, 'l') ) { # Canvas object ref needed for drawing; gun angle is in degrees.
-    if ( $Goodguy->draw_good_guy('l') ) { # gun angle is in degrees.
-        $lh->fatal(
+#if ( $Goodguy->draw_good_guy($gdc, 'l') ) { # Canvas object ref needed for drawing; gun angle is in degrees.
+if ( $Goodguy->draw_good_guy('l') ) {         # gun angle is in degrees.
+    $lh->fatal(
 "\a\a\a\nSomething bad happened in draw_good_guy.\nProgram execution terminated."
-        );
-        exit( $gpo->ONE_VALUE );
-    }
-
+    );
+    exit( $gpo->ONE_VALUE );
+}
 
 #   #  load initial conditions into good_guy & bad_guys i.e. build player list */
 #
@@ -364,27 +370,27 @@ my $pb = $gof->Button( -text => 'Play', -command => &playGame )
 #    #endif
 #
 
-   # The following needs to be called after you get all players on the
-   # canvas with the exception of bullets.  Bullets can leave the scrollable
-   # area and we don't care about them once they leave the scrollable area.
-   # Also note that for our purposes the scrollable area is basically static.
-   # This is why we're setting the bounding region BEFORE any bullets get fired.
-   # See section 9.3 of "Mastering Perl/Tk".
+# The following needs to be called after you get all players on the
+# canvas with the exception of bullets.  Bullets can leave the scrollable
+# area and we don't care about them once they leave the scrollable area.
+# Also note that for our purposes the scrollable area is basically static.
+# This is why we're setting the bounding region BEFORE any bullets get fired.
+# See section 9.3 of "Mastering Perl/Tk".
 
 # line below causes window to shrink from maximized so be careful when you call it.
 # Only call once you've got all graphical game elements on screen.
 
-    if (0) {
-        $gdc->configure( -scrollregion => [ $gdc->bbox("all") ] );
-        $lh->debug(
+if (0) {
+    $gdc->configure( -scrollregion => [ $gdc->bbox("all") ] );
+    $lh->debug(
 'Canvas bounding box for all subwidgets is active. It causes maximized window to shrink.'
-        );
-    }
-    else {
-        $lh->debug(
+    );
+}
+else {
+    $lh->debug(
 'Canvas bounding box for all subwidgets currently disabled because it causes maximized window to shrink.'
-        );
-    }
+    );
+}
 
 # Build the player list and add players except for bullets.
 
@@ -392,77 +398,151 @@ my $pb = $gof->Button( -text => 'Play', -command => &playGame )
 
 # Add bad guys to player list.
 
-  #    #  main processing loop - let the games begin ! */
-  #
-  #    while ( player_list != NULL ) {
-  #        visit_player(player_list);
-  #
-  #        player_list = player_list->next;
-  #    }
-  #
+#    #  main processing loop - let the games begin ! */
+#
+#    while ( player_list != NULL ) {
+#        visit_player(player_list);
+#
+#        player_list = player_list->next;
+#    }
+#
 
 # Define event handler for keyboard events/commands; must be done AFTER game assets instantiated.
 
-$mw->bind(
-    '<KeyRelease>' => sub {
-        my ($widget) = @_;
-        my $e = $widget->XEvent;    # get event object
-        my ( $keysym_text, $keysym_decimal ) = ( $e->K, $e->N );
-        $lh->debug(
-            "KEYRELEASE EVENT: keysym=$keysym_text, numeric=$keysym_decimal");
+$mw->bind( '<KeyRelease>' => \&handleKeyRelease );
 
-#$lh->debug( Dumper( \$e ) ); # Event object has some binary data that makes Dumping messy.
+MainLoop
+  ; # This starts the graphics subsystem and causes UI to be displayed. EVENT HANDLING LOOP.
 
-#$Goodguy->draw_good_guy($keysym_text) if($keysym_text =~ /^(Left|a|Right|d)$/);
-
-        if ( $keysym_text =~ /^(Left|a|Right|d)$/ ) {
-            $Goodguy->draw_good_guy($keysym_text);
-        }
-        elsif ( $keysym_text =~ /^(Space| |w)$/ ) {
-
-            # Center of bullet when fired by the good guy; use center of Goodguy. */
-
-            # new_player->pd.b.x = polar_to_cartesian_coords((float) (from->pd.gg.radius + from->pd.gg.gun_length + (TWO_VALUE * BULLET_RADIUS)),from->pd.gg.gun_angle,'x') + from->pd.gg.x;
-            # new_player->pd.b.y = polar_to_cartesian_coords((float) (from->pd.gg.radius + from->pd.gg.gun_length + (TWO_VALUE * BULLET_RADIUS)),from->pd.gg.gun_angle,'y') + from->pd.gg.y;
-
-            #  movement step increments for bullet when fired by the good guy */
-
-		my $bulletGood = Bullet->new();
-                $bulletGood->bullet_post_constructor($gdc,
-			$Goodguy->x,
-			$Goodguy->y,  
-			(BULLET_RADIUS * cos($Goodguy->gun_angle) * $Goodguy->GOOD_GUY_BULLET_SPEED_FACTOR), # x_step
-			(BULLET_RADIUS * sin($Goodguy->gun_angle) * $Goodguy->GOOD_GUY_BULLET_SPEED_FACTOR), # y_step
-		);
-        }
-        else {
-            ;    # Null statement until we can decide on suitable default.
-        }
-
-    }
-);
-
-MainLoop;    # This starts the graphics subsystem and causes UI to be displayed. EVENT HANDLING LOOP.
-
-  #    #  the game's over so free up the memory that was previously allocated */
-  #
-  #    player_list->prev->next = NULL;
-  #
-  #    while ( player_list != NULL ) {
-  #        player_list = player_list->next;
-  #        free( player_list->prev );
-  #    }
+#    #  the game's over so free up the memory that was previously allocated */
+#
+#    player_list->prev->next = NULL;
+#
+#    while ( player_list != NULL ) {
+#        player_list = player_list->next;
+#        free( player_list->prev );
+#    }
 
 #  restore the pregame video environment */
 restore_pre_game_environment();
 
-exit ( $gpo->ZERO_VALUE );    #  indicate normal program termination */
+exit( $gpo->ZERO_VALUE );    #  indicate normal program termination */
 
 # -----------------------------< End Main >----------------------------------*/
 
 sub playGame {
     return 0;
-}    # sub playGame
+}                            # sub playGame
+
+sub handleKeyRelease {
+
+    $lh->trace('Entered handleKeyRelease');
+
+    my ($widget) = @_;
+    my $e = $widget->XEvent;    # get event object
+    my ( $keysym_text, $keysym_decimal ) = ( $e->K, $e->N );
+    $lh->debug(
+        "KEYRELEASE EVENT: keysym=$keysym_text, numeric=$keysym_decimal");
+
+#$lh->debug( Dumper( \$e ) ); # Event object has some binary data that makes Dumping messy.
+
+#$Goodguy->draw_good_guy($keysym_text) if($keysym_text =~ /^(Left|a|Right|d)$/);
+
+    if ( $keysym_text =~ /^(Left|a|Right|d)$/ ) {
+        $Goodguy->draw_good_guy($keysym_text);
+    }
+    elsif ( $keysym_text =~ /^(space| |w)$/ ) {
+
+        # Center of bullet when fired by the good guy; use center of Goodguy. */
+
+# new_player->pd.b.x = polar_to_cartesian_coords((float) (from->pd.gg.radius + from->pd.gg.gun_length + (TWO_VALUE * $gpo->BULLET_RADIUS)),from->pd.gg.gun_angle,'x') + from->pd.gg.x;
+# new_player->pd.b.y = polar_to_cartesian_coords((float) (from->pd.gg.radius + from->pd.gg.gun_length + (TWO_VALUE * $gpo->BULLET_RADIUS)),from->pd.gg.gun_angle,'y') + from->pd.gg.y;
+
+        #  movement step increments for bullet when fired by the good guy */
+
+        my $bulletGood = Bullet->new();
+
+        # Generate a unique key id for player being added to playerHash.
+        $playerHash{ Data::Uniqid::suniqid() } = $bulletGood;
+
+        my $x_step =
+          ( $bulletGood->BULLET_RADIUS *
+              cos( $Goodguy->gun_angle ) *
+              $Goodguy->GOOD_GUY_BULLET_SPEED_FACTOR );
+
+        my $y_step =
+          ( $bulletGood->BULLET_RADIUS *
+              sin( $Goodguy->gun_angle ) *
+              $Goodguy->GOOD_GUY_BULLET_SPEED_FACTOR );
+
+        $lh->debug( "Parameter values passed to bullet_post_constructor:\n"
+              . "\tx = $Goodguy->x\n"
+              . "\ty = $Goodguy->y\n"
+              . "\tx_step = $x_step\n"
+              . "\ty_step = $y_step\n" );
+
+        $bulletGood->bullet_post_constructor(
+            $gdc,
+            $Goodguy->x,
+            $Goodguy->y,
+            $x_step,
+            $y_step,
+            $Goodguy # Who shot bullet. Passing explicit ref causing problems so just pass object scalar.
+        );
+    }
+    else {
+        ;            # Null statement until we can decide on suitable default.
+    }
+
+   # Queue up low priority event callbacks including moving bullets and Badguys.
+    $mw->afterIdle( \&processPlayerHash );    # queue up event
+    $mw->idletasks;                           # dispatch event for processing
+
+    $lh->trace('Leaving handleKeyRelease');
+
+}    # handleKeyRelease()
+
+sub processPlayerHash {
+
+# This subroutine iterates thru the %playerHash and does things like move Badguys and bullets
+# and allow Badguys to fire bullets.
+
+    $lh->debug('Entered processPlayerHash');
+
+    foreach my $key ( sort( keys(%playerHash) ) ) {
+
+        $lh->debug( "Dump of player at key \"$key\""
+              . " being processed before alteration:\n"
+              . Dumper( \$playerHash{$key} ) );
+
+        my $playerType = ref( $playerHash{$key} );
+        $lh->debug("Processing player of type \"$playerType\".");
+
+        if ( $playerType eq 'Badguy' ) {
+            $lh->warn(
+                "Processing of player type \"$playerType\" not implemented yet."
+            );
+
+        }
+        elsif ( $playerType eq 'Bullet' ) {
+            $playerHash{$key}->move_bullet();
+
+            # Determine if bullet hit anything.
+
+        }
+        else {
+            $lh->warn(
+                "Don't know how to process player of type \"$playerType\".");
+        }
+    }    # for ...
+
+    $lh->debug(
+        "Processing of players completed. Current state of playerHash is:\n"
+          . Dumper( \%playerHash ) );
+
+    $lh->debug('Leaving processPlayerHash');
+
+}    # processPlayerHash()
 
 #sub BEGIN {
 #
