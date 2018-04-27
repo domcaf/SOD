@@ -11,7 +11,11 @@
 our $gpo;    # Globals Proxy Object for getting access to GlobalConstants.
 our $lh;     # Global log handle for Log4PERL usage.
 
-use lib '.'; # Needed for access/usage of sod packages/class definitions.
+# The following two globals are for canvas dimensions.
+our $maxX;
+our $maxY;
+
+use lib '.';    # Needed for access/usage of sod packages/class definitions.
 
 use Badguy
   ;  # Found using PERL5LIB environment variable or preceeding 'use lib' pragma.
@@ -265,6 +269,9 @@ my $gdc =
   ->pack( -side => 'top', -fill => 'both', -expand => 1 )
   ; # Game Display Canvas Widget - We're limiting scrolling to scroll region established later on.
 
+$maxX = $gdc->cget( -width );
+$maxY = $gdc->cget( -height );
+
 my $serverInfo = $gdc->server;    # String is returned.
 $lh->debug("Server info for canvas: \"$serverInfo\".");
 
@@ -448,50 +455,66 @@ sub handleKeyRelease {
 
 #$Goodguy->draw_good_guy($keysym_text) if($keysym_text =~ /^(Left|a|Right|d)$/);
 
-    if ( $keysym_text =~ /^(Left|a|Right|d)$/ ) {
+    if ( $keysym_text =~ /^p$/ ) {
+        $lh->debug( 'playerHash contents: ' . Dumper( \%playerHash ) );
+    }
+    elsif ( $keysym_text =~ /^(Left|a|Right|d)$/ ) {
         $Goodguy->draw_good_guy($keysym_text);
     }
     elsif ( $keysym_text =~ /^(space| |w)$/ ) {
 
-        # Center of bullet when fired by the good guy; use center of Goodguy. */
+# Goodguys can have as many active bullets as there are Badguys but Badguys can have
+# only one active bullet on the playing field at a time. This offsets fact that there is only
+# one Goodguy and multiple Badguys.
+# They can't fire any more bullets until their active bullet count is less than their limit.
 
-# new_player->pd.b.x = polar_to_cartesian_coords((float) (from->pd.gg.radius + from->pd.gg.gun_length + (TWO_VALUE * $gpo->BULLET_RADIUS)),from->pd.gg.gun_angle,'x') + from->pd.gg.x;
-# new_player->pd.b.y = polar_to_cartesian_coords((float) (from->pd.gg.radius + from->pd.gg.gun_length + (TWO_VALUE * $gpo->BULLET_RADIUS)),from->pd.gg.gun_angle,'y') + from->pd.gg.y;
+        my $bulletCountGood = 0;
+        foreach my $key ( keys(%playerHash) ) {
+            $bulletCountGood++
+              if ( 'Goodguy' eq ref( $playerHash{$key}->from ) );
+        }
 
-        #  movement step increments for bullet when fired by the good guy */
+        $lh->debug("Goodguy bullet count is \"$bulletCountGood\".");
 
-        my $bulletGood = Bullet->new();
+        if ( $bulletCountGood < $gpo->MAX_BAD_GUYS ) {
 
-        # Generate a unique key id for player being added to playerHash.
-        $playerHash{ Data::Uniqid::suniqid() } = $bulletGood;
+            my $bulletGood = Bullet->new();
 
-        my $x_step =
-          ( $bulletGood->BULLET_RADIUS *
-              cos( $Goodguy->gun_angle ) *
-              $Goodguy->GOOD_GUY_BULLET_SPEED_FACTOR );
+            # Generate a unique key id for player being added to playerHash.
+            $playerHash{ Data::Uniqid::suniqid() } = $bulletGood;
 
-        my $y_step =
-          ( $bulletGood->BULLET_RADIUS *
-              sin( $Goodguy->gun_angle ) *
-              $Goodguy->GOOD_GUY_BULLET_SPEED_FACTOR );
+            #  movement step increments for bullet when fired by the good guy */
 
-        $lh->debug( "Parameter values passed to bullet_post_constructor:\n"
-              . "\tx = $Goodguy->x\n"
-              . "\ty = $Goodguy->y\n"
-              . "\tx_step = $x_step\n"
-              . "\ty_step = $y_step\n" );
+            my $x_step =
+              ( $bulletGood->BULLET_RADIUS *
+                  cos( $Goodguy->gun_angle ) *
+                  $Goodguy->GOOD_GUY_BULLET_SPEED_FACTOR );
 
-        $bulletGood->bullet_post_constructor(
-            $gdc,
-            $Goodguy->x,
-            $Goodguy->y,
-            $x_step,
-            $y_step,
-            $Goodguy # Who shot bullet. Passing explicit ref causing problems so just pass object scalar.
-        );
+            my $y_step =
+              ( $bulletGood->BULLET_RADIUS *
+                  sin( $Goodguy->gun_angle ) *
+                  $Goodguy->GOOD_GUY_BULLET_SPEED_FACTOR );
+
+            $lh->debug( "Parameter values passed to bullet_post_constructor:\n"
+                  . "\tx = $Goodguy->x\n"
+                  . "\ty = $Goodguy->y\n"
+                  . "\tx_step = $x_step\n"
+                  . "\ty_step = $y_step\n" );
+
+            # Center of bullet when fired by good guy is center of Goodguy. */
+
+            $bulletGood->bullet_post_constructor(
+                $gdc,
+                $Goodguy->x,
+                $Goodguy->y,
+                $x_step,
+                $y_step,
+                $Goodguy # Who shot bullet. Passing explicit ref causing problems so just pass object scalar.
+            );
+        }    # if
     }
     else {
-        ;            # Null statement until we can decide on suitable default.
+        ;    # Null statement until we can decide on suitable default.
     }
 
    # Queue up low priority event callbacks including moving bullets and Badguys.
@@ -511,9 +534,9 @@ sub processPlayerHash {
 
     foreach my $key ( sort( keys(%playerHash) ) ) {
 
-        $lh->debug( "Dump of player at key \"$key\""
-              . " being processed before alteration:\n"
-              . Dumper( \$playerHash{$key} ) );
+        #        $lh->debug( "Dump of player at key \"$key\""
+        #              . " being processed before alteration:\n"
+        #              . Dumper( \$playerHash{$key} ) );
 
         my $playerType = ref( $playerHash{$key} );
         $lh->debug("Processing player of type \"$playerType\".");
@@ -527,7 +550,23 @@ sub processPlayerHash {
         elsif ( $playerType eq 'Bullet' ) {
             $playerHash{$key}->move_bullet();
 
-            # Determine if bullet hit anything.
+            # Is bullet still visible on field of play? Remove if not.
+            if (   $playerHash{$key}->x < 0
+                || $playerHash{$key}->x > $maxX
+                || $playerHash{$key}->y < 0
+                || $playerHash{$key}->y > $maxY )
+            {
+
+                # Remove bullet from playerHash.
+
+                $lh->debug('Removing bullet from playerHash.');
+                delete( $playerHash{$key} );
+            }
+            else {
+
+                # Determine if bullet hit anything.
+                $lh->debug('Bullet collision detection not implemented yet.');
+            }
 
         }
         else {
@@ -536,9 +575,9 @@ sub processPlayerHash {
         }
     }    # for ...
 
-    $lh->debug(
-        "Processing of players completed. Current state of playerHash is:\n"
-          . Dumper( \%playerHash ) );
+   #    $lh->debug(
+   #        "Processing of players completed. Current state of playerHash is:\n"
+   #          . Dumper( \%playerHash ) );
 
     $lh->debug('Leaving processPlayerHash');
 

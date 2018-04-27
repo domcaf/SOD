@@ -385,28 +385,45 @@ sub move_bullet {
     $self->x( $self->x + $self->x_step );
     $self->y( $self->y + $self->y_step );
 
-    $bbc = $self->calculateBoundingBoxCoordinates();
+# Decide if bullet should be drawn in its new location or if it is no longer visible.
+    if (   $self->x < 0
+        || $self->x > $maxX
+        || $self->y < 0
+        || $self->y > $maxY )
+    {
 
-    $gdc->createOval(
-        $bbc->{ul_x},
-        $bbc->{ul_y},
-        $bbc->{lr_x},
-        $bbc->{lr_y},
-        -fill => (
-            (
-                  ( ref( $self->from ) eq 'Goodguy' ) ? 'orange'
-                : ( ref( $self->from ) eq 'Badguy' )  ? 'red'
-                :                                       'blue'
+        # Bullet no longer visible in drawable area; don't redraw.
+
+        $self->log->debug(
+            'Bullet no longer visible. Remove from playerHash.' );
+    }
+    else {
+
+        # Bullet still visible so redraw it in its new location.
+
+        $bbc = $self->calculateBoundingBoxCoordinates();
+
+        $gdc->createOval(
+            $bbc->{ul_x},
+            $bbc->{ul_y},
+            $bbc->{lr_x},
+            $bbc->{lr_y},
+            -fill => (
+                (
+                      ( ref( $self->from ) eq 'Goodguy' ) ? 'orange'
+                    : ( ref( $self->from ) eq 'Badguy' )  ? 'red'
+                    :                                       'blue'
+                )
+            ),
+            -outline => (
+                (
+                      ( ref( $self->from ) eq 'Goodguy' ) ? 'orange'
+                    : ( ref( $self->from ) eq 'Badguy' )  ? 'red'
+                    :                                       'blue'
+                )
             )
-        ),
-        -outline => (
-            (
-                  ( ref( $self->from ) eq 'Goodguy' ) ? 'orange'
-                : ( ref( $self->from ) eq 'Badguy' )  ? 'red'
-                :                                       'blue'
-            )
-        )
-    );
+        );
+    }
 
     $self->log->debug('Leaving move_bullet method.');
 }    # move_bullet()
