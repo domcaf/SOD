@@ -33,83 +33,83 @@ has 'LOG_CONFIG' => (
 # in all your modules.
 
 # Keyboard constants
-use constant {
-
-    F1  => 59,
-    F2  => 60,
-    F3  => 61,
-    F4  => 62,
-    F5  => 63,
-    F6  => 64,
-    F7  => 65,
-    F8  => 66,
-    F9  => 67,
-    F10 => 68,
-    F11 => 133,
-    F12 => 134,
-
-    SHIFT_F1  => 84,
-    SHIFT_F2  => 85,
-    SHIFT_F3  => 86,
-    SHIFT_F4  => 87,
-    SHIFT_F5  => 88,
-    SHIFT_F6  => 89,
-    SHIFT_F7  => 90,
-    SHIFT_F8  => 91,
-    SHIFT_F9  => 92,
-    SHIFT_F10 => 93,
-    SHIFT_F11 => 135,
-    SHIFT_F12 => 136,
-
-    CTRL_F1  => 94,
-    CTRL_F2  => 95,
-    CTRL_F3  => 96,
-    CTRL_F4  => 97,
-    CTRL_F5  => 98,
-    CTRL_F6  => 99,
-    CTRL_F7  => 100,
-    CTRL_F8  => 101,
-    CTRL_F9  => 102,
-    CTRL_F10 => 103,
-    CTRL_F11 => 137,
-    CTRL_F12 => 138,
-
-    ALT_F1  => 104,
-    ALT_F2  => 105,
-    ALT_F3  => 106,
-    ALT_F4  => 107,
-    ALT_F5  => 108,
-    ALT_F6  => 109,
-    ALT_F7  => 110,
-    ALT_F8  => 111,
-    ALT_F9  => 112,
-    ALT_F10 => 113,
-    ALT_F11 => 139,
-    ALT_F12 => 140,
-
-    UP_ARROW    => 72,
-    DOWN_ARROW  => 80,
-    LEFT_ARROW  => 75,
-    RIGHT_ARROW => 77,
-
-    CTRL_W => 23,
-    CTRL_Z => 26,
-
-    HOME_KEY => 71,
-    END_KEY  => 79,
-
-    PGUP_KEY => 73,
-    PGDN_KEY => 81,
-
-    INSERT_KEY => 82,
-    DELETE_KEY => 83,
-
-    SPACE_BAR => 32,
-
-    WAIT      => 0,
-    DONT_WAIT => 1
-
-};
+#use constant {
+#
+#    F1  => 59,
+#    F2  => 60,
+#    F3  => 61,
+#    F4  => 62,
+#    F5  => 63,
+#    F6  => 64,
+#    F7  => 65,
+#    F8  => 66,
+#    F9  => 67,
+#    F10 => 68,
+#    F11 => 133,
+#    F12 => 134,
+#
+#    SHIFT_F1  => 84,
+#    SHIFT_F2  => 85,
+#    SHIFT_F3  => 86,
+#    SHIFT_F4  => 87,
+#    SHIFT_F5  => 88,
+#    SHIFT_F6  => 89,
+#    SHIFT_F7  => 90,
+#    SHIFT_F8  => 91,
+#    SHIFT_F9  => 92,
+#    SHIFT_F10 => 93,
+#    SHIFT_F11 => 135,
+#    SHIFT_F12 => 136,
+#
+#    CTRL_F1  => 94,
+#    CTRL_F2  => 95,
+#    CTRL_F3  => 96,
+#    CTRL_F4  => 97,
+#    CTRL_F5  => 98,
+#    CTRL_F6  => 99,
+#    CTRL_F7  => 100,
+#    CTRL_F8  => 101,
+#    CTRL_F9  => 102,
+#    CTRL_F10 => 103,
+#    CTRL_F11 => 137,
+#    CTRL_F12 => 138,
+#
+#    ALT_F1  => 104,
+#    ALT_F2  => 105,
+#    ALT_F3  => 106,
+#    ALT_F4  => 107,
+#    ALT_F5  => 108,
+#    ALT_F6  => 109,
+#    ALT_F7  => 110,
+#    ALT_F8  => 111,
+#    ALT_F9  => 112,
+#    ALT_F10 => 113,
+#    ALT_F11 => 139,
+#    ALT_F12 => 140,
+#
+#    UP_ARROW    => 72,
+#    DOWN_ARROW  => 80,
+#    LEFT_ARROW  => 75,
+#    RIGHT_ARROW => 77,
+#
+#    CTRL_W => 23,
+#    CTRL_Z => 26,
+#
+#    HOME_KEY => 71,
+#    END_KEY  => 79,
+#
+#    PGUP_KEY => 73,
+#    PGDN_KEY => 81,
+#
+#    INSERT_KEY => 82,
+#    DELETE_KEY => 83,
+#
+#    SPACE_BAR => 32,
+#
+#    WAIT      => 0,
+#    DONT_WAIT => 1
+#
+#};
 
 # int get_keystroke(int pause, int *special_key); # prototype - C language context.
 
@@ -136,6 +136,8 @@ has 'ZERO_VALUE'    => ( is => 'ro', default => 0,   isa => 'Int' );
 
 #  trigonometry and player constants
 
+# TODO: Keep in mind that Tk angles are specified in degrees while PERL trig functions expect radians.
+
 has 'FULL_CIRCLE_DEGREES' => ( default => 360,       is => 'ro', isa => 'Int' );
 has 'FULL_CIRCLE_RADIANS' => ( default => 6.282,     is => 'ro', isa => 'Num' );
 has 'HALF_CIRCLE_DEGREES' => ( default => 180,       is => 'ro', isa => 'Int' );
@@ -143,6 +145,7 @@ has 'HALF_CIRCLE_RADIANS' => ( default => 3.1415927, is => 'ro', isa => 'Num' );
 has 'MAX_BAD_GUYS'        => ( default => 3,         is => 'ro', isa => 'Int' );
 has 'MAX_BULLETS'         => ( default => 1,         is => 'ro', isa => 'Int' );
 has 'PI'                  => ( default => 3.1415927, is => 'ro', isa => 'Num' );
+has 'RADS_PER_DEGREE'     => ( default => 0.0174,    is => 'ro', isa => 'Num' );
 
 # METHODS
 

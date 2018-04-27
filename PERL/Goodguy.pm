@@ -1,5 +1,7 @@
 package Goodguy;
 
+# TODO: Keep in mind that Tk angles are specified in degrees while PERL trig functions expect radians.
+
 use lib '.';
 use Moose;
 use namespace::autoclean;
@@ -16,9 +18,10 @@ has 'maxY' => ( is => 'rw', isa => 'Int', default => 0 )
   ;    # Maximum size of game display canvas in Y dimension.
 
 has 'color'     => ( is => 'rw', isa => 'Str', default => 'blue' );
-has 'gun_angle' => ( is => 'rw', isa => 'Int', default => 0 );        # Degrees
+has 'gun_angle' => ( is => 'rw', isa => 'Int', default => 0 )
+  ;    # Degrees. Might it be more efficient to use Radians in future? #TODO
 has 'GOOD_GUY_BULLET_SPEED_FACTOR' =>
-  ( is => 'ro', isa => 'Int', default => 15 );
+  ( is => 'ro', isa => 'Int', default => 20 );
 
 # ggbb = Good Guy Bounding Box
 has 'ggbb' => ( is => 'rw', isa => 'HashRef' )
@@ -32,12 +35,13 @@ has 'gbbo' => ( is => 'rw', isa => 'Num' );
 use constant {
 
     #GOOD_GUY_BULLET_SPEED_FACTOR => 3,
-    GOOD_GUY_GUN_LENGTH         => 0.03,    #  specified as percentage
-    GOOD_GUY_RADIUS             => 0.08,    #  specified as percentage
-    GOOD_GUY_ROTATION_INCREMENT => 5,       #  degrees
-    GUN_WIDTH_HALF_ANGLE        => 0.1,     #  specified in radians
-    GUN_WIDTH_FULL_ANGLE        => 5,       # specified in degrees
-    MAX_GOOD_GUY_EVENTS         => 1,       #  num of events processed per visit
+    GOOD_GUY_GUN_LENGTH => 0.03,    #  specified as percentage
+    GOOD_GUY_RADIUS     => 0.08,    #  specified as percentage
+    GOOD_GUY_ROTATION_INCREMENT =>
+      5,    #  degrees; #TODO consider Radians for efficiency in future?
+    GUN_WIDTH_HALF_ANGLE => 0.1,    #  specified in radians
+    GUN_WIDTH_FULL_ANGLE => 5,      # specified in degrees
+    MAX_GOOD_GUY_EVENTS  => 1,      #  num of events processed per visit
 
 };
 
@@ -187,9 +191,9 @@ sub draw_good_guy {
       shift;    # Gun barrel adjustment angle for good guy in degrees.
 
     my $maxX = $gdc->cget( -width )
-      ;         # Already doing this in good_guy_post_constructor method
+      ;         # Already doing this in good_guy_post_constructor method TODO
     my $maxY = $gdc->cget( -height )
-      ;         # Already doing this in good_guy_post_constructor method
+      ;         # Already doing this in good_guy_post_constructor method TODO
 
     my $success = $self->ZERO_VALUE;
 

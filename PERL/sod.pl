@@ -1,6 +1,8 @@
 #!/usr/bin/env perl
 #!/usr/bin/env perl -d
 
+# TODO: Keep in mind that Tk angles are specified in degrees while PERL trig functions expect radians.
+
 # You don't want to use ptkdb when debugging other PERL/Tk programs
 # because of problems with event handling per "Mastering PERL/Tk" book.
 #!/usr/bin/env perl -d:ptkdb
@@ -343,8 +345,10 @@ if ( $Badguy->draw_bad_guy() ) {
 my $Goodguy = Goodguy->new();
 $Goodguy->good_guy_post_constructor($gdc);    # Do additional initialization.
 
+# TODO: Keep in mind that Tk angles are specified in degrees while PERL trig functions expect radians.
+
 #if ( $Goodguy->draw_good_guy($gdc, 'l') ) { # Canvas object ref needed for drawing; gun angle is in degrees.
-if ( $Goodguy->draw_good_guy('l') ) {         # gun angle is in degrees.
+if ( $Goodguy->draw_good_guy('l') ) {    # gun angle is in degrees.
     $lh->fatal(
 "\a\a\a\nSomething bad happened in draw_good_guy.\nProgram execution terminated."
     );
@@ -455,7 +459,10 @@ sub handleKeyRelease {
 
 #$Goodguy->draw_good_guy($keysym_text) if($keysym_text =~ /^(Left|a|Right|d)$/);
 
-    if ( $keysym_text =~ /^p$/ ) {
+    if ( $keysym_text =~ /^g$/ ) {
+        $lh->debug( 'Goodguy object state: ' . Dumper($Goodguy) );
+    }
+    elsif ( $keysym_text =~ /^p$/ ) {
         $lh->debug( 'playerHash contents: ' . Dumper( \%playerHash ) );
     }
     elsif ( $keysym_text =~ /^(Left|a|Right|d)$/ ) {
@@ -485,15 +492,20 @@ sub handleKeyRelease {
 
             #  movement step increments for bullet when fired by the good guy */
 
+# TODO: Keep in mind that Tk angles are specified in degrees while PERL trig functions expect radians.
+
             my $x_step =
               ( $bulletGood->BULLET_RADIUS *
-                  cos( $Goodguy->gun_angle ) *
+                  cos( $Goodguy->gun_angle * $gpo->RADS_PER_DEGREE ) *
                   $Goodguy->GOOD_GUY_BULLET_SPEED_FACTOR );
 
+  # A negative multiplier necessary because coordinate system in y-axis reversed
+  # per Tk graphics framework.
             my $y_step =
               ( $bulletGood->BULLET_RADIUS *
-                  sin( $Goodguy->gun_angle ) *
-                  $Goodguy->GOOD_GUY_BULLET_SPEED_FACTOR );
+                  sin( $Goodguy->gun_angle * $gpo->RADS_PER_DEGREE ) *
+                  $Goodguy->GOOD_GUY_BULLET_SPEED_FACTOR *
+                  -1 );
 
             $lh->debug( "Parameter values passed to bullet_post_constructor:\n"
                   . "\tx = $Goodguy->x\n"
