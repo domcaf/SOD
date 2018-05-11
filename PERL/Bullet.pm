@@ -308,6 +308,12 @@ sub move_bullet {
     my $self = shift;
     $self->log->debug('Entering move_bullet method.');
 
+#    my $mw = shift
+#      ; # main window of canvas in which bullet appears. Can't find/remember how to get main window from
+#     # canvas object so passing it in for the time being as it's needed for bullet movement event propagation.
+#    It's better not to do/trigger event propagation here because it tends to flood Tk event queue and cause
+#    program to crash.  Try doing it in sod.pl instead.
+
     # Keep in mind that bullets will move in a linear fashion according to
     # equation, y = mx + b.
 
@@ -394,8 +400,7 @@ sub move_bullet {
 
         # Bullet no longer visible in drawable area; don't redraw.
 
-        $self->log->debug(
-            'Bullet no longer visible. Remove from playerHash.' );
+        $self->log->debug('Bullet no longer visible. Remove from playerHash.');
     }
     else {
 
@@ -424,6 +429,26 @@ sub move_bullet {
             )
         );
     }
+
+# Queueing up event movement here causes the Tk event queue to be flooded with too
+# many events and causes program to crash. Better to do this somewhere in main of sod.pl
+# because you'll get events queued on a synchronous/regular basis BUT there will be
+# fewer events to deal with and should improve program stability.
+#
+#    $self->log->debug('move_bullet method: queueing up next movement event...');
+#
+## Get the main window that the Game Display Canvas resides in as it's needed for
+## event queueing.
+## This is currently passed in as a method parameter but I think there's supposed to
+## be a way to get the main window via the canvas widget/object attribute.
+#
+#   # Queue up low priority event callbacks including moving bullets and Badguys.
+#    $mw->afterIdle( \&main::processPlayerHash )
+#      ;    # queue up event and set handler.
+#    $mw->idletasks;    # dispatch event for processing
+#
+#    $self->log->debug(
+#        'move_bullet method: ... movement event queueing completed.');
 
     $self->log->debug('Leaving move_bullet method.');
 }    # move_bullet()

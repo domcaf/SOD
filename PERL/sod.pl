@@ -531,7 +531,11 @@ sub handleKeyRelease {
 
    # Queue up low priority event callbacks including moving bullets and Badguys.
     $mw->afterIdle( \&processPlayerHash );    # queue up event
-    $mw->idletasks;                           # dispatch event for processing
+
+# Statement below should be commented out if program crashing because you're
+# forcing it to process idle events instead of letting it decide when to do
+# processing.
+# $mw->idletasks;    # dispatch event for processing. Let system decide when to dispatch.
 
     $lh->trace('Leaving handleKeyRelease');
 
@@ -560,7 +564,10 @@ sub processPlayerHash {
 
         }
         elsif ( $playerType eq 'Bullet' ) {
-            $playerHash{$key}->move_bullet();
+
+          # MainWindow, $mw passed in call below because can't remember/find how
+          # to get a canvas's MainWindow in move_bullet method call below.
+            $playerHash{$key}->move_bullet($mw);
 
             # Is bullet still visible on field of play? Remove if not.
             if (   $playerHash{$key}->x < 0
@@ -590,6 +597,18 @@ sub processPlayerHash {
    #    $lh->debug(
    #        "Processing of players completed. Current state of playerHash is:\n"
    #          . Dumper( \%playerHash ) );
+
+    $lh->debug(
+'Queueing next player movement event so that player movement is self sustaining.'
+    );
+
+   # Queue up low priority event callbacks including moving bullets and Badguys.
+    $mw->afterIdle( \&processPlayerHash );    # queue up event
+
+    # Statement below should be commented out if program crashing because you're
+    # forcing it to process idle events instead of letting it decide when to do
+    # processing.
+    # $mw->idletasks;    # dispatch event for processing. Causing program crash.
 
     $lh->debug('Leaving processPlayerHash');
 
