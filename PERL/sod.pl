@@ -326,21 +326,54 @@ $lh->info( "\nGame Display Canvas Dimensions:\twidth = "
 #  initialize the random # generator */
 #randomize();
 
-$lh->info('Attempting to draw bad guy bitmap with graphics primitives.');
-
 #sleep(5); #DEBUG
 
-my $Badguy = Badguy->new();
-$Badguy->bad_guy_post_constructor($gdc);    # Do additional initialization.
+# Instantiate the bad guys.
+my $badGuyImageObject;    # Used for cloning bad guys.
+for ( my $bgc = 0 ; $bgc < $gpo->MAX_BAD_GUYS ; $bgc++ ) {
 
-#  generate and capture bad guy image
-#if ( $Badguy->draw_bad_guy($gdc) ) { # Canvas object ref needed for drawing.
-if ( $Badguy->draw_bad_guy() ) {
-    $lh->fatal(
+    my $bgLabel = 'BadGuy_' . $bgc;
+    $lh->debug("Instantiating bad guy id \"$bgLabel\".");
+
+    my $Badguy = Badguy->new();
+    $Badguy->bad_guy_post_constructor( $gdc, $bgLabel )
+      ;                   # Do additional initialization.
+
+    # Add new bad guy to player hash
+    $playerHash{$bgLabel} = $Badguy;
+
+# Generate and capture bad guy image.
+# We only want to draw the image once and then we clone the image for the other bad guys.
+    unless ($bgc) {
+
+# We only want to draw the initial bad guy then we'll clone its image onto the others.
+        if ( $Badguy->draw_bad_guy() ) {
+            $lh->fatal(
 "\a\a\a\nSomething bad happened in draw_bad_guy.\nProgram execution terminated."
-    );
-    exit( $gpo->ONE_VALUE );
-}
+            );
+            exit( $gpo->ONE_VALUE );
+        }
+        else {
+            $badGuyImageObject = $Badguy->bitmap;
+        }
+    }
+    else {
+        # Clone the initial bad guy image onto the others.
+        # This is probably just a reference copy and not an actual object clone.
+        $Badguy->bitmap($badGuyImageObject);
+
+#TODO It would be good if we could change id/label on cloned image object
+# because we might run into problems later because of lack of correspondence of
+# labels between image object and image item on canvas. Lack of correspondence might
+# cause display failures of bad guys.
+        1; # This is just until we figure out exactly what we're supposed to do.
+    }
+
+# Designate an initial location on the bad guy's outtermost orbital path i.e. Pick
+# a random angle and calculate its cartesian coordinates for the bad guy's initial
+# starting location.
+
+}    # bad guy creation loop
 
 my $Goodguy = Goodguy->new();
 $Goodguy->good_guy_post_constructor($gdc);    # Do additional initialization.
@@ -475,15 +508,42 @@ sub handleKeyRelease {
 # one Goodguy and multiple Badguys.
 # They can't fire any more bullets until their active bullet count is less than their limit.
 
-        my $bulletCountGood = 0;
+        #        my $bulletCountGood = 0;
+        #        my $bulletCountBad = 0;
+        #        my $bulletCountUnknown = 0;
+
+        my %bulletCounts = (
+            'Goodguy' => 0,
+            'Badguy'  => 0,
+            'Unknown' => 0
+        );
+
         foreach my $key ( keys(%playerHash) ) {
-            $bulletCountGood++
-              if ( 'Goodguy' eq ref( $playerHash{$key}->from ) );
-        }
 
-        $lh->debug("Goodguy bullet count is \"$bulletCountGood\".");
+            #            $bulletCountGood++
+            #              if (
+            #		  'Bullet' eq ref( $playerHash{$key} )
+            #		  &&
+            #	          'Goodguy' eq ref( $playerHash{$key}->from )
+            #		 );
 
-        if ( $bulletCountGood < $gpo->MAX_BAD_GUYS ) {
+            if ( 'Bullet' eq ref( $playerHash{$key} ) ) {
+
+           #                if ( 'Goodguy' eq ref( $playerHash{$key}->from ) ) {
+           #
+           #                    $bulletCountGood++;
+           #                }
+
+                $bulletCounts{ ref( $playerHash{$key}->from ) }++
+                  ;    # increment count
+
+            }
+
+        }    # foreach
+
+        $lh->debug( "Current bullet counts are: " . Dumper( \%bulletCounts ) );
+
+        if ( $bulletCounts{'Goodguy'} < $gpo->MAX_BAD_GUYS ) {
 
             my $bulletGood = Bullet->new();
 
@@ -555,12 +615,16 @@ sub processPlayerHash {
         #              . Dumper( \$playerHash{$key} ) );
 
         my $playerType = ref( $playerHash{$key} );
-        $lh->debug("Processing player of type \"$playerType\".");
+        $lh->debug(
+            "Processing player of type \"$playerType\" whose id is \"$key\".");
 
         if ( $playerType eq 'Badguy' ) {
-            $lh->warn(
-                "Processing of player type \"$playerType\" not implemented yet."
-            );
+
+#            $lh->warn(
+#                "Processing of player type \"$playerType\" not implemented yet."
+#            );
+
+            $playerHash{$key}->move_bad_guy();
 
         }
         elsif ( $playerType eq 'Bullet' ) {

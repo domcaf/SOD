@@ -7,7 +7,7 @@ use Data::Dumper;
 use Tk::Photo;
 use Tk::PNG;
 
-#use Utilities;
+use Utilities;  # Trig utilities for Polar <--> Cartesian coordinate conversion.
 
 with 'GlobalConstants', 'MooseX::Log::Log4perl';
 extends 'Sprites';
@@ -28,47 +28,59 @@ use constant {
     BAD_GUY_MAX_ANGLE_STEP      => 6,        #  This is in degrees */
     BAD_GUY_MOUTH_HEIGHT        => 0.001,    #  percentage */
     BAD_GUY_MOUTH_WIDTH         => 0.003,    #  percentage */
-    SHOOTING_PROBABILITY_FACTOR => 101,
+    SHOOTING_PROBABILITY_FACTOR => 33,
 
 };
 
-# This is a derived class of Sprites so the attribute below is unnecessary.
-#has 'badguy' => (
-#    isa => 'Object',    #  badguy inherits qualities of sprite
-#    is  => 'ro'
-#);
+has 'maxX' => ( is => 'rw', isa => 'Int', default => 0 )
+  ;    # Maximum size of game display canvas in X dimension.
+has 'maxY' => ( is => 'rw', isa => 'Int', default => 0 )
+  ;    # Maximum size of game display canvas in Y dimension.
 
 has 'radius' => (
 
     #  radial distance from screen center */
-    isa => 'Int',
+    isa => 'Num',
     is  => 'rw'
 );
 
 has 'angle_step' => (
 
-    #  angle in radians */
-    isa => 'Num',
-    is  => 'ro'
+#  Angle in degrees because most Tk APIs prefer degrees as opposed to radians. */
+    isa     => 'Int',
+    is      => 'rw',
+    default => 1
 );
 
 has 'current_angle' => (
 
-    #  current angular position in radians */
-    isa => 'Num',
+    #  current angular position in degrees */
+    isa     => 'Num',
+    is      => 'rw',
+    default => 0
+);
+
+has 'id_label' => (
+
+#  Label used to tie/associate image ibjects and image items together for badguy display.
+    isa => 'Str',
     is  => 'rw'
 );
 
-our $gdc; # This should be set in post constructor method so "Game Display Canvas" doesn't have to be passed all other the place.
+our $gdc
+  ; # This should be set in post constructor method so "Game Display Canvas" doesn't have to be passed all other the place.
+
+our $screen_center_x;
+our $screen_center_y;
 
 # METHODS
 
 sub bad_guy_post_constructor {
 
 # DESCRIPTION     : Moose manual strongly discourages overriding default free
-#                                     constructor so this method should be called AFTER constructor
-#                                     to set some values in the Sprites superclass. It should only
-#                                     be called once immediately after free constructor is called.
+#                   constructor so this method should be called AFTER constructor
+#                   to set some values in the Sprites superclass. It should only
+#                   be called once immediately after free constructor is called.
 # INPUTS          : A ref to Game Display Canvas.
 # OUTPUTS         : Int value. Zero, 0, means ok otherwise a problem occurred.
 
@@ -78,15 +90,40 @@ sub bad_guy_post_constructor {
 
     $gdc = shift;    # gdc is a class global scoped with "our".
 
+    my $labelForId = shift;
+    $self->id_label($labelForId);
+
+    $self->maxX( $gdc->cget( -width ) );
+    $screen_center_x = $self->maxX / 2;
+
+    $self->maxY( $gdc->cget( -height ) );
+    $screen_center_y = $self->maxY / 2;
+
     my $success = $self->ZERO_VALUE;
+
+#  set the bitmap extents - can only be done after image is loaded then query image obj
+#       Try doing this in the draw_bad_guy() method.
+#  $self->width(image->width);
+#  $self->height(image->height);
+
+#  Don't think you have to specify a bounding box when displaying an image/bitmap.
+
+  #  randomly choose a step angle between 1 & BAD_GUY_MAX_ANGLE_STEP ( degrees )
+    $self->angle_step( int( rand(BAD_GUY_MAX_ANGLE_STEP) ) + 1 );
+
+    $self->current_angle( int( rand( $self->FULL_CIRCLE_DEGREES ) ) );
+
+    $self->radius(
+        int(
+            ( ( $self->maxX > $self->maxY ) ? $self->maxY : $self->maxX ) /
+              $self->TWO_VALUE
+        )
+    );
 
     $self->log->debug('Leaving bad_guy_post_constructor method.');
     return ($success);
 
 }    # bad_guy_post_constructor()
-
-
-
 
 # ****************************************************************************/
 # * Function Name   : draw_bad_guy.                                         **/
@@ -101,10 +138,9 @@ sub bad_guy_post_constructor {
 
 sub draw_bad_guy {
     my $self = shift;
-    #my $gdc  = shift;    # Game Display Canvas object = gdc.
 
-    my $maxX    = $gdc->cget( -width );
-    my $maxY    = $gdc->cget( -height );
+    $self->log->debug('Entered draw_bad_guy method.');
+
     my $success = 0;
 
   #  put the bad guy on the screen */
@@ -125,7 +161,7 @@ sub draw_bad_guy {
     my $b = $self->TWENTY_VALUE;
 
     # New calculations used with PERL/Tk
-    my $BGBOB_xStart = ( $maxX / $self->THIRTY_VALUE );
+    my $BGBOB_xStart = ( $self->maxX / $self->THIRTY_VALUE );
     my $BGBOB_yStart = $m * $BGBOB_xStart + $b;
 
     my $BGMOB_xStart = $BGBOB_xStart + $self->TEN_VALUE;
@@ -227,10 +263,10 @@ sub draw_bad_guy {
 
 #	#  set the bitmap extents */
 #
-#	$self->super->x = ($maxX / TWO_VALUE) - (BAD_GUY_BODY_WIDTH * $maxX);
-#	$self->super->y = ($maxY / TWO_VALUE) - (BAD_GUY_EYE_LENGTH * $maxX);
-#	$self->super->width = TWO_VALUE * BAD_GUY_BODY_WIDTH * $maxX;
-#	$self->super->height = (BAD_GUY_EYE_LENGTH * $maxX) + (BAD_GUY_BODY_HEIGHT * $maxY);
+#	$self->super->x = ($self->maxX / TWO_VALUE) - (BAD_GUY_BODY_WIDTH * $self->maxX);
+#	$self->super->y = ($self->maxY / TWO_VALUE) - (BAD_GUY_EYE_LENGTH * $self->maxX);
+#	$self->super->width = TWO_VALUE * BAD_GUY_BODY_WIDTH * $self->maxX;
+#	$self->super->height = (BAD_GUY_EYE_LENGTH * $self->maxX) + (BAD_GUY_BODY_HEIGHT * $self->maxY);
 #
 #	#  allocate space for the bitmap. See Tk::Window?
 #	# # See sect 17.7.3 of "Mastering PERL/Tk" from grabbing a bitmap off a canvas.
@@ -291,7 +327,7 @@ sub draw_bad_guy {
           . $self->BAD_GUY_PNG_LOC );
 
     my $badGuyImgObj = $gdc->Photo(
-        'BadGuy',
+        $self->id_label,
         -file    => $self->BAD_GUY_PNG_LOC,
         -format  => 'PNG',
         -palette => '1/1/1'
@@ -314,16 +350,16 @@ sub draw_bad_guy {
           . "\n" );
 
 #########################################################################
-    # NOTE: The name 'BadGuy' is what ties the $badGuyImgObj created above
-    #	to the image item on the canvas below depending on it's state.
+   # NOTE: The name $self->id_label is what ties the $badGuyImgObj created above
+   #	to the image item on the canvas below depending on it's state.
 #########################################################################
 
     $gdc->createImage(
         0, 0,
         -anchor        => 'nw',
-        -image         => 'BadGuy',
-        -activeimage   => 'BadGuy',
-        -disabledimage => 'BadGuy',
+        -image         => $self->id_label,
+        -activeimage   => $self->id_label,
+        -disabledimage => $self->id_label,
         -state         => 'normal'
     );
     $self->log->debug("Created image item for canvas");
@@ -331,7 +367,7 @@ sub draw_bad_guy {
 #sleep(5); # Give a couple of moments to see what was put up on screen before erasing.
 #-----------------------------------------------------------------------------------
 # Clear the bad guy image previously placed on screen.
-    $gdc->createRectangle( 0, 0, $maxX, $maxY, -fill => 'black' );
+# $gdc->createRectangle( 0, 0, $self->maxX, $self->maxY, -fill => 'black' );
 
 #sleep(5); # Give a couple of moments to see that erasure was successful.
 #-----------------------------------------------------------------------------------
@@ -354,71 +390,138 @@ sub draw_bad_guy {
 #	else
 #		$success = ONE_VALUE;
 
+    $self->log->debug('Leaving draw_bad_guy method.');
+
     return ($success);
 }    # End draw_bad_guy()
 
 # *************************< End draw_bad_guy >***************************/
 
-#sub move_bad_guy {
-#
-#
-#	# Player type specific functionality has been moved into class methods
-#	# for specific player types.
-#
-#	# The following may be useful for player movement in context of PERL/Tk:
-#	# http://search.cpan.org/~srezic/Tk-804.034/pod/Canvas.pod#TRANSFORMATIONS
-#
-#	players *player_who_shot_bullet;
-#
-#	static float reference_radius;
-#	static float reference_angle;
-#
-#	static int screen_max_x;
-#	static int screen_max_y;
-#	static int two_pi_rads = TWO_VALUE * PI;
-#	static int screen_center_x;
-#	static int screen_center_y;
-#
-#	screen_max_x = getmaxx();
-#	screen_max_y = getmaxy();
-#
-#	screen_center_x = (int) screen_max_x / TWO_VALUE;
-#	screen_center_y = (int) screen_max_y / TWO_VALUE;
-#
-#
-#	reference_radius = sqrt(pow((getmaxx()/TWO_VALUE),TWO_VALUE) + pow((getmaxy()/TWO_VALUE),TWO_VALUE));
-#	reference_angle = atan(getmaxy()/getmaxx());
-#
-#	setfillstyle(SOLID_FILL,getbkcolor());
-#
-#	# The following may be useful for player movement in context of PERL/Tk:
-#	# http://search.cpan.org/~srezic/Tk-804.034/pod/Canvas.pod#TRANSFORMATIONS
-#
-#	if(mm->pt == bad)
-#	{
-#		#  erase mm from its old location */
-#		bar(mm->pd.bg.badguy.x,mm->pd.bg.badguy.y,(mm->pd.bg.badguy.x + mm->pd.bg.badguy.width),(mm->pd.bg.badguy.y + mm->pd.bg.badguy.height));
-#
-#		#  update the current angle of the bad guy */
-#		mm->pd.bg.current_angle += mm->pd.bg.angle_step;
-#
-#		#  calculate the new polar radius for the bad guy's new location */
-#		if(mm->pd.bg.current_angle > two_pi_rads)
-#		{
-#			mm->pd.bg.radius-= FIVE_VALUE;
-#			mm->pd.bg.current_angle-= two_pi_rads;
-#		}
-#
-#		#  convert the polar angle into cartesian coordinates for the bad guy's new location */
-#		mm->pd.bg.badguy.x = (int) polar_to_cartesian_coords(mm->pd.bg.radius,mm->pd.bg.current_angle,'x') + screen_center_x;
-#		mm->pd.bg.badguy.y = (int) polar_to_cartesian_coords(mm->pd.bg.radius,mm->pd.bg.current_angle,'y') + screen_center_y;
-#
-#		#  redisplay mm at its new position */
-#		putimage(mm->pd.bg.badguy.x,mm->pd.bg.badguy.y,(short unsigned int *) mm->pd.bg.badguy.bitmap,COPY_PUT);
-#
-#	}
-#
-#
-#} # move_bad_guy() 
+sub move_bad_guy {
+
+    my $self = shift;
+
+# Using an accessor method as if it were a variable doesn't work as well as isolating
+# the call as in the example below.  The results vary depending on what you do.
+    $self->log->debug(
+        "Entered move_bad_guy method for \"" . $self->id_label . "\"." );
+
+    $self->log_bad_guy_status();
+
+    # Player type specific functionality has been moved into class methods
+    # for specific player types.
+
+    # The following may be useful for player movement in context of PERL/Tk:
+    # http://search.cpan.org/~srezic/Tk-804.034/pod/Canvas.pod#TRANSFORMATIONS
+    # See also the canvas->move() and canvas->coords() methods.
+
+# Remember that the Tk canvas has methods move() and coords() that make moving things very easy.
+
+#  Erase from old location. This may be unnecessary with move() or coords() methods.
+
+# bar(mm->pd.bg.badguy.x,mm->pd.bg.badguy.y,(mm->pd.bg.badguy.x + mm->pd.bg.badguy.width),(mm->pd.bg.badguy.y + mm->pd.bg.badguy.height));
+
+    #  update the current angle of the bad guy */
+    $self->current_angle( $self->current_angle + $self->angle_step );
+
+    #  calculate the new polar radius for the bad guy's new location */
+    if ( $self->current_angle > $self->FULL_CIRCLE_DEGREES ) {
+        $self->radius(
+            (
+                  ( $self->radius > $self->FIVE_VALUE )
+                ? ( $self->radius - $self->FIVE_VALUE )
+                : $self->THREE_VALUE
+            )
+        );
+        $self->current_angle(
+            $self->current_angle - $self->FULL_CIRCLE_DEGREES );
+    }
+
+    # REMINDER: PERL trig functions expect args in radians and Tk uses degrees.
+
+    my $angleCurrentRadians = $self->current_angle * $self->RADS_PER_DEGREE;
+
+#  Convert the polar angle into cartesian coordinates for the bad guy's new location */
+#TODO: This should be refactored so only one call needs to be made to get the Cartesian coordinates.
+
+    $self->x(
+        Utilities::polar_to_cartesian_coords( $self->radius,
+            $angleCurrentRadians, 'x' ) + $screen_center_x
+    );
+
+    $self->y(
+        Utilities::polar_to_cartesian_coords( $self->radius,
+            $angleCurrentRadians, 'y' ) + $screen_center_y
+    );
+
+    # Redisplay bad guy at its new position.
+    $gdc->coords( $self->id_label, $self->x, $self->y );
+
+    # This already exists from draw_bad_guy(). Just put here as comment
+    # as reminder of how it was created and persisted.
+    #    my $badGuyImgObj = $gdc->Photo(
+    #        'BadGuy', # TODO: Is this right or should it be parameterized?
+    #        -file    => $self->BAD_GUY_PNG_LOC,
+    #        -format  => 'PNG',
+    #        -palette => '1/1/1'
+    #    );
+    #    $self->log->debug("created image object of type photo");
+    #
+    #    # Store image object in Sprites superclass.
+    #    $self->log->debug(
+    #        "Attempting to store badGuyImgObj in Sprites base class.");
+    #    $self->bitmap($badGuyImgObj);
+    #    $self->log->debug(
+    #        "Storage of badGuyImgObj in Sprites base class completed.");
+    #
+    #    $Data::Dumper::Sortkeys = 1;
+    #    $self->log->debug( "BadGuy image object is a \""
+    #          . ref($badGuyImgObj)
+    #          . "\" whose contents is:\n"
+    #          . Dumper($badGuyImgObj)
+    #          . "\n" );
+    #
+    #########################################################################
+    # NOTE: The name 'BadGuy' is what ties the $badGuyImgObj created above
+    #	to the image item on the canvas below depending on it's state.
+    #########################################################################
+    #
+    #    $gdc->createImage(
+    #        0, 0,
+    #        -anchor        => 'nw',
+    #        -image         => 'BadGuy',
+    #        -activeimage   => 'BadGuy',
+    #        -disabledimage => 'BadGuy',
+    #        -state         => 'normal'
+    #    );
+
+    $self->log->debug("Moved bad guy from image object on canvas");
+
+    $self->log_bad_guy_status();
+
+    $self->log->debug(
+        "Leaving move_bad_guy method for \"" . $self->id_label . "\"." );
+
+}    # move_bad_guy()
+
+sub log_bad_guy_status {
+
+    my $self = shift;
+
+# TODO: There's probably a way to do this with the instrospection capabilities of Moose; look into for future.
+
+    $self->log->debug(
+            "Bad Guy status for \"" . $self->id_label . "\":"
+          . "\n\tangle_step    = \"" . $self->angle_step . "\"."
+          . "\n\tcurrent_angle = \"" . $self->current_angle . "\"."
+          . "\n\tid_label      = \"" . $self->id_label . "\"."
+          . "\n\tmaxX          = \"" . $self->maxX . "\"."
+          . "\n\tmaxY          = \"" . $self->maxY . "\"."
+          . "\n\tradius        = \"" . $self->radius . "\"."
+    );
+
+    $self->log_sprite_status();
+
+}    # log_bad_guy_status()
 
 1;

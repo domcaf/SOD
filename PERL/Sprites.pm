@@ -18,15 +18,14 @@ has 'bitmap' => ( is => 'rw', isa => 'Object' );
 # complicated so it might be best to create a utility  routine that calculates the bounding box points based on
 # the center point coordinates and height & width info below.
 
-has 'x' => ( is => 'rw', isa => 'Num' );
+has 'x' => ( is => 'rw', isa => 'Num', default => 0 );
+has 'y' => ( is => 'rw', isa => 'Num', default => 0 );
 
-has 'y' => ( is => 'rw', isa => 'Num' );
+has 'width'      => ( is => 'rw', isa => 'Num', default => 0 );
+has 'half_width' => ( is => 'rw', isa => 'Num', default => 0 );
 
-has 'width' => ( is => 'rw', isa => 'Num' );
-has 'half_width' => ( is => 'rw', isa => 'Num' );
-
-has 'height' => ( is => 'rw', isa => 'Num' );
-has 'half_height' => ( is => 'rw', isa => 'Num' );
+has 'height'      => ( is => 'rw', isa => 'Num', default => 0 );
+has 'half_height' => ( is => 'rw', isa => 'Num', default => 0 );
 
 sub calculateBoundingBoxCoordinates {
 
@@ -64,5 +63,23 @@ sub calculateBoundingBoxCoordinates {
     return ( \%boundingBoxCoordinates );
 
 }    # calculateBoundingBoxCoordinates()
+
+sub log_sprite_status {
+
+    my $self = shift;
+
+# TODO: There's probably a way to do this with the instrospection capabilities of Moose; look into for future.
+
+    $self->log->debug(
+            "\n\tSprite status is:"
+          . "\n\t\thalf_height = \"" . $self->half_height . "\"."
+          . "\n\t\thalf_width  = \"" . $self->half_width . "\"."
+          . "\n\t\theight      = \"" . $self->height . "\"."
+          . "\n\t\twidth       = \"" . $self->width . "\"."
+          . "\n\t\tx           = \"" . $self->x . "\"."
+          . "\n\t\ty           = \"" . $self->y . "\"."
+    );
+
+}    # log_sprite_status()
 
 1;
