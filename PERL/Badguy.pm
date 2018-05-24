@@ -60,11 +60,26 @@ has 'current_angle' => (
     default => 0
 );
 
-has 'id_label' => (
+has 'tkTag' => (
 
-#  Label used to tie/associate image ibjects and image items together for badguy display.
+# Label used to tie/associate image objects and image items together for badguy display.
+# It's important to distinguish between "tags" and "ids" in Tk context. "Tags" can be
+# arbitrarily chosen by programmer as long as their unique. "Ids" are returned from a
+# Tk canvas call to create an object. i.e. $tkId = $canvas->createImage(...).
+
     isa => 'Str',
     is  => 'rw'
+);
+
+has 'tkId' => (
+
+   # Used for storing the Tk Id returned from a canvas->createXXX() method call.
+   # Attribute is typed as "Any" because we don't know if we're getting back a
+   # string, number or a ref of some kind so "Any" is the safest choice.
+
+    isa => 'Any',
+    is  => 'rw'
+
 );
 
 our $gdc
@@ -91,7 +106,7 @@ sub bad_guy_post_constructor {
     $gdc = shift;    # gdc is a class global scoped with "our".
 
     my $labelForId = shift;
-    $self->id_label($labelForId);
+    $self->tkTag($labelForId);
 
     $self->maxX( $gdc->cget( -width ) );
     $screen_center_x = $self->maxX / 2;
@@ -327,7 +342,7 @@ sub draw_bad_guy {
           . $self->BAD_GUY_PNG_LOC );
 
     my $badGuyImgObj = $gdc->Photo(
-        $self->id_label,
+        $self->tkTag,
         -file    => $self->BAD_GUY_PNG_LOC,
         -format  => 'PNG',
         -palette => '1/1/1'
@@ -350,19 +365,23 @@ sub draw_bad_guy {
           . "\n" );
 
 #########################################################################
-   # NOTE: The name $self->id_label is what ties the $badGuyImgObj created above
-   #	to the image item on the canvas below depending on it's state.
+    # NOTE: The name $self->tkTag is what ties the $badGuyImgObj created above
+    #	to the image item on the canvas below depending on it's state.
 #########################################################################
 
-    $gdc->createImage(
-        0, 0,
-        -anchor        => 'nw',
-        -image         => $self->id_label,
-        -activeimage   => $self->id_label,
-        -disabledimage => $self->id_label,
-        -state         => 'normal'
+    $self->tkId(
+        $gdc->createImage(
+            0, 0,
+            -anchor        => 'nw',
+            -image         => $self->tkTag,
+            -activeimage   => $self->tkTag,
+            -disabledimage => $self->tkTag,
+            -state         => 'normal'
+        )
     );
-    $self->log->debug("Created image item for canvas");
+
+    $self->log->debug(
+        "Created image item for canvas with id of \"" . $self->tkId . "\"" );
 
 #sleep(5); # Give a couple of moments to see what was put up on screen before erasing.
 #-----------------------------------------------------------------------------------
@@ -403,8 +422,11 @@ sub move_bad_guy {
 
 # Using an accessor method as if it were a variable doesn't work as well as isolating
 # the call as in the example below.  The results vary depending on what you do.
-    $self->log->debug(
-        "Entered move_bad_guy method for \"" . $self->id_label . "\"." );
+    $self->log->debug( "Entered move_bad_guy method for tag: \""
+          . $self->tkTag
+          . "\"\tid: \""
+          . $self->tkId
+          . "\"." );
 
     $self->log_bad_guy_status();
 
@@ -433,6 +455,7 @@ sub move_bad_guy {
                 : $self->THREE_VALUE
             )
         );
+
         $self->current_angle(
             $self->current_angle - $self->FULL_CIRCLE_DEGREES );
     }
@@ -455,7 +478,8 @@ sub move_bad_guy {
     );
 
     # Redisplay bad guy at its new position.
-    $gdc->coords( $self->id_label, $self->x, $self->y );
+    #$gdc->coords( $self->tkTag, $self->x, $self->y ); # Didn't work.
+    $gdc->coords( $self->tkId, $self->x, $self->y );
 
     # This already exists from draw_bad_guy(). Just put here as comment
     # as reminder of how it was created and persisted.
@@ -499,8 +523,11 @@ sub move_bad_guy {
 
     $self->log_bad_guy_status();
 
-    $self->log->debug(
-        "Leaving move_bad_guy method for \"" . $self->id_label . "\"." );
+    $self->log->debug( "Leaving move_bad_guy method for tag: \""
+          . $self->tkTag
+          . "\"\tid: \""
+          . $self->tkId
+          . "\"." );
 
 }    # move_bad_guy()
 
@@ -510,18 +537,82 @@ sub log_bad_guy_status {
 
 # TODO: There's probably a way to do this with the instrospection capabilities of Moose; look into for future.
 
-    $self->log->debug(
-            "Bad Guy status for \"" . $self->id_label . "\":"
-          . "\n\tangle_step    = \"" . $self->angle_step . "\"."
-          . "\n\tcurrent_angle = \"" . $self->current_angle . "\"."
-          . "\n\tid_label      = \"" . $self->id_label . "\"."
-          . "\n\tmaxX          = \"" . $self->maxX . "\"."
-          . "\n\tmaxY          = \"" . $self->maxY . "\"."
-          . "\n\tradius        = \"" . $self->radius . "\"."
-    );
+    $self->log->debug( "Bad Guy status for \""
+          . $self->tkTag . "\":"
+          . "\n\tangle_step    = \""
+          . $self->angle_step . "\"."
+          . "\n\tcurrent_angle = \""
+          . $self->current_angle . "\"."
+          . "\n\ttkTag      = \""
+          . $self->tkTag . "\"."
+          . "\n\tmaxX          = \""
+          . $self->maxX . "\"."
+          . "\n\tmaxY          = \""
+          . $self->maxY . "\"."
+          . "\n\tradius        = \""
+          . $self->radius
+          . "\"." );
 
     $self->log_sprite_status();
 
 }    # log_bad_guy_status()
+
+sub load_bad_guy_image {
+
+    my $self = shift;
+
+    $self->log->debug(
+        "Entered load_bad_guy_image() for \"" . $self->tkTag . "\"." );
+
+    $self->log->debug( 'Attempting to read png image grabbed from a file: '
+          . $self->BAD_GUY_PNG_LOC );
+
+    my $badGuyImgObj = $gdc->Photo(
+        $self->tkTag,
+        -file    => $self->BAD_GUY_PNG_LOC,
+        -format  => 'PNG',
+        -palette => '1/1/1'
+    );
+    $self->log->debug("created image object of type photo");
+
+    # Store image object in Sprites superclass.
+    $self->log->debug(
+        "Attempting to store badGuyImgObj in Sprites base class.");
+    $self->bitmap($badGuyImgObj);
+    $self->log->debug(
+        "Storage of badGuyImgObj in Sprites base class completed.");
+
+    #    $Data::Dumper::Sortkeys = 1;
+    #    $self->log->debug( "BadGuy image object is a \""
+    #          . ref($badGuyImgObj)
+    #          . "\" whose contents is:\n"
+    #          . Dumper($badGuyImgObj)
+    #          . "\n" );
+
+#########################################################################
+    # NOTE: The name $self->tkTag is what ties the $badGuyImgObj created above
+    #	to the image item on the canvas below depending on it's state.
+#########################################################################
+
+    $self->tkId(
+        $gdc->createImage(
+            int( rand( int( $self->maxX / 2 ) ) ),    # X
+            int( rand( int( $self->maxY / 2 ) ) ),    # Y
+            -anchor        => 'nw',
+            -image         => $self->tkTag,
+            -activeimage   => $self->tkTag,
+            -disabledimage => $self->tkTag,
+            -state         => 'normal'
+        )
+    );
+
+    $self->log->debug( "Created image item for canvas which returned id of \""
+          . $self->tkId
+          . "\"." );
+
+    $self->log->debug(
+        "Leaving load_bad_guy_image() for \"" . $self->tkTag . "\"." );
+
+}    # load_bad_guy_image()
 
 1;

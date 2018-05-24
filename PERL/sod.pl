@@ -360,18 +360,21 @@ for ( my $bgc = 0 ; $bgc < $gpo->MAX_BAD_GUYS ; $bgc++ ) {
     else {
         # Clone the initial bad guy image onto the others.
         # This is probably just a reference copy and not an actual object clone.
-        $Badguy->bitmap($badGuyImageObject);
+        #$Badguy->bitmap($badGuyImageObject);
 
 #TODO It would be good if we could change id/label on cloned image object
 # because we might run into problems later because of lack of correspondence of
 # labels between image object and image item on canvas. Lack of correspondence might
 # cause display failures of bad guys.
-        1; # This is just until we figure out exactly what we're supposed to do.
+
+	# load image for remaining bad guys from a file.
+	$Badguy->load_bad_guy_image();
+
     }
 
 # Designate an initial location on the bad guy's outtermost orbital path i.e. Pick
 # a random angle and calculate its cartesian coordinates for the bad guy's initial
-# starting location.
+# starting location. This is being done in bad_guy_post_constructor() method.
 
 }    # bad guy creation loop
 
