@@ -25,7 +25,7 @@ use constant {
     BAD_GUY_EYE_ANGLE_3         => 130,      #  degrees */
     BAD_GUY_EYE_ANGLE_4         => 150,      #  degrees */
     BAD_GUY_EYE_LENGTH          => 0.02,     #  percentage */
-    BAD_GUY_MAX_ANGLE_STEP      => 6,        #  This is in degrees */
+    BAD_GUY_MAX_ANGLE_STEP      => 4,        #  This is in degrees */
     BAD_GUY_MOUTH_HEIGHT        => 0.001,    #  percentage */
     BAD_GUY_MOUTH_WIDTH         => 0.003,    #  percentage */
     SHOOTING_PROBABILITY_FACTOR => 33,
@@ -39,7 +39,14 @@ has 'maxY' => ( is => 'rw', isa => 'Int', default => 0 )
 
 has 'radius' => (
 
-    #  radial distance from screen center */
+    #  current radial distance from screen center
+    isa => 'Num',
+    is  => 'rw'
+);
+
+has 'max_radius' => (
+
+    #  maximum radial distance from screen center
     isa => 'Num',
     is  => 'rw'
 );
@@ -134,6 +141,8 @@ sub bad_guy_post_constructor {
               $self->TWO_VALUE
         )
     );
+
+    $self->max_radius( $self->radius );
 
     $self->log->debug('Leaving bad_guy_post_constructor method.');
     return ($success);
@@ -451,8 +460,8 @@ sub move_bad_guy {
         $self->radius(
             (
                   ( $self->radius > $self->FIVE_VALUE )
-                ? ( $self->radius - $self->FIVE_VALUE )
-                : $self->THREE_VALUE
+                ? ( $self->radius - $self->ONE_VALUE )
+                : $self->max_radius
             )
         );
 

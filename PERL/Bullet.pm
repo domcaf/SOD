@@ -48,6 +48,17 @@ has 'from' => (
     is  => 'rw'
 );
 
+has 'tkId' => (
+
+   # Used for storing the Tk Id returned from a canvas->createXXX() method call.
+   # Attribute is typed as "Any" because we don't know if we're getting back a
+   # string, number or a ref of some kind so "Any" is the safest choice.
+
+    isa => 'Any',
+    is  => 'rw'
+
+);
+
 our $gdc
   ; # Used so we don't have to pass handle to "Game Display Canvas" all over the place. We set it once
     # in bullet_post_constructor() and then we can use it in all class/instance methods as needed.
@@ -132,32 +143,39 @@ sub bullet_post_constructor {
 
     # Draw bullet
 
+# TODO: Switch to using the canvas->move() or canvas->coords() method for bullet
+# movement.  You'll probably see a performance improvement.
+
     my $bbc = $self->calculateBoundingBoxCoordinates();
 
-    $gdc->createOval(
-        $bbc->{ul_x},
-        $bbc->{ul_y},
-        $bbc->{lr_x},
-        $bbc->{lr_y},
-        -fill => (
-            (
-                  ( ref( $self->from ) eq 'Goodguy' ) ? 'orange'
-                : ( ref( $self->from ) eq 'Badguy' )  ? 'red'
-                :                                       'blue'
-            )
-        ),
-        -outline => (
-            (
-                  ( ref( $self->from ) eq 'Goodguy' ) ? 'orange'
-                : ( ref( $self->from ) eq 'Badguy' )  ? 'red'
-                :                                       'blue'
+    $self->tkId(
+        $gdc->createOval(
+            $bbc->{ul_x},
+            $bbc->{ul_y},
+            $bbc->{lr_x},
+            $bbc->{lr_y},
+            -fill => (
+                (
+                      ( ref( $self->from ) eq 'Goodguy' ) ? 'green'
+                    : ( ref( $self->from ) eq 'Badguy' )  ? 'red'
+                    :                                       'blue'
+                )
+            ),
+            -outline => (
+                (
+                      ( ref( $self->from ) eq 'Goodguy' ) ? 'green'
+                    : ( ref( $self->from ) eq 'Badguy' )  ? 'red'
+                    :                                       'blue'
+                )
             )
         )
     );
 
     $self->log->debug(
         "\tShooter is a \"" . ref( $self->from ) . "\" object." );
-    $self->log->debug('Leaving bullet_post_constructor method.');
+    $self->log->debug( 'Leaving bullet_post_constructor method for tkId = '
+          . $self->tkId
+          . ' .' );
     return ($success);
 
 }    # bullet_post_constructor()
@@ -307,12 +325,10 @@ sub bullet_post_constructor {
 sub move_bullet {
     my $self = shift;
     $self->log->debug('Entering move_bullet method.');
+    my $bbc;
 
-#    my $mw = shift
-#      ; # main window of canvas in which bullet appears. Can't find/remember how to get main window from
-#     # canvas object so passing it in for the time being as it's needed for bullet movement event propagation.
-#    It's better not to do/trigger event propagation here because it tends to flood Tk event queue and cause
-#    program to crash.  Try doing it in sod.pl instead.
+# TODO: Switch to using the canvas->move() or canvas->coords() method for bullet
+# movement.  You'll probably see a performance improvement.
 
     # Keep in mind that bullets will move in a linear fashion according to
     # equation, y = mx + b.
@@ -320,69 +336,20 @@ sub move_bullet {
     # The following may be useful for player movement in context of PERL/Tk:
     # http://search.cpan.org/~srezic/Tk-804.034/pod/Canvas.pod#TRANSFORMATIONS
 
-#	players *player_who_shot_bullet;
-#
-#	static float reference_radius;
-#	static float reference_angle;
-#
-#	static int screen_max_x;
-#	static int screen_max_y;
-#	static int two_pi_rads = TWO_VALUE * PI;
-#	static int screen_center_x;
-#	static int screen_center_y;
-#
-#	screen_max_x = getmaxx();
-#	screen_max_y = getmaxy();
-#
-#	screen_center_x = (int) screen_max_x / TWO_VALUE;
-#	screen_center_y = (int) screen_max_y / TWO_VALUE;
-#
-#
-#	reference_radius = sqrt(pow((getmaxx()/TWO_VALUE),TWO_VALUE) + pow((getmaxy()/TWO_VALUE),TWO_VALUE));
-#	reference_angle = atan(getmaxy()/getmaxx());
-#
-#	setfillstyle(SOLID_FILL,getbkcolor());
+# Erase bullet from its current location. Might be unnecessary using canvas->move() or canvas->coords().
 
-    # The following may be useful for player movement in context of PERL/Tk:
-    # http://search.cpan.org/~srezic/Tk-804.034/pod/Canvas.pod#TRANSFORMATIONS
-
-#	else if(mm->pt == bullet)
-#	{
-#		#  erase mm from its old location */
-#		fillellipse((int) mm->pd.b.x,(int) mm->pd.b.y,mm->pd.b.radius,mm->pd.b.radius);
-#
-#		#  setup mm's new position */
-#		mm->pd.b.x += mm->pd.b.x_step;
-#		mm->pd.b.y += mm->pd.b.y_step;
-#
-#		if((mm->pd.b.x <= screen_max_x) && (mm->pd.b.x >= ZERO_VALUE) && (mm->pd.b.y <= screen_max_y) && (mm->pd.b.y >= ZERO_VALUE))
-#		{
-#			#  identify the type of player who shot the bullet */
-#			player_who_shot_bullet = (players *) mm->pd.b.from;  #  this is necessary because "from" is a void pointer */
-#
-#			#  redisplay mm at its new position  - choose appropriate bullet color */
-#			setfillstyle(SOLID_FILL,(player_who_shot_bullet->pt == good) ? GREEN : YELLOW);
-#
-#			fillellipse((int) mm->pd.b.x,(int) mm->pd.b.y,mm->pd.b.radius,mm->pd.b.radius);
-#		}
-#		else
-#			delete_player(mm);
-#
-#	}
-
-# Erase bullet from its current location.
 #my $background_color = $gdc->cget( -background ); # Should already be defined because of bullet_post_constructor().
 
-    my $bbc = $self->calculateBoundingBoxCoordinates();
-
-    $gdc->createOval(
-        $bbc->{ul_x},
-        $bbc->{ul_y},
-        $bbc->{lr_x},
-        $bbc->{lr_y},
-        -fill    => $background_color,
-        -outline => $background_color
-    );
+    #    $bbc = $self->calculateBoundingBoxCoordinates();
+    #
+    #    $gdc->createOval(
+    #        $bbc->{ul_x},
+    #        $bbc->{ul_y},
+    #        $bbc->{lr_x},
+    #        $bbc->{lr_y},
+    #        -fill    => $background_color,
+    #        -outline => $background_color
+    #    );
 
     # Redraw bullet in its new location.
 
@@ -408,26 +375,34 @@ sub move_bullet {
 
         $bbc = $self->calculateBoundingBoxCoordinates();
 
-        $gdc->createOval(
-            $bbc->{ul_x},
-            $bbc->{ul_y},
-            $bbc->{lr_x},
-            $bbc->{lr_y},
-            -fill => (
-                (
-                      ( ref( $self->from ) eq 'Goodguy' ) ? 'orange'
-                    : ( ref( $self->from ) eq 'Badguy' )  ? 'red'
-                    :                                       'blue'
-                )
-            ),
-            -outline => (
-                (
-                      ( ref( $self->from ) eq 'Goodguy' ) ? 'orange'
-                    : ( ref( $self->from ) eq 'Badguy' )  ? 'red'
-                    :                                       'blue'
-                )
-            )
+        #        $gdc->createOval(
+        #            $bbc->{ul_x},
+        #            $bbc->{ul_y},
+        #            $bbc->{lr_x},
+        #            $bbc->{lr_y},
+        #            -fill => (
+        #                (
+        #                      ( ref( $self->from ) eq 'Goodguy' ) ? 'green'
+        #                    : ( ref( $self->from ) eq 'Badguy' )  ? 'red'
+        #                    :                                       'blue'
+        #                )
+        #            ),
+        #            -outline => (
+        #                (
+        #                      ( ref( $self->from ) eq 'Goodguy' ) ? 'green'
+        #                    : ( ref( $self->from ) eq 'Badguy' )  ? 'red'
+        #                    :                                       'blue'
+        #                )
+        #            )
+        #        );
+
+        #$gdc->coords( $self->tkId, $self->x, $self->y );
+
+        $gdc->coords(
+            $self->tkId,  $bbc->{ul_x}, $bbc->{ul_y},
+            $bbc->{lr_x}, $bbc->{lr_y}
         );
+
     }
 
 # Queueing up event movement here causes the Tk event queue to be flooded with too

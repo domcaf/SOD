@@ -367,8 +367,8 @@ for ( my $bgc = 0 ; $bgc < $gpo->MAX_BAD_GUYS ; $bgc++ ) {
 # labels between image object and image item on canvas. Lack of correspondence might
 # cause display failures of bad guys.
 
-	# load image for remaining bad guys from a file.
-	$Badguy->load_bad_guy_image();
+        # load image for remaining bad guys from a file.
+        $Badguy->load_bad_guy_image();
 
     }
 
@@ -508,43 +508,13 @@ sub handleKeyRelease {
 
 # Goodguys can have as many active bullets as there are Badguys but Badguys can have
 # only one active bullet on the playing field at a time. This offsets fact that there is only
-# one Goodguy and multiple Badguys.
+# one Goodguy and multiple Badguys. To simplify this fairness adjustment the "one bullet per
+# bad guy" constraint is in aggregate for the maximum number of bad guys meaning that
+# some bad guys might fire multiple bullets and other bad guys might fire none as long as
+# the number of active bad guy bullets doesn't exceed the MAX_BAD_GUYS limit.
 # They can't fire any more bullets until their active bullet count is less than their limit.
 
-        #        my $bulletCountGood = 0;
-        #        my $bulletCountBad = 0;
-        #        my $bulletCountUnknown = 0;
-
-        my %bulletCounts = (
-            'Goodguy' => 0,
-            'Badguy'  => 0,
-            'Unknown' => 0
-        );
-
-        foreach my $key ( keys(%playerHash) ) {
-
-            #            $bulletCountGood++
-            #              if (
-            #		  'Bullet' eq ref( $playerHash{$key} )
-            #		  &&
-            #	          'Goodguy' eq ref( $playerHash{$key}->from )
-            #		 );
-
-            if ( 'Bullet' eq ref( $playerHash{$key} ) ) {
-
-           #                if ( 'Goodguy' eq ref( $playerHash{$key}->from ) ) {
-           #
-           #                    $bulletCountGood++;
-           #                }
-
-                $bulletCounts{ ref( $playerHash{$key}->from ) }++
-                  ;    # increment count
-
-            }
-
-        }    # foreach
-
-        $lh->debug( "Current bullet counts are: " . Dumper( \%bulletCounts ) );
+        my %bulletCounts = checkBulletCounts();
 
         if ( $bulletCounts{'Goodguy'} < $gpo->MAX_BAD_GUYS ) {
 
@@ -623,11 +593,75 @@ sub processPlayerHash {
 
         if ( $playerType eq 'Badguy' ) {
 
-#            $lh->warn(
-#                "Processing of player type \"$playerType\" not implemented yet."
-#            );
+            # A Badguy can either shoot or move during a turn but not both.
+            # The equivalent of a coin flip determines what happens.
 
-            $playerHash{$key}->move_bad_guy();
+            if ( int( rand(2) ) ) {
+
+                $playerHash{$key}->move_bad_guy();
+
+            }
+            else {
+
+# Check bullet counts and verify bad guys under limit before allowing to shoot.
+# I would only do this once per each call of this subroutine so as not to waste
+# excessive CPU on checking. Doing only one check per call of this subroutine
+# will allow bad guys to occasionally have more active bullets in play then they
+# should but this is a game and no one's safety depends on it so no big deal.
+
+# Goodguys can have as many active bullets as there are Badguys but Badguys can have
+# only one active bullet on the playing field at a time. This offsets fact that there is only
+# one Goodguy and multiple Badguys. To simplify this fairness adjustment the "one bullet per
+# bad guy" constraint is in aggregate for the maximum number of bad guys meaning that
+# some bad guys might fire multiple bullets and other bad guys might fire none as long as
+# the number of active bad guy bullets doesn't exceed the MAX_BAD_GUYS limit.
+# They can't fire any more bullets until their active bullet count is less than their limit.
+
+                my %bulletCounts = checkBulletCounts();
+
+                if ( $bulletCounts{'Badguy'} < $gpo->MAX_BAD_GUYS ) {
+
+                    my $bulletBad = Bullet->new();
+
+                # Generate a unique key id for player being added to playerHash.
+                    $playerHash{ Data::Uniqid::suniqid() } = $bulletBad;
+
+             #  movement step increments for bullet when fired by the bad guy */
+
+# TODO: Keep in mind that Tk angles are specified in degrees while PERL trig functions expect radians.
+
+                    my $x_step =
+                      $bulletBad->BULLET_RADIUS *
+                      cos( $playerHash{$key}->current_angle *
+                          $gpo->RADS_PER_DEGREE );
+
+  # A negative multiplier necessary because coordinate system in y-axis reversed
+  # per Tk graphics framework.
+                    my $y_step =
+                      $bulletBad->BULLET_RADIUS *
+                      sin( $playerHash{$key}->current_angle *
+                          $gpo->RADS_PER_DEGREE ) * -1;
+
+                    $lh->debug(
+                        "Parameter values passed to bullet_post_constructor:\n"
+                          . "\tx = $playerHash{ $key }->x\n"
+                          . "\ty = $playerHash{ $key }->y\n"
+                          . "\tx_step = $x_step\n"
+                          . "\ty_step = $y_step\n" );
+
+                 # Center of bullet when fired by Badguy is center of Badguy. */
+
+                    $bulletBad->bullet_post_constructor(
+                        $gdc,
+                        $playerHash{$key}->x,
+                        $playerHash{$key}->y,
+                        $x_step,
+                        $y_step,
+                        $playerHash{$key}    # Who shot bullet.
+                    );
+                }    # bad guy will fire a bullet
+
+            }    # bad guy might fire a bullet
 
         }
         elsif ( $playerType eq 'Bullet' ) {
@@ -680,6 +714,41 @@ sub processPlayerHash {
     $lh->debug('Leaving processPlayerHash');
 
 }    # processPlayerHash()
+
+sub checkBulletCounts {
+
+    $lh->debug('Entering checkBulletCounts.');
+
+# Goodguys can have as many active bullets as there are Badguys but Badguys can have
+# only one active bullet on the playing field at a time. This offsets fact that there is only
+# one Goodguy and multiple Badguys. To simplify this fairness adjustment the "one bullet per
+# bad guy" constraint is in aggregate for the maximum number of bad guys meaning that
+# some bad guys might fire multiple bullets and other bad guys might fire none as long as
+# the number of active bad guy bullets doesn't exceed the MAX_BAD_GUYS limit.
+# They can't fire any more bullets until their active bullet count is less than their limit.
+
+    my %bulletCounts = (
+        'Goodguy' => 0,
+        'Badguy'  => 0,
+        'Unknown' => 0
+    );
+
+    foreach my $key ( keys(%playerHash) ) {
+
+        if ( 'Bullet' eq ref( $playerHash{$key} ) ) {
+
+            # increment count
+            $bulletCounts{ ref( $playerHash{$key}->from ) }++;
+        }
+
+    }    # foreach
+
+    $lh->debug( "Current bullet counts are: " . Dumper( \%bulletCounts ) );
+    $lh->debug('Leaving checkBulletCounts.');
+
+    return (%bulletCounts);
+
+}    # checkBulletCounts()
 
 #sub BEGIN {
 #
