@@ -679,13 +679,18 @@ sub processPlayerHash {
 
                 # Remove bullet from playerHash.
 
-                $lh->debug('Removing bullet from playerHash.');
+                $lh->debug('Removing bullet from playerHash & Tk framework.');
+                $gdc->delete( $playerHash{$key}->tkId, $key );
                 delete( $playerHash{$key} );
             }
             else {
 
                 # Determine if bullet hit anything.
                 $lh->debug('Bullet collision detection not implemented yet.');
+
+#                $lh->debug('Removing bullet and what it hit from playerHash & Tk framework.');
+# Don't forget to add in the ?->tkId and ?->tkTag of what was hit.
+#		$gdc->delete($playerHash{$key}->tkId, $key);
             }
 
         }
