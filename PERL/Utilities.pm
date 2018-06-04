@@ -7,7 +7,6 @@ use namespace::autoclean;
 
 with 'GlobalConstants';
 
-
 # METHODS
 
 # -----------------------------< Functions >---------------------------------*/
@@ -35,7 +34,7 @@ with 'GlobalConstants';
 
 sub setup_video_driver_and_mode {
 
-	my $self = shift;
+    my $self = shift;
 
     #
 ## Pretty much all setup is done in the main of the consumer of this module when
@@ -114,8 +113,8 @@ sub setup_video_driver_and_mode {
 #    #endif
 #
 #    return ($error_flag);
-    #return ($ZERO_VALUE);
-    return ($self->ZERO_VALUE);
+#return ($ZERO_VALUE);
+    return ( $self->ZERO_VALUE );
 }
 
 # ****************************< End setup_video_driver_and_mode >*********/
@@ -146,13 +145,13 @@ sub restore_pre_game_environment {
     return;
 }
 
-
 sub spirals_help {
 
     #  put the display in text mode */
     #restorecrtmode();
 
-    my $helpString = "\t\t\t"
+    my $helpString =
+        "\t\t\t"
       . "S P I R A L S    O F    D E A T H\n\n"
       . "\"Spirals of Death\" is a game in which bad guys, who move in a decaying spirals,\n"
       . "shoot at the good guy who's located in the center of the screen.  The good guy\n"
@@ -181,11 +180,11 @@ sub spirals_help {
 
     return ($helpString);
 
-} # spirals_help
+}    # spirals_help
 
-  # ****************************< End spirals_help >***************************/
+# ****************************< End spirals_help >***************************/
 
-  sub testTrig {
+sub testTrig {
 
     my ( $x, $y, $radius, $angle, $resp );
     $resp = 1;
@@ -195,32 +194,37 @@ sub spirals_help {
         print("\a\a\nEnter float values for x & y ---> ");
         my $vals = <>;
         chomp($vals);
-        my @pt  = split /\s+/, $vals;
+        my @pt = split /\s+/, $vals;
         $x = $pt[0];
         $y = $pt[1];
         print("\nYou entered the following values: $x\t$y.");
 
-        $radius = cartesian_to_polar_coords( $x, $y, 'r' );
+        #        $radius = cartesian_to_polar_coords( $x, $y, 'r' );
+        #        $angle = cartesian_to_polar_coords( $x, $y, 'a' );
 
-        $angle = cartesian_to_polar_coords( $x, $y, 'a' );
+        my %coords = cartesian_to_polar_coords( $x, $y );
 
-        print "\n\nThe polar coordinates for ($x, $y) are ($radius, $angle).";
+        print "\n\nThe polar coordinates for ($x, $y) are ("
+          . $coords{'radius'} . ', '
+          . $coords{'angle'} . ").";
 
         print("\n\nEnter float values for radius & angle ---> ");
         $vals = <>;
         chomp($vals);
-        @pt  = split /\s+/, $vals;
+        @pt     = split /\s+/, $vals;
         $radius = $pt[0];
-        $angle = $pt[1];
+        $angle  = $pt[1];
 
         print("\nYou entered the following values: $radius\t$angle");
 
+        %coords = polar_to_cartesian_coords( $radius, $angle );
+
         print(  "\nThe x coordinate for ($radius ,$angle) is \""
-              . polar_to_cartesian_coords( $radius, $angle, 'x' )
+              . $coords{'x'}
               . "\"" );
 
         print(  "\nThe y coordinate for ($radius ,$angle) is \""
-              . polar_to_cartesian_coords( $radius, $angle, 'y' )
+              . $coords{'y'}
               . "\"" );
 
         print("\nDo you want to run another test (1 for y, 0 for n) ---> ");
@@ -228,48 +232,42 @@ sub spirals_help {
         chomp($resp);
 
     }
-  }    # sub testTrig
+}    # sub testTrig
 
 #----------------------------------------------------------------------------------
 
 sub polar_to_cartesian_coords {
 
-    my ( $radius, $angle, $x_or_y, $x, $y );
+    my ( $radius, $angle, %coords );
     $radius = shift;
     $angle  = shift;
-    $x_or_y = shift;
 
     # Algorithm at https://www.mathsisfun.com/polar-cartesian-coordinates.html.
 
-    $x = $radius * cos($angle);
+    $coords{'x'} = $radius * cos($angle);
 
-    $y = $radius * sin($angle);
+    $coords{'y'} = $radius * sin($angle);
 
-    return ( ( $x_or_y eq 'x' ) ? $x : $y );
+    return (%coords);
 
-# Later on we'll change this to return a json obj with the x & y coordinates inside.
-# It's very inefficient to make 2 calls to this .;
 }
 
 #----------------------------------------------------------------------------------
 
 sub cartesian_to_polar_coords {
 
-    my ( $x, $y, $angle_or_radius, $angle, $radius );
-    $x               = shift;
-    $y               = shift;
-    $angle_or_radius = shift;
+    my ( $x, $y, %coords );
+    $x = shift;
+    $y = shift;
 
     # Algorithm at https://www.mathsisfun.com/polar-cartesian-coordinates.html.
 
-    $radius = sqrt( ( $x**2 + $y**2 ) );
+    $coords{'radius'} = sqrt( ( $x**2 + $y**2 ) );
 
-    $angle = atan2( $y, $x );    # Return value in radians.
+    $coords{'angle'} = atan2( $y, $x );    # Return value in radians.
 
-    return ( ( $angle_or_radius eq 'a' ) ? $angle : $radius );
+    return (%coords);
 
-# Later on we'll change this to return a json obj with the x & y coordinates inside.
-# It's very inefficient to make 2 calls to this .;
 }
 
 #----------------------------------------------------------------------------------

@@ -476,15 +476,12 @@ sub move_bad_guy {
 #  Convert the polar angle into cartesian coordinates for the bad guy's new location */
 #TODO: This should be refactored so only one call needs to be made to get the Cartesian coordinates.
 
-    $self->x(
-        Utilities::polar_to_cartesian_coords( $self->radius,
-            $angleCurrentRadians, 'x' ) + $screen_center_x
-    );
+    my %coords = Utilities::polar_to_cartesian_coords( $self->radius,
+        $angleCurrentRadians );
 
-    $self->y(
-        Utilities::polar_to_cartesian_coords( $self->radius,
-            $angleCurrentRadians, 'y' ) + $screen_center_y
-    );
+    $self->x( $coords{'x'} + $screen_center_x );
+
+    $self->y( $coords{'y'} + $screen_center_y );
 
     # Redisplay bad guy at its new position.
     #$gdc->coords( $self->tkTag, $self->x, $self->y ); # Didn't work.

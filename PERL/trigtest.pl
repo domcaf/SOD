@@ -1,10 +1,11 @@
 #!/usr/bin/env perl
 
-use lib '/home/domcaf/Documents/GIT-DATA/SOD/PERL';
-use SOD::Utilities;
+use lib '.';
+use Utilities;
 
-#&SOD::Utilities::testTrig;
-testTrig;
+print "\nTesting commencing ...\n";
+
+Utilities::testTrig();
 
 print "\nTesting completed.\n\n";
 
