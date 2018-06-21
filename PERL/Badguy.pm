@@ -621,4 +621,87 @@ sub load_bad_guy_image {
 
 }    # load_bad_guy_image()
 
+
+# ****************************************************************************/
+# * Function Name   : did_bad_good_guy_collide.                        **/
+# * Description     : This function determines if a bad guy and the good    **/
+# *                   guy collided.  It returns a value of 1 if a collision **/
+# *                   took place otherwise it returns a value of 0.         **/
+# * Inputs          : A pointer to a bad guy.                               **/
+# * Outputs         : An indicator of whether or not a collision took place.**/
+# * Programmer(s)   : Dominic Caffey.                                       **/
+# * Notes & Comments: Created on 4-29-92.                                   **/
+# *                  - On the first call to this routine, it searches the   **/
+# *                    player list to find the good guy.  When it finds good**/
+# *                    guy, it stores the good guy's address in a static    **/
+# *                    pointer variable.  This way on subsequent calls to   **/
+# *                    this routine the player list doesn't have to be      **/
+# *                    researched to find the good guy.                     **/
+# *                  - If a collision has occurred, the good guy's color is **/
+# *                    changed to the next color in its color sequence.     **/
+# *                                                                         **/
+# *                                                                         **/
+# ****************************************************************************/
+
+sub did_bad_good_guy_collide {
+
+	my $self = shift;
+
+    $self->log->debug( "Entered did_bad_good_guy_collide() for \"" . $self->tkTag . "\"." );
+
+	int collide = ZERO_VALUE;
+	float bad_guy_radial_distance;
+	static players *gg = NULL;
+	players *ferret; #  used to find the good guy in the player list */
+
+	#  find the good guy in the player list */
+	if(gg == NULL)
+	{
+		ferret = bg;  #  set the ferret to the same value as the bad guy as a starting point */
+
+		while((ferret->next != bg) && (ferret->next->pt != good))
+			ferret = ferret->next;
+
+		#  the good guy has been found */
+		gg = ferret->next;
+
+	}
+
+	#  start checking for the collision */
+
+	#  calculate radius of bad guy from center of screen */
+	bad_guy_radial_distance = sqrt(pow((bg->pd.bg.badguy.x - gg->pd.gg.x),TWO_VALUE) + pow((bg->pd.bg.badguy.y - gg->pd.gg.y),TWO_VALUE));
+
+	if(bad_guy_radial_distance <= gg->pd.gg.radius)
+	{
+		collide = ONE_VALUE;
+
+		#  while we're here, set the good guy's color to its next color */
+		switch(gg->pd.gg.gun_color)
+		{
+			case GREEN:
+				gg->pd.gg.gun_color = YELLOW;
+				draw_good_guy(gg,ZERO_VALUE);
+				break;
+
+			case YELLOW:
+				gg->pd.gg.gun_color = RED;
+				draw_good_guy(gg,ZERO_VALUE);
+				break;
+
+			case RED:
+			default:
+				gg->pd.gg.gun_color = getbkcolor();
+				draw_good_guy(gg,ZERO_VALUE);
+				break;
+		}
+	}
+
+
+    $self->log->debug( "Leaving did_bad_good_guy_collide() for \"" . $self->tkTag . "\"." );
+
+	return(collide);
+} # did_bad_good_guy_collide()
+
+
 1;
