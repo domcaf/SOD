@@ -5,9 +5,7 @@ use Moose;
 use namespace::autoclean;
 use Data::Dumper;
 
-#use constant { BULLET_RADIUS => 0.02
-#};    # percentage of average screen dimensions.
-#with 'GlobalConstants', 'MooseX::Log::Log4perl', 'Utilities';
+$Data::Dumper::Sortkeys = 1;
 
 with 'GlobalConstants', 'MooseX::Log::Log4perl';
 extends 'Sprites';
@@ -59,6 +57,17 @@ has 'tkId' => (
 
 );
 
+has 'tkTag' => (
+
+# Label used to tie/associate canvas objects and developer assigned identifiers for future use.
+# It's important to distinguish between "tags" and "ids" in Tk context. "Tags" can be
+# arbitrarily chosen by programmer as long as their unique. "Ids" are returned from a
+# Tk canvas call to create an object. i.e. $tkId = $canvas->createOval(...).
+
+    isa => 'Str',
+    is  => 'rw'
+);
+
 our $gdc
   ; # Used so we don't have to pass handle to "Game Display Canvas" all over the place. We set it once
     # in bullet_post_constructor() and then we can use it in all class/instance methods as needed.
@@ -102,6 +111,7 @@ sub bullet_post_constructor {
     $self->x_step(shift);
     $self->y_step(shift);
     $self->from(shift);
+    $self->tkTag(shift);
 
     $self->log->debug(
             "Attribute values after being loaded from method parameter list:"
@@ -247,82 +257,91 @@ sub bullet_post_constructor {
 # ****************************< Start did_bullet_hit_something >********/
 
 # ****************************************************************************/
-# * Function Name   : did_bullet_hit_something.                        **/
+# * Function Name   : did_bullet_hit_something.                             **/
 # * Description     : This function determines if a bullet hit something.   **/
 # *                   If it hit something it identifies what it hit and     **/
-# *                   returns a pointer to the hit object otherwise it      **/
-# *                   returns a value of NULL.                              **/
-# * Inputs          : A pointer to the bullet being tested for a hit.       **/
-# * Outputs         : A pointer to hit object or NULL if no hit.            **/
+# *                   returns a handle  to the hit object otherwise it      **/
+# *                   returns a value of NULL/UNDEF.                        **/
+# * Inputs          : Nothing at this time.                                 **/
+# * Outputs         : A handle to hit object or NULL/UNDEF if no hit.       **/
+# *                   In PERL implementation, handle is a key into the      **/
+# *                   playerHash i.e. a string.                             **/
 # * Programmer(s)   : Dominic Caffey.                                       **/
-# * Notes & Comments: Created on 4-30-92.                                   **/
-# *                                                                         **/
+# * Notes & Comments: - Created on 4-30-92.                                 **/
+# *                   - Updated for PERL implementation on 7-29-2018.       **/
 # *                                                                         **/
 # ****************************************************************************/
 
 sub did_bullet_hit_something {
+
+# For a mathematical approach to collision detection, the canvas "bbox" method
+# will likely be very useful.  More info on this method is available at the
+# following for the book "Mastering Perl/Tk":
+# - https://docstore.mik.ua/orelly/perl3/tk/ch09_03.htm#INDEX-1092
+# - https://docstore.mik.ua/orelly/perl3/tk/ch09_10.htm#INDEX-1299
+# - https://metacpan.org/pod/distribution/Tk/pod/Canvas.pod#$canvas-%3Ebbox(tagOrId,-?tagOrId,-tagOrId,-...?)
+
     my $self = shift;
     $self->log->debug('Entering did_bullet_hit_something() method.');
 
-	players *target = NULL;
-	float look_ahead_x, look_ahead_y, look_ahead_dist_to_screen_center, distance_between_bullets;
-	static int background_color;
-	static int screen_center_x, screen_center_y;
-	int target_found = ZERO_VALUE;
+    my @selfCoordsList = $gdc->bbox( $self->tkId );
 
-	background_color = getbkcolor();
-	screen_center_x = (int) (getmaxx()/TWO_VALUE);
-	screen_center_y = (int) (getmaxy()/TWO_VALUE);
+#    $self->log->debug( 'Bounding box coordinates of self, in list format, are:'
+#          . Dumper( \@selfCoordsList ) );
 
+    my %selfCoordsHash = (
+        'ulx' => $selfCoordsList[0],
+        'uly' => $selfCoordsList[1],
+        'lrx' => $selfCoordsList[2],
+        'lry' => $selfCoordsList[3]
+    );
 
-	#  calculate look ahead coordinates */
-	look_ahead_x = bullet->pd.b.x + (TWO_VALUE * bullet->pd.b.x_step);
-	look_ahead_y = bullet->pd.b.y + (TWO_VALUE * bullet->pd.b.y_step);
+#    $self->log->debug( 'Bounding box coordinates of self, in hash format, are:'
+#          . Dumper( \%selfCoordsHash ) );
 
-	#  determine if the bullet actually hit something */
-	if(getpixel((int) look_ahead_x,(int) look_ahead_y) != background_color)
-	{
-		#  the bullet hit something, find out what it hit */
-		target = bullet->next; #  set starting point for search */
+    $self->log->debug(
+            "Cartesian representation of bounding box coordinates:\n"
+          . "\tUpper Left  ("
+          . $selfCoordsHash{'ulx'} . ", "
+          . $selfCoordsHash{'uly'} . ")\n"
+          . "\tLower Right ("
+          . $selfCoordsHash{'lrx'} . ", "
+          . $selfCoordsHash{'lry'}
+          . ")\n" );
 
-		while((target != bullet) && (!target_found))  #  traverse the player list */
-		{
-			if(target != bullet->pd.b.from) #  a player can't shoot itself */
+# See https://metacpan.org/pod/distribution/Tk/pod/Canvas.pod#overlapping-x1-y1-x2-y2
+# This was also helpful https://nnc3.com/mags/Perl3/tk/ch09_09.htm
 
-				if(target->pt == good)
-				{
-					look_ahead_dist_to_screen_center = sqrt(pow((look_ahead_x - screen_center_x),TWO_VALUE) + pow((look_ahead_y - screen_center_y),TWO_VALUE));
+# Essentially what we are doing is finding the tkId's for the items within bounding box of the $self bullet
+# object then later we can remove those objects along with the
+# bullet object. Keep in mind that the bullet object itself will be included in hit list so
+# if hit list doesn't contain at least two or more items then the bullet didn't hit anything.
+# Keep in mind that we also don't know in what order items in the hitlist appear so if multiple
+# items are found then remove self->tkId of this bullet then return first item in remaining list.
 
-					if(look_ahead_dist_to_screen_center <= target->pd.gg.radius)
-						target_found = ONE_VALUE;
-				}
-				else if(target->pt == bad)
-				{
-					if((look_ahead_x >= target->pd.bg.badguy.x) &&
-						(look_ahead_x <= (target->pd.bg.badguy.x + target->pd.bg.badguy.width)) &&
-						(look_ahead_y >= target->pd.bg.badguy.y) &&
-						(look_ahead_y <= (target->pd.bg.badguy.y + target->pd.bg.badguy.height)))
-							target_found = ONE_VALUE;
-				}
-				else #  the player type is another bullet */
-				{
-				  #  if the distance between their two centers is less than (2 * r) then they hit each other */
-					distance_between_bullets = sqrt(pow((look_ahead_x - target->pd.b.x),TWO_VALUE) + pow((look_ahead_y - target->pd.b.y),TWO_VALUE));
+    my @hitList = $gdc->find(
+        'overlapping',          $selfCoordsHash{'ulx'},
+        $selfCoordsHash{'uly'}, $selfCoordsHash{'lrx'},
+        $selfCoordsHash{'lry'}
+    );
 
-					if(distance_between_bullets <= (2 * bullet->pd.b.radius))
-						target_found = ONE_VALUE;
-				}
+    # Exclude tkId of this "self" bullet and return first item in remaining list
+    # if something remains.
 
-			if(!target_found)
-				target = target->next;
+    my @noSelfList = grep !/$self->tkId/, @hitList;
 
-		}
-	}
+    $self->log->debug(
+"Find overlapping call returned the following object(s) hit by bullet, excluding bullet:\n"
+          . Dumper( \@noSelfList ) );
+
+    $self->log->debug(
+        'Bullet hit ' . scalar(@noSelfList) ? $noSelfList[0] : 'nothing.' );
 
     $self->log->debug('Leaving did_bullet_hit_something() method.');
-	return(target);
-} # did_bullet_hit_something()
 
+    return ( scalar(@noSelfList) ? $noSelfList[0] : '' );
+
+}    # did_bullet_hit_something()
 
 sub move_bullet {
     my $self = shift;

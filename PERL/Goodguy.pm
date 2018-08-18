@@ -31,6 +31,28 @@ has 'ggbb' => ( is => 'rw', isa => 'HashRef' )
 #     Because good guy is round, we'll use one constant for both x & y offsets to keep things simpler.
 has 'gbbo' => ( is => 'rw', isa => 'Num' );
 
+has 'tkId' => (
+
+   # Used for storing the Tk Id returned from a canvas->createXXX() method call.
+   # Attribute is typed as "Any" because we don't know if we're getting back a
+   # string, number or a ref of some kind so "Any" is the safest choice.
+
+    isa => 'Any',
+    is  => 'rw'
+
+);
+
+has 'tkTag' => (
+
+# Label used to tie/associate canvas objects and developer assigned identifiers for future use.
+# It's important to distinguish between "tags" and "ids" in Tk context. "Tags" can be
+# arbitrarily chosen by programmer as long as their unique. "Ids" are returned from a
+# Tk canvas call to create an object. i.e. $tkId = $canvas->createOval(...).
+
+    isa => 'Str',
+    is  => 'rw'
+);
+
 # Good guy constants
 use constant {
 
@@ -156,12 +178,19 @@ sub good_guy_post_constructor {
     # Draw good guy's body.
     $bbc = $self->calculateBoundingBoxCoordinates();
     $self->ggbb($bbc);
-    $gdc->createOval(
-        $bbc->{ul_x}, $bbc->{ul_y}, $bbc->{lr_x}, $bbc->{lr_y},
-        -fill    => 'green',
-        -outline => 'green'
+
+    $self->tkId(
+        $gdc->createOval(
+            $bbc->{ul_x}, $bbc->{ul_y}, $bbc->{lr_x}, $bbc->{lr_y},
+            -fill    => 'green',
+            -outline => 'green',
+            -tags    => 'Goodguy'
+        )
     );
+
     $self->color('green');
+
+    $self->tkTag('Goodguy');
 
     $self->log->debug('Leaving good_guy_post_constructor method.');
     return ($success);

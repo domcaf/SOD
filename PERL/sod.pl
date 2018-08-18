@@ -380,6 +380,8 @@ for ( my $bgc = 0 ; $bgc < $gpo->MAX_BAD_GUYS ; $bgc++ ) {
 
 my $Goodguy = Goodguy->new();
 $Goodguy->good_guy_post_constructor($gdc);    # Do additional initialization.
+$playerHash{'Goodguy'} =
+  $Goodguy;    # Needed for collision detection related to bullets.
 
 # TODO: Keep in mind that Tk angles are specified in degrees while PERL trig functions expect radians.
 
@@ -521,7 +523,8 @@ sub handleKeyRelease {
             my $bulletGood = Bullet->new();
 
             # Generate a unique key id for player being added to playerHash.
-            $playerHash{ Data::Uniqid::suniqid() } = $bulletGood;
+            my $bulletKey = Data::Uniqid::suniqid();
+            $playerHash{$bulletKey} = $bulletGood;
 
             #  movement step increments for bullet when fired by the good guy */
 
@@ -544,7 +547,8 @@ sub handleKeyRelease {
                   . "\tx = $Goodguy->x\n"
                   . "\ty = $Goodguy->y\n"
                   . "\tx_step = $x_step\n"
-                  . "\ty_step = $y_step\n" );
+                  . "\ty_step = $y_step\n"
+                  . "\ttkTag = $bulletKey\n" );
 
             # Center of bullet when fired by good guy is center of Goodguy. */
 
@@ -554,7 +558,9 @@ sub handleKeyRelease {
                 $Goodguy->y,
                 $x_step,
                 $y_step,
-                $Goodguy # Who shot bullet. Passing explicit ref causing problems so just pass object scalar.
+                $Goodguy
+                , # Who shot bullet. Passing explicit ref causing problems so just pass object scalar.
+                $bulletKey # Key into playerHash for bullet that was just instantiated.
             );
         }    # if
     }
@@ -624,7 +630,8 @@ sub processPlayerHash {
                     my $bulletBad = Bullet->new();
 
                 # Generate a unique key id for player being added to playerHash.
-                    $playerHash{ Data::Uniqid::suniqid() } = $bulletBad;
+                    my $bulletKey = Data::Uniqid::suniqid();
+                    $playerHash{$bulletKey} = $bulletBad;
 
              #  movement step increments for bullet when fired by the bad guy */
 
@@ -657,7 +664,8 @@ sub processPlayerHash {
                         $playerHash{$key}->y,
                         $x_step,
                         $y_step,
-                        $playerHash{$key}    # Who shot bullet.
+                        $playerHash{$key},    # Who shot bullet.
+                        $bulletKey    # tkTag / key in playerHash of new bullet.
                     );
                 }    # bad guy will fire a bullet
 
@@ -686,13 +694,57 @@ sub processPlayerHash {
             else {
 
                 # Determine if bullet hit anything.
-                $lh->debug('Bullet collision detection not implemented yet.');
 
-#                $lh->debug('Removing bullet and what it hit from playerHash & Tk framework.');
-# Don't forget to add in the ?->tkId and ?->tkTag of what was hit.
-#		$gdc->delete($playerHash{$key}->tkId, $key);
+                my $playerHitTkId;    # This key into %playerHash.
+
+              # Don't forget to add in the ?->tkId and ?->tkTag of what was hit.
+                if ( $playerHitTkId =
+                    $playerHash{$key}->did_bullet_hit_something() )
+                {
+
+                    $lh->debug('Removing bullet.');
+
+                    # Get rid of bullet from game display canvas.
+
+                    $gdc->delete( $playerHash{$key}->tkId, $key );
+
+                    # Get rid of bullet from playerHash.
+                    delete( $playerHash{$key} );
+
+                    $lh->debug('Processing what bullet hit.');
+
+                    my @tkTagsHitList = $gdc->gettags($playerHitTkId);
+
+                    $lh->debug( "Bullet hit target with TkId of \""
+                          . $playerHitTkId
+                          . "\". It has associated tags of:\n"
+                          . Dumper( \@tkTagsHitList ) );
+
+                    unless ( $tkTagsHitList[0] eq 'Goodguy' ) {
+
+                        $gdc->delete($playerHitTkId);
+
+                        # Get rid of bullet from playerHash.
+                        delete( $tkTagsHitList[0] );
+
+                    }
+                    else {
+# Do stuff specific to Goodguy getting hit by a bullet like change color or end game.
+                        ;
+                    }
+
+                }
+                else {
+
+                    $lh->debug('Bullet collision NOT detected.');
+
+                }
+
             }
 
+        }
+        elsif ( $playerType eq 'Goodguy' ) {
+            next;    # Nothing to do at this time.
         }
         else {
             $lh->warn(
